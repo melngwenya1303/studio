@@ -6,3 +6,5 @@ import '@/ai/flows/enhance-prompt.ts';
 import '@/ai/flows/generate-title.ts';
 import '@/ai/flows/describe-image.ts';
 import '@/ai/flows/get-creative-feedback.ts';
+import '@/ai/flows/generate-story.ts';
+import '@/ai/flows/get-remix-suggestions.ts';

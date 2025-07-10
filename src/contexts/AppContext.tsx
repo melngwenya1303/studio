@@ -9,7 +9,7 @@ interface AppContextType {
   isAdmin: boolean;
   creations: Creation[];
   addCreation: (creation: Omit<Creation, 'id' | 'createdAt'>) => void;
-  remix: (item: Creation | GalleryItem) => void;
+  startRemix: (item: Creation | GalleryItem) => void;
   remixData: Creation | GalleryItem | null;
   clearRemixData: () => void;
 }
@@ -32,7 +32,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setCreations(prev => [newCreation, ...prev]);
   };
   
-  const remix = useCallback((item: Creation | GalleryItem) => {
+  const startRemix = useCallback((item: Creation | GalleryItem) => {
     setRemixData(item);
     router.push('/design-studio');
   }, [router]);
@@ -42,7 +42,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <AppContext.Provider value={{ user, isAdmin, creations, addCreation, remix, remixData, clearRemixData }}>
+    <AppContext.Provider value={{ user, isAdmin, creations, addCreation, startRemix, remixData, clearRemixData }}>
       {children}
     </AppContext.Provider>
   );

@@ -1,8 +1,6 @@
-
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import dynamic from 'next/dynamic';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from "@/hooks/use-toast";
@@ -10,6 +8,7 @@ import { enhancePrompt } from '@/ai/flows/enhance-prompt';
 import { generateImage } from '@/ai/flows/generate-image';
 import { generateTitle } from '@/ai/flows/generate-title';
 import { getCreativeFeedback } from '@/ai/flows/get-creative-feedback';
+import { generateStory } from '@/ai/flows/generate-story';
 import { DEVICES, STYLES } from '@/lib/constants';
 import type { Device, Style, Creation } from '@/lib/types';
 import Icon from '@/components/shared/icon';
@@ -18,22 +17,6 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
-import { Skeleton } from '@/components/ui/skeleton';
-
-/*
-const ClientScene = dynamic(() => import('@/components/canvas/ClientScene'), {
-    ssr: false,
-    loading: () => (
-        <div className="flex flex-col items-center justify-center h-full w-full text-primary">
-            <div className="w-full h-full flex items-center justify-center">
-                <Icon name="Laptop" className="w-16 h-16 animate-pulse" />
-            </div>
-            <p className="mt-4 font-semibold absolute bottom-4">Loading 3D Preview...</p>
-        </div>
-    )
-});
-*/
-
 
 export default function DesignStudioPage() {
     const { user, addCreation, remixData, clearRemixData } = useApp();
@@ -46,6 +29,8 @@ export default function DesignStudioPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isEnhancing, setIsEnhancing] = useState(false);
     const [isGettingFeedback, setIsGettingFeedback] = useState(false);
+    const [isTellingStory, setIsTellingStory] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [modal, setModal] = useState({ isOpen: false, title: '', children: <></> });
 
     useEffect(() => {
@@ -101,6 +86,7 @@ export default function DesignStudioPage() {
 
     const handleSaveCreation = async () => {
         if (!generatedDecal || !user) return;
+        setIsSaving(true);
         try {
             const result = await generateTitle({ prompt: generatedDecal.prompt });
             const title = result.title;
@@ -108,6 +94,8 @@ export default function DesignStudioPage() {
             toast({ title: 'Success!', description: 'Your design has been saved to My Designs.' });
         } catch (error) {
             toast({ variant: "destructive", title: "Save Error", description: "Could not save your design." });
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -144,6 +132,24 @@ export default function DesignStudioPage() {
             toast({ variant: 'destructive', title: 'Error', description: 'Could not get AI feedback at this time.' });
         } finally {
             setIsGettingFeedback(false);
+        }
+    }
+
+    const handleTellStory = async () => {
+        if (!generatedDecal) return;
+        setIsTellingStory(true);
+        try {
+            const result = await generateStory({ prompt: generatedDecal.prompt });
+            setModal({
+                isOpen: true,
+                title: 'A Creation\'s Story',
+                children: <p className="leading-relaxed">{result.story}</p>,
+                size: 'lg'
+            });
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not generate a story at this time.' });
+        } finally {
+            setIsTellingStory(false);
         }
     }
 
@@ -193,7 +199,7 @@ export default function DesignStudioPage() {
                     <div className="grid grid-cols-3 gap-3">
                         {STYLES.map(style => (
                             <motion.button key={style.name} onClick={() => setSelectedStyle(style)}
-                                className={`relative rounded-lg border-2 transition-all duration-200 overflow-hidden focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'border-primary' : 'border-transparent hover:border-primary/50'}`}
+                                className={`relative group rounded-lg border-2 transition-all duration-200 overflow-hidden focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'border-primary' : 'border-transparent hover:border-primary/50'}`}
                                 disabled={isLoading}
                                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                 <Image src={style.image} alt={style.name} width={150} height={150} className="w-full h-auto" />
@@ -212,14 +218,23 @@ export default function DesignStudioPage() {
                         {isLoading ? 'Designing...' : 'Create My Decal'}
                     </motion.button>
                     <div className="flex gap-3">
-                        <Button variant="outline" onClick={handleSaveCreation} disabled={isLoading || !generatedDecal} className="w-full">Save Design</Button>
+                        <Button variant="outline" onClick={handleSaveCreation} disabled={isLoading || !generatedDecal || isSaving} className="w-full">
+                            {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
+                            {isSaving ? 'Saving...' : 'Save Design'}
+                        </Button>
                         <Button onClick={handleFinalize} disabled={isLoading || !generatedDecal} className="w-full bg-green-600 hover:bg-green-700">Finalize Design</Button>
                     </div>
                     {generatedDecal && (
-                        <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
-                            {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
-                            Get AI Feedback ✨
-                        </Button>
+                        <div className="grid grid-cols-2 gap-3">
+                            <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
+                                {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
+                                AI Coach ✨
+                            </Button>
+                             <Button variant="outline" onClick={handleTellStory} disabled={isTellingStory} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
+                                {isTellingStory ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="BookOpen" />}
+                                Tell a Story ✨
+                            </Button>
+                        </div>
                     )}
                 </div>
             </motion.div>

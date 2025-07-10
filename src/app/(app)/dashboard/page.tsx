@@ -10,15 +10,17 @@ import Image from 'next/image';
 import Modal from '@/components/shared/modal';
 import { useToast } from '@/hooks/use-toast';
 import { describeImage } from '@/ai/flows/describe-image';
-import { Creation } from '@/lib/types';
+import { getRemixSuggestions } from '@/ai/flows/get-remix-suggestions';
+import type { Creation } from '@/lib/types';
 
 export default function DashboardPage() {
-    const { creations, remix } = useApp();
+    const { creations, startRemix } = useApp();
     const router = useRouter();
     const { toast } = useToast();
 
     const [modal, setModal] = useState({ isOpen: false, title: '', children: <></> });
     const [isDescribing, setIsDescribing] = useState<string | null>(null);
+    const [isRemixing, setIsRemixing] = useState<string | null>(null);
 
     const handleDescribe = async (creation: Creation) => {
         setIsDescribing(creation.id);
@@ -33,7 +35,7 @@ export default function DashboardPage() {
                       <ul className="space-y-3">
                           {result.prompts.map((p, i) => (
                               <li key={i} onClick={() => {
-                                remix({ ...creation, prompt: p });
+                                startRemix({ ...creation, prompt: p });
                                 setModal(prev => ({...prev, isOpen: false}));
                               }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
                                   <p className="font-mono text-sm">"{p}"</p>
@@ -48,6 +50,44 @@ export default function DashboardPage() {
             toast({ variant: 'destructive', title: 'Error', description: 'Could not generate descriptions for this image.' });
         } finally {
             setIsDescribing(null);
+        }
+    };
+    
+    const handleRemix = async (creation: Creation) => {
+        setIsRemixing(creation.id);
+        try {
+            const result = await getRemixSuggestions({ prompt: creation.prompt });
+            setModal({
+                isOpen: true,
+                title: 'Intelligent Remix Ideas',
+                children: (
+                    <div className="space-y-4">
+                        <p>Not sure where to start? Try one of these AI-powered ideas to remix your creation!</p>
+                        <ul className="space-y-3">
+                            <li onClick={() => {
+                                startRemix(creation);
+                                setModal(prev => ({ ...prev, isOpen: false }));
+                            }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+                                <p className="font-semibold">Just take me to the original</p>
+                            </li>
+                            {result.suggestions.map((p, i) => (
+                                <li key={i} onClick={() => {
+                                    startRemix({ ...creation, prompt: p });
+                                    setModal(prev => ({ ...prev, isOpen: false }));
+                                }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+                                    <p className="font-mono text-sm">"{p}"</p>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                ),
+            });
+        } catch (error) {
+            console.error('Remix suggestions error:', error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not get remix ideas. Starting with original prompt.' });
+            startRemix(creation);
+        } finally {
+            setIsRemixing(null);
         }
     };
 
@@ -75,16 +115,18 @@ export default function DashboardPage() {
                         >
                             <Image src={creation.url} alt={creation.title || creation.prompt} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end">
-                                <p className="text-white text-sm font-semibold truncate">{creation.title || creation.prompt}</p>
+                                <p className="text-white text-sm font-semibold truncate" title={creation.title}>{creation.title || creation.prompt}</p>
                                 <div className="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <motion.button 
-                                        onClick={() => remix(creation)} 
-                                        className="px-3 py-1.5 bg-white/20 text-white text-xs font-semibold rounded-full backdrop-blur-md hover:bg-white/30 transition-all"
+                                        onClick={() => handleRemix(creation)} 
+                                        disabled={!!isRemixing}
+                                        className="px-3 py-1.5 bg-white/20 text-white text-xs font-semibold rounded-full backdrop-blur-md hover:bg-white/30 transition-all flex items-center gap-1 disabled:opacity-50"
                                         initial={{ y: 10, opacity: 0 }}
                                         animate={{ y: 0, opacity: 1 }}
                                         transition={{ delay: 0.1 }}
                                     >
-                                        Remix ✨
+                                        {isRemixing === creation.id ? <Icon name="Wand2" className="w-3 h-3 animate-pulse" /> : <Icon name="Sparkles" className="w-3 h-3" />}
+                                        Remix
                                     </motion.button>
                                     <motion.button 
                                         onClick={() => handleDescribe(creation)}

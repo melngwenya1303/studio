@@ -8,15 +8,17 @@ import Image from 'next/image';
 import Modal from '@/components/shared/modal';
 import { useToast } from '@/hooks/use-toast';
 import { describeImage } from '@/ai/flows/describe-image';
-import { GalleryItem } from '@/lib/types';
+import { getRemixSuggestions } from '@/ai/flows/get-remix-suggestions';
+import type { GalleryItem } from '@/lib/types';
 import Icon from '@/components/shared/icon';
 
 export default function InspirationGalleryPage() {
-    const { remix } = useApp();
+    const { startRemix } = useApp();
     const { toast } = useToast();
 
     const [modal, setModal] = useState({ isOpen: false, title: '', children: <></> });
     const [isDescribing, setIsDescribing] = useState<number | null>(null);
+    const [isRemixing, setIsRemixing] = useState<number | null>(null);
 
     const handleDescribe = async (item: GalleryItem) => {
         setIsDescribing(item.id);
@@ -31,7 +33,7 @@ export default function InspirationGalleryPage() {
                       <ul className="space-y-3">
                           {result.prompts.map((p, i) => (
                               <li key={i} onClick={() => {
-                                remix({ ...item, prompt: p });
+                                startRemix({ ...item, prompt: p });
                                 setModal(prev => ({...prev, isOpen: false}));
                               }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
                                   <p className="font-mono text-sm">"{p}"</p>
@@ -46,6 +48,44 @@ export default function InspirationGalleryPage() {
             toast({ variant: 'destructive', title: 'Error', description: 'Could not generate descriptions for this image.' });
         } finally {
             setIsDescribing(null);
+        }
+    };
+
+    const handleRemix = async (item: GalleryItem) => {
+        setIsRemixing(item.id);
+        try {
+            const result = await getRemixSuggestions({ prompt: item.prompt });
+            setModal({
+                isOpen: true,
+                title: 'Intelligent Remix Ideas',
+                children: (
+                    <div className="space-y-4">
+                        <p>Not sure where to start? Try one of these AI-powered ideas to remix this design!</p>
+                        <ul className="space-y-3">
+                             <li onClick={() => {
+                                startRemix(item);
+                                setModal(prev => ({ ...prev, isOpen: false }));
+                            }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+                                <p className="font-semibold">Just take me to the original</p>
+                            </li>
+                            {result.suggestions.map((p, i) => (
+                                <li key={i} onClick={() => {
+                                    startRemix({ ...item, prompt: p });
+                                    setModal(prev => ({ ...prev, isOpen: false }));
+                                }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+                                    <p className="font-mono text-sm">"{p}"</p>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                ),
+            });
+        } catch (error) {
+            console.error('Remix suggestions error:', error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not get remix ideas. Starting with original prompt.' });
+            startRemix(item);
+        } finally {
+            setIsRemixing(null);
         }
     };
 
@@ -68,7 +108,10 @@ export default function InspirationGalleryPage() {
                            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2 line-clamp-2" title={item.prompt}>{item.prompt}</p>
                            <p className="text-xs text-gray-500 dark:text-gray-400 italic mb-4 line-clamp-3">Curator's Note: "{item.curatorNote}"</p>
                            <div className="mt-auto flex items-center gap-2">
-                            <Button onClick={() => remix(item)} className="w-full">Remix this Design ✨</Button>
+                            <Button onClick={() => handleRemix(item)} disabled={!!isRemixing} className="w-full">
+                                {isRemixing === item.id ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
+                                Remix this Design
+                            </Button>
                             <Button 
                                 onClick={() => handleDescribe(item)} 
                                 disabled={!!isDescribing}
