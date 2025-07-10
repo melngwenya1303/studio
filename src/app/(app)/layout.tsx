@@ -13,7 +13,7 @@ export default function AppLayout({
   const pathname = usePathname();
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-50 to-gray-200 dark:from-gray-900 dark:to-black text-gray-800 dark:text-gray-200">
+    <div className="flex h-screen bg-gray-100 dark:bg-background text-gray-800 dark:text-gray-200">
       <Sidebar />
       <main className="flex-1 overflow-y-auto">
         <motion.div

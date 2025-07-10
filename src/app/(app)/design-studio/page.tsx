@@ -427,9 +427,9 @@ export default function DesignStudioPage() {
                                         </div>
 
                                         <motion.button onClick={() => handleGenerate(prompt)} disabled={isLoading || !prompt.trim() || !policyAccepted}
-                                            className="w-full py-3 px-6 rounded-xl font-semibold text-lg text-white transition-all duration-300 bg-gradient-to-r from-primary to-pink-600 hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
+                                            className="w-full py-3 px-6 rounded-xl font-semibold text-lg text-white transition-all duration-300 bg-gradient-to-r from-primary to-accent hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
                                             whileHover={{ y: -2 }} whileTap={{ y: 1 }}>
-                                            {isLoading ? 'Designing...' : 'Create My Decal'}
+                                            {isLoading ? 'Designing...' : 'Create My Design'}
                                         </motion.button>
                                         
                                         {generatedDecal && (
@@ -480,7 +480,7 @@ export default function DesignStudioPage() {
                     initial={{ scale: 0.8, opacity: 0 }} 
                     animate={{ scale: 1, opacity: 1 }} 
                     transition={{ duration: 0.7, delay: 0.2 }} 
-                    className="lg:col-span-3 flex items-center justify-center bg-gray-100 dark:bg-gray-800/50 rounded-2xl min-h-[50vh] lg:min-h-0 p-8"
+                    className="lg:col-span-3 flex items-center justify-center bg-gray-100 dark:bg-black/20 rounded-2xl min-h-[50vh] lg:min-h-0 p-8"
                 >
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center text-primary text-center">

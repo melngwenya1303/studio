@@ -4,48 +4,48 @@
 
 @layer base {
   :root {
-    --background: 240 10% 96%;
+    --background: 228 94% 98%; /* Lighter gray for a clean look */
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 229 89% 63%;
+    --primary: 277 82% 56%; /* Deep Indigo */
     --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 0 0% 96.1%;
     --muted-foreground: 240 3.8% 46.1%;
-    --accent: 229 89% 63%;
+    --accent: 266 94% 63%; /* Vibrant Violet */
     --accent-foreground: 0 0% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
-    --ring: 229 89% 63%;
+    --ring: 277 82% 56%;
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: 240 5% 10%;
-    --foreground: 0 0% 98%;
-    --card: 240 5% 12%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 10% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 229 89% 73%;
+    --background: 0 0% 7.1%; /* #121212 */
+    --foreground: 0 0% 95%; /* rgba(255, 255, 255, 0.87) - High-Emphasis */
+    --card: 0 0% 11.8%; /* #1E1E1E */
+    --card-foreground: 0 0% 95%;
+    --popover: 0 0% 17.3%; /* #2C2C2C */
+    --popover-foreground: 0 0% 95%;
+    --primary: 277 70% 75%; /* Desaturated Indigo for dark mode */
     --primary-foreground: 0 0% 98%;
-    --secondary: 240 3.7% 15.9%;
+    --secondary: 0 0% 15%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 240 3.7% 15.9%;
-    --muted-foreground: 240 5% 64.9%;
-    --accent: 229 89% 73%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 63.9%; /* rgba(255, 255, 255, 0.60) - Medium-Emphasis */
+    --accent: 266 80% 78%; /* Desaturated Violet for dark mode */
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 3.7% 15.9%;
-    --input: 240 3.7% 20%;
-    --ring: 229 89% 73%;
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 277 70% 75%;
   }
 }
 
