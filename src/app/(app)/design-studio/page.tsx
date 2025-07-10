@@ -564,7 +564,7 @@ export default function DesignStudioPage() {
                                                 ease: 'easeInOut',
                                             }}
                                         >
-                                            <Icon name="Cube" className="w-24 h-24 text-primary/30" />
+                                            <Icon name="Box" className="w-24 h-24 text-primary/30" />
                                         </motion.div>
                                         <h3 className="text-lg font-semibold">Interactive 3D Preview</h3>
                                         <p className="max-w-xs">This feature is coming soon! You'll be able to rotate, pan, and zoom to see your design from every angle.</p>
@@ -579,7 +579,7 @@ export default function DesignStudioPage() {
                                <Icon name="ImageIcon" className="w-4 h-4 mr-2" /> 2D
                             </ToggleGroupItem>
                             <ToggleGroupItem value="3D" aria-label="3D Preview">
-                               <Icon name="Cube" className="w-4 h-4 mr-2" /> 3D
+                               <Icon name="Box" className="w-4 h-4 mr-2" /> 3D
                             </ToggleGroupItem>
                         </ToggleGroup>
                         <Button variant="outline" disabled>
