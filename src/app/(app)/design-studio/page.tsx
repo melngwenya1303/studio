@@ -19,7 +19,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const Scene = dynamic(() => import('@/components/canvas/Scene'), {
+const ClientScene = dynamic(() => import('@/components/canvas/ClientScene'), {
     ssr: false,
     loading: () => (
         <div className="flex flex-col items-center justify-center h-full w-full text-primary">
@@ -206,7 +206,7 @@ export default function DesignStudioPage() {
                                 <p className="mt-4 font-semibold">AI is creating magic...</p>
                             </div>
                         ) : (
-                            <Scene deviceName={selectedDevice.name} decalUrl={generatedDecal?.url || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='} />
+                            <ClientScene deviceName={selectedDevice.name} decalUrl={generatedDecal?.url || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='} />
                         )}
                     </CardContent>
                 </Card>
