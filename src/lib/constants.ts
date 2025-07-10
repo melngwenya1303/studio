@@ -5,9 +5,9 @@ export const DEVICES: Device[] = [
         name: 'Laptop', 
         icon: 'Laptop', 
         models: [
-            { name: '13-inch', previewImage: 'https://placehold.co/800x500.png', 'data-ai-hint': 'laptop', previewWidth: 500, previewHeight: 300, decalWidth: 200, decalHeight: 120 },
-            { name: '15-inch', previewImage: 'https://placehold.co/800x500.png', 'data-ai-hint': 'laptop', previewWidth: 500, previewHeight: 300, decalWidth: 250, decalHeight: 150 },
-            { name: '16-inch', previewImage: 'https://placehold.co/800x500.png', 'data-ai-hint': 'laptop', previewWidth: 500, previewHeight: 300, decalWidth: 280, decalHeight: 170 },
+            { name: 'MacBook Air 13"', previewImage: 'https://placehold.co/800x500.png', 'data-ai-hint': 'laptop', previewWidth: 500, previewHeight: 300, decalWidth: 200, decalHeight: 120 },
+            { name: 'Surface Pro 15"', previewImage: 'https://placehold.co/800x500.png', 'data-ai-hint': 'laptop', previewWidth: 500, previewHeight: 300, decalWidth: 250, decalHeight: 150 },
+            { name: 'Dell XPS 16"', previewImage: 'https://placehold.co/800x500.png', 'data-ai-hint': 'laptop', previewWidth: 500, previewHeight: 300, decalWidth: 280, decalHeight: 170 },
         ],
         // Default values, can be removed if models are always present
         previewImage: 'https://placehold.co/800x500.png',
@@ -28,14 +28,14 @@ export const DEVICES: Device[] = [
         decalHeight: 300 
     },
     { 
-        name: 'Headphones', 
-        icon: 'Headphones', 
-        previewImage: 'https://placehold.co/600x600.png', 
-        'data-ai-hint': 'headphones', 
-        previewWidth: 400, 
+        name: 'Tablet', 
+        icon: 'Tablet', 
+        previewImage: 'https://placehold.co/600x800.png', 
+        'data-ai-hint': 'tablet computer', 
+        previewWidth: 300, 
         previewHeight: 400, 
-        decalWidth: 150, 
-        decalHeight: 150 
+        decalWidth: 220, 
+        decalHeight: 350 
     },
 ];
 
