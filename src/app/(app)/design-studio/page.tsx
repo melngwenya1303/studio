@@ -22,7 +22,7 @@ import Image from 'next/image';
 import { Checkbox } from '@/components/ui/checkbox';
 import Link from 'next/link';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 
 export default function DesignStudioPage() {
@@ -280,24 +280,25 @@ export default function DesignStudioPage() {
 
                 {selectedDevice.models && selectedDevice.models.length > 0 && (
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.3 }} className="space-y-2 overflow-hidden">
-                        <label className="text-lg font-semibold text-gray-700 dark:text-gray-200 block">1a. Select a model</label>
-                        <RadioGroup 
-                            value={selectedModel?.name} 
+                        <Label htmlFor="device-model" className="text-lg font-semibold text-gray-700 dark:text-gray-200 block">1a. Select a model</Label>
+                        <Select
+                            value={selectedModel?.name}
                             onValueChange={(value) => {
                                 const model = selectedDevice.models?.find(m => m.name === value);
                                 if (model) setSelectedModel(model);
                             }}
-                            className="grid grid-cols-3 gap-3"
                         >
-                            {selectedDevice.models.map(model => (
-                                <div key={model.name} className="flex items-center">
-                                    <RadioGroupItem value={model.name} id={model.name} className="peer sr-only" />
-                                    <Label htmlFor={model.name} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary w-full cursor-pointer">
+                            <SelectTrigger id="device-model" className="w-full">
+                                <SelectValue placeholder="Select a model" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {selectedDevice.models.map(model => (
+                                    <SelectItem key={model.name} value={model.name}>
                                         {model.name}
-                                    </Label>
-                                </div>
-                            ))}
-                        </RadioGroup>
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </motion.div>
                 )}
 
