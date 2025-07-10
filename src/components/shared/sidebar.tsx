@@ -41,7 +41,7 @@ const SidebarHeader = () => (
     >
       <Icon name="Wand2" className="w-6 h-6 text-white" />
     </motion.div>
-    <h1 className="text-2xl font-bold font-headline text-foreground">SkinGen</h1>
+    <h1 className="text-2xl font-bold font-headline text-foreground">SurfaceStory</h1>
   </motion.div>
 );
 
