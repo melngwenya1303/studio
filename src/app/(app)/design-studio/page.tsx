@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from "@/hooks/use-toast";
@@ -9,6 +9,7 @@ import { generateImage } from '@/ai/flows/generate-image';
 import { generateTitle } from '@/ai/flows/generate-title';
 import { getCreativeFeedback } from '@/ai/flows/get-creative-feedback';
 import { generateStory } from '@/ai/flows/generate-story';
+import { generateAudio } from '@/ai/flows/generate-audio';
 import { DEVICES, STYLES } from '@/lib/constants';
 import type { Device, Style, Creation } from '@/lib/types';
 import Icon from '@/components/shared/icon';
@@ -32,6 +33,12 @@ export default function DesignStudioPage() {
     const [isTellingStory, setIsTellingStory] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [modal, setModal] = useState({ isOpen: false, title: '', children: <></> });
+    
+    // Accessibility States
+    const [isListening, setIsListening] = useState(false);
+    const [isSpeaking, setIsSpeaking] = useState(false);
+    const audioRef = useRef<HTMLAudioElement>(null);
+    const recognitionRef = useRef<any>(null);
 
     useEffect(() => {
         if (remixData) {
@@ -49,6 +56,64 @@ export default function DesignStudioPage() {
             clearRemixData();
         }
     }, [remixData, clearRemixData]);
+
+    // Speech-to-Text Effect
+    useEffect(() => {
+        if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognitionRef.current = new SpeechRecognition();
+            const recognition = recognitionRef.current;
+            recognition.continuous = false;
+            recognition.lang = 'en-US';
+            recognition.interimResults = false;
+
+            recognition.onresult = (event: any) => {
+                const transcript = event.results[0][0].transcript;
+                setPrompt(prev => prev ? `${prev} ${transcript}` : transcript);
+                setIsListening(false);
+            };
+            recognition.onerror = (event: any) => {
+                console.error('Speech recognition error', event.error);
+                toast({ variant: "destructive", title: "Voice Error", description: "Could not recognize speech. Please try again." });
+                setIsListening(false);
+            };
+            recognition.onend = () => {
+                setIsListening(false);
+            };
+        }
+    }, [toast]);
+
+    const handleToggleListening = () => {
+        if (!recognitionRef.current) {
+            toast({ variant: "destructive", title: "Not Supported", description: "Voice recognition is not supported in your browser." });
+            return;
+        }
+        if (isListening) {
+            recognitionRef.current.stop();
+        } else {
+            recognitionRef.current.start();
+            setIsListening(true);
+        }
+    };
+
+    // Text-to-Speech Handler
+    const handleTextToSpeech = async () => {
+        if (!prompt.trim()) return;
+        setIsSpeaking(true);
+        try {
+            const { media } = await generateAudio({ text: prompt });
+            if (audioRef.current) {
+                audioRef.current.src = media;
+                audioRef.current.play();
+                audioRef.current.onended = () => setIsSpeaking(false);
+            }
+        } catch (error) {
+            console.error(error);
+            toast({ variant: "destructive", title: "Audio Error", description: "Could not generate audio for the prompt." });
+            setIsSpeaking(false);
+        }
+    };
+
 
     const handleGenerate = async (basePrompt: string) => {
         if (!basePrompt.trim()) {
@@ -172,6 +237,7 @@ export default function DesignStudioPage() {
             <Modal isOpen={modal.isOpen} title={modal.title} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} size={(modal as any).size}>
                 {modal.children}
             </Modal>
+            <audio ref={audioRef} className="hidden" />
             <motion.div initial={{ x: -50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5 }} className="lg:col-span-1 flex flex-col space-y-6">
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-white font-headline">Design Studio</h2>
                 
@@ -193,18 +259,30 @@ export default function DesignStudioPage() {
                     <label className="text-lg font-semibold text-gray-700 dark:text-gray-200 block">2. Describe your vision</label>
                     <div className="relative">
                         <Textarea
-                            className="w-full p-4 pr-12 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+                            className="w-full p-4 pr-24 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
                             placeholder={`A decal for my ${selectedDevice.name}... e.g., 'a serene koi pond'`}
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
                             rows={4}
-                            disabled={isLoading || isEnhancing}
+                            disabled={isLoading || isEnhancing || isListening}
                         />
-                        <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleEnhancePrompt} disabled={isLoading || isEnhancing || !prompt.trim()}
-                            className="absolute top-3 right-3 p-2 rounded-full bg-purple-100 dark:bg-purple-900/50 text-primary dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900 disabled:opacity-50"
-                            title="Enhance with AI ✨">
-                            <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
-                        </motion.button>
+                        <div className="absolute top-3 right-3 flex items-center gap-1">
+                             <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleToggleListening} disabled={isLoading || isEnhancing}
+                                className={`p-2 rounded-full bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-300 hover:bg-cyan-200 dark:hover:bg-cyan-900 disabled:opacity-50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}
+                                title="Speak Your Prompt">
+                                <Icon name="Mic" className="w-5 h-5" />
+                            </motion.button>
+                            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleTextToSpeech} disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking}
+                                className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900 disabled:opacity-50"
+                                title="Listen to Prompt">
+                                <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
+                            </motion.button>
+                            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleEnhancePrompt} disabled={isLoading || isEnhancing || !prompt.trim()}
+                                className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/50 text-primary dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900 disabled:opacity-50"
+                                title="Enhance with AI ✨">
+                                <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
+                            </motion.button>
+                        </div>
                     </div>
                 </div>
                 
