@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { enhancePrompt } from '@/ai/flows/enhance-prompt';
 import { generateImage } from '@/ai/flows/generate-image';
 import { generateTitle } from '@/ai/flows/generate-title';
+import { getCreativeFeedback } from '@/ai/flows/get-creative-feedback';
 import { DEVICES, STYLES } from '@/lib/constants';
 import type { Device, Style, Creation } from '@/lib/types';
 import Icon from '@/components/shared/icon';
@@ -44,6 +45,7 @@ export default function DesignStudioPage() {
     const [generatedDecal, setGeneratedDecal] = useState<Omit<Creation, 'id' | 'createdAt' | 'title'> | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isEnhancing, setIsEnhancing] = useState(false);
+    const [isGettingFeedback, setIsGettingFeedback] = useState(false);
     const [modal, setModal] = useState({ isOpen: false, title: '', children: <></> });
 
     useEffect(() => {
@@ -127,9 +129,27 @@ export default function DesignStudioPage() {
       });
     };
 
+    const handleGetFeedback = async () => {
+        if (!generatedDecal) return;
+        setIsGettingFeedback(true);
+        try {
+            const result = await getCreativeFeedback({ prompt: generatedDecal.prompt });
+            setModal({
+                isOpen: true,
+                title: 'AI Creative Coach',
+                children: <p>{result.feedback}</p>,
+                size: 'lg'
+            });
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not get AI feedback at this time.' });
+        } finally {
+            setIsGettingFeedback(false);
+        }
+    }
+
     return (
         <div className="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
-            <Modal isOpen={modal.isOpen} title={modal.title} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}>
+            <Modal isOpen={modal.isOpen} title={modal.title} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} size={(modal as any).size}>
                 {modal.children}
             </Modal>
             <motion.div initial={{ x: -50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5 }} className="lg:col-span-1 flex flex-col space-y-6">
@@ -195,6 +215,12 @@ export default function DesignStudioPage() {
                         <Button variant="outline" onClick={handleSaveCreation} disabled={isLoading || !generatedDecal} className="w-full">Save Design</Button>
                         <Button onClick={handleFinalize} disabled={isLoading || !generatedDecal} className="w-full bg-green-600 hover:bg-green-700">Finalize Design</Button>
                     </div>
+                    {generatedDecal && (
+                        <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
+                            {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
+                            Get AI Feedback ✨
+                        </Button>
+                    )}
                 </div>
             </motion.div>
 
