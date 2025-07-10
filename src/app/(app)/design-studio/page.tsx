@@ -48,8 +48,8 @@ export default function DesignStudioPage() {
     const audioRef = useRef<HTMLAudioElement>(null);
     const recognitionRef = useRef<any>(null);
 
-    const steps = ['Canvas', 'Vision', 'Style'];
-    const [currentStep, setCurrentStep] = useState(1);
+    // Step tracking
+    const [completedSteps, setCompletedSteps] = useState<number[]>([]);
 
     const handleDeviceSelection = (device: Device) => {
         setSelectedDevice(device);
@@ -57,6 +57,9 @@ export default function DesignStudioPage() {
             setSelectedModel(device.models[0]);
         } else {
             setSelectedModel(null);
+        }
+        if (!completedSteps.includes(1)) {
+            setCompletedSteps(prev => [...prev, 1]);
         }
     };
     
@@ -69,18 +72,17 @@ export default function DesignStudioPage() {
             setSelectedStyle(style);
             const device = DEVICES.find(d => d.name === (remixData as Creation).deviceType) || DEVICES[0];
             handleDeviceSelection(device);
-            // This part might need adjustment if remixData includes model info
             setGeneratedDecal({
                 url: remixData.url,
                 prompt: remixData.prompt,
                 style: remixData.style,
                 deviceType: device.name,
             });
+            setCompletedSteps([1, 2, 3]);
             clearRemixData();
         }
     }, [remixData, clearRemixData]);
 
-    // Speech-to-Text Effect
     useEffect(() => {
         if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -105,6 +107,12 @@ export default function DesignStudioPage() {
             };
         }
     }, [toast]);
+    
+    useEffect(() => {
+        if (prompt.trim() && !completedSteps.includes(2)) {
+            setCompletedSteps(prev => [...prev, 2]);
+        }
+    }, [prompt, completedSteps]);
 
     const handleToggleListening = () => {
         if (!recognitionRef.current) {
@@ -119,7 +127,6 @@ export default function DesignStudioPage() {
         }
     };
 
-    // Text-to-Speech Handler
     const handleTextToSpeech = async () => {
         if (!prompt.trim()) return;
         setIsSpeaking(true);
@@ -260,10 +267,10 @@ export default function DesignStudioPage() {
     
     const Step = ({ stepNumber, title }: { stepNumber: number; title: string; }) => (
         <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg ${currentStep >= stepNumber ? 'bg-primary text-primary-foreground' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'}`}>
-                {currentStep > stepNumber ? '✓' : stepNumber}
+            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg ${completedSteps.includes(stepNumber) ? 'bg-primary text-primary-foreground' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'}`}>
+                {completedSteps.includes(stepNumber) ? '✓' : stepNumber}
             </div>
-            <h3 className={`ml-4 text-xl font-headline font-semibold ${currentStep >= stepNumber ? 'text-gray-800 dark:text-white' : 'text-gray-500'}`}>{title}</h3>
+            <h3 className={`ml-4 text-xl font-headline font-semibold ${completedSteps.includes(stepNumber) ? 'text-gray-800 dark:text-white' : 'text-gray-500'}`}>{title}</h3>
         </div>
     );
 
@@ -276,16 +283,6 @@ export default function DesignStudioPage() {
             <motion.div initial={{ x: -50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5 }} className="lg:col-span-1 flex flex-col space-y-6">
                 <div className="space-y-6">
                     <h2 className="text-3xl font-bold text-gray-800 dark:text-white font-headline">Design Studio</h2>
-                    
-                    <div className="flex items-center justify-between p-3 rounded-full bg-gray-100 dark:bg-gray-800/50">
-                        {steps.map((step, index) => (
-                             <div key={index} className="flex-1 text-center">
-                                <span className={`font-semibold ${currentStep === index + 1 ? 'text-primary' : (currentStep > index + 1 ? 'text-gray-700 dark:text-gray-200' : 'text-gray-400 dark:text-gray-500')}`}>
-                                    {step}
-                                </span>
-                            </div>
-                        ))}
-                    </div>
                 </div>
                 
                 <Card className="shadow-lg">
@@ -378,7 +375,12 @@ export default function DesignStudioPage() {
                                     <CarouselItem key={index} className="pl-2 md:basis-1/2 lg:basis-1/2">
                                         <div className="p-1">
                                             <button 
-                                                onClick={() => setSelectedStyle(style)} 
+                                                onClick={() => {
+                                                    setSelectedStyle(style);
+                                                    if (!completedSteps.includes(3)) {
+                                                        setCompletedSteps(prev => [...prev, 3]);
+                                                    }
+                                                }} 
                                                 className={`w-full rounded-lg transition-all duration-200 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'ring-2 ring-primary ring-offset-background ring-offset-2' : ''}`}
                                                 disabled={isLoading}
                                             >
@@ -419,29 +421,31 @@ export default function DesignStudioPage() {
                         whileHover={{ y: -2 }} whileTap={{ y: 1 }}>
                         {isLoading ? 'Designing...' : 'Create My Decal'}
                     </motion.button>
-                    <div className="flex gap-3">
-                        <Button variant="outline" onClick={handleSaveCreation} disabled={isLoading || !generatedDecal || isSaving} className="w-full">
-                            {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
-                            {isSaving ? 'Saving...' : 'Save Design'}
-                        </Button>
-                        <Button onClick={handleFinalize} disabled={isLoading || !generatedDecal} className="w-full bg-green-600 hover:bg-green-700">Finalize Design</Button>
-                    </div>
                     {generatedDecal && (
-                        <div className="grid grid-cols-2 gap-3">
-                            <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
-                                {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
-                                Edit with AI ✨
-                            </Button>
-                             <Button variant="outline" onClick={handleTellStory} disabled={isTellingStory} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
-                                {isTellingStory ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="BookOpen" />}
-                                Tell a Story ✨
-                            </Button>
-                        </div>
+                        <>
+                            <div className="flex gap-3">
+                                <Button variant="outline" onClick={handleSaveCreation} disabled={isLoading || isSaving} className="w-full">
+                                    {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
+                                    {isSaving ? 'Saving...' : 'Save Design'}
+                                </Button>
+                                <Button onClick={handleFinalize} className="w-full bg-green-600 hover:bg-green-700">Finalize Design</Button>
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
+                                    {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
+                                    Edit with AI ✨
+                                </Button>
+                                <Button variant="outline" onClick={handleTellStory} disabled={isTellingStory} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
+                                    {isTellingStory ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="BookOpen" />}
+                                    Tell a Story ✨
+                                </Button>
+                            </div>
+                        </>
                     )}
                 </div>
             </motion.div>
 
-            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="lg:col-span-2 bg-gray-100 dark:bg-gray-900/50 p-8 rounded-2xl flex items-center justify-center">
+            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="lg:col-span-2 flex items-center justify-center">
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center h-full text-primary">
                         <Icon name="Wand2" className="w-16 h-16 animate-pulse" />
@@ -452,8 +456,8 @@ export default function DesignStudioPage() {
                         <Image
                             src={currentCanvas.previewImage}
                             alt={`${currentCanvas.name} preview`}
-                            width={500}
-                            height={500}
+                            width={800}
+                            height={800}
                             className="object-contain max-w-full max-h-full"
                             data-ai-hint={currentCanvas['data-ai-hint']}
                             key={currentCanvas.name}
