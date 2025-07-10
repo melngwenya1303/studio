@@ -1,9 +1,10 @@
+
 'use client';
 
 import { Suspense, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 import { Canvas } from '@react-three/fiber';
-import { OrbitControls, useTexture, Center } from '@react-three/drei';
+import { OrbitControls, useTexture, Center, Preload } from '@react-three/drei';
 import Icon from '@/components/shared/icon';
 
 const LaptopModel = dynamic(() => import('./LaptopModel').then(mod => mod.LaptopModel), { ssr: false });
@@ -29,7 +30,7 @@ function ModelScene({ deviceName, decalUrl }: { deviceName: string, decalUrl: st
             <Center>
                 <TexturedModel DeviceModel={DeviceModel} decalUrl={decalUrl} />
             </Center>
-            <OrbitControls enableZoom={false} enablePan={false} />
+            <OrbitControls enableZoom={false} enablePan={false} maxPolarAngle={Math.PI / 2} minPolarAngle={Math.PI / 2} />
         </>
     );
 }
@@ -44,12 +45,9 @@ function TexturedModel({ DeviceModel, decalUrl }: { DeviceModel: React.Component
 export default function ClientScene({ deviceName, decalUrl }: { deviceName: string, decalUrl: string }) {
     return (
         <Canvas camera={{ position: [0, 0, 2.5], fov: 50 }} dpr={[1, 2]}>
-            <Suspense fallback={
-                <Center>
-                    <Icon name="Laptop" className="w-16 h-16 animate-pulse text-primary" />
-                </Center>
-            }>
+            <Suspense fallback={null}>
                 <ModelScene deviceName={deviceName} decalUrl={decalUrl} />
+                <Preload all />
             </Suspense>
         </Canvas>
     );

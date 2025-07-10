@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from "@/hooks/use-toast";
@@ -22,12 +22,6 @@ import Image from 'next/image';
 import { Checkbox } from '@/components/ui/checkbox';
 import Link from 'next/link';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import dynamic from 'next/dynamic';
-
-const ClientScene = dynamic(() => import('@/components/canvas/ClientScene'), {
-    ssr: false,
-    loading: () => <div className="flex items-center justify-center h-full"><Icon name="Laptop" className="w-16 h-16 animate-pulse text-primary" /></div>
-});
 
 export default function DesignStudioPage() {
     const { user, addCreation, remixData, clearRemixData } = useApp();
@@ -208,7 +202,6 @@ export default function DesignStudioPage() {
                             {result.suggestions.map((p, i) => (
                                 <li key={i} onClick={() => {
                                   setPrompt(p);
-                                  handleGenerate(p);
                                   setModal(prev => ({...prev, isOpen: false}));
                                 }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
                                     <p className="font-mono text-sm">"{p}"</p>
@@ -376,8 +369,13 @@ export default function DesignStudioPage() {
                                 <Icon name="Wand2" className="w-16 h-16 animate-pulse" />
                                 <p className="mt-4 font-semibold">AI is creating magic...</p>
                             </div>
+                        ) : generatedDecal ? (
+                            <Image src={generatedDecal.url} alt="Generated Decal" layout="fill" objectFit="contain" />
                         ) : (
-                             <ClientScene deviceName={selectedDevice.name} decalUrl={generatedDecal?.url || '/placeholder.png'} />
+                            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                                <Icon name="ImageIcon" className="w-24 h-24" />
+                                <p className="mt-4 font-semibold text-lg">Your generated design will appear here</p>
+                            </div>
                         )}
                     </CardContent>
                 </Card>
