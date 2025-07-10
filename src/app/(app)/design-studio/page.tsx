@@ -277,14 +277,15 @@ export default function DesignStudioPage() {
 
     return (
         <TooltipProvider>
-            <div className="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
+            <div className="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-4 gap-8 h-full">
                 <Modal isOpen={modal.isOpen} title={modal.title} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} size={(modal as any).size}>
                     {modal.children}
                 </Modal>
                 <audio ref={audioRef} className="hidden" />
+
                 <motion.div initial={{ x: -50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5 }} className="lg:col-span-1 flex flex-col space-y-6">
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold text-gray-800 dark:text-white font-headline">Design Studio</h2>
+                        <h2 className="text-3xl font-bold text-gray-800 dark:text-white font-headline">Creator's Canvas</h2>
                     </div>
                     
                     <Card className="shadow-lg">
@@ -338,7 +339,7 @@ export default function DesignStudioPage() {
                         <CardContent>
                             <div className="relative">
                                 <Textarea
-                                    className="w-full p-4 pr-4 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+                                    className="w-full p-4 pr-4 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-base text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
                                     placeholder={`A decal for my ${currentCanvas.name}... e.g., 'a serene koi pond'`}
                                     value={prompt}
                                     onChange={(e) => setPrompt(e.target.value)}
@@ -392,7 +393,7 @@ export default function DesignStudioPage() {
                             <Carousel opts={{ align: "start", loop: true }} className="w-full">
                                 <CarouselContent className="-ml-2">
                                     {STYLES.map((style, index) => (
-                                        <CarouselItem key={index} className="pl-2 md:basis-1/2 lg:basis-1/2">
+                                        <CarouselItem key={index} className="pl-2 basis-1/2">
                                             <div className="p-1">
                                                 <button 
                                                     onClick={() => {
@@ -465,7 +466,7 @@ export default function DesignStudioPage() {
                     </div>
                 </motion.div>
 
-                <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="lg:col-span-2 flex items-center justify-center">
+                <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="lg:col-span-3 flex items-center justify-center">
                     {isLoading ? (
                         <div className="flex flex-col items-center justify-center h-full text-primary">
                             <Icon name="Wand2" className="w-16 h-16 animate-pulse" />
