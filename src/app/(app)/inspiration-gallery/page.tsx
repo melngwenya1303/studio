@@ -19,7 +19,7 @@ export default function InspirationGalleryPage() {
                 {GALLERY_ITEMS.map(item => (
                     <div key={item.id} className="group relative rounded-xl overflow-hidden shadow-lg bg-white dark:bg-gray-800/80 border border-gray-200 dark:border-gray-700 flex flex-col">
                        <div className="relative w-full h-56">
-                         <Image src={item.url} alt={item.prompt} layout="fill" className="object-cover" {...{ 'data-ai-hint': item['data-ai-hint'] }} />
+                         <Image src={item.url} alt={item.prompt} fill className="object-cover" {...{ 'data-ai-hint': item['data-ai-hint'] }} />
                        </div>
                        <div className="p-4 flex flex-col flex-grow">
                            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2 line-clamp-2" title={item.prompt}>{item.prompt}</p>

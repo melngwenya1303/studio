@@ -31,7 +31,7 @@ export default function DashboardPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: i * 0.05 }}
                         >
-                            <Image src={creation.url} alt={creation.title || creation.prompt} layout="fill" className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                            <Image src={creation.url} alt={creation.title || creation.prompt} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end">
                                 <p className="text-white text-sm font-semibold truncate">{creation.title || creation.prompt}</p>
                                 <motion.button 
