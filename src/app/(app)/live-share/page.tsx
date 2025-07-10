@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -42,10 +43,10 @@ export default function LiveSharePage() {
             >
                 <header className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+                        <h1 className="text-h1 font-bold font-headline flex items-center gap-3">
                             <Icon name="Users" /> Live Session
-                        </h2>
-                        <p className="text-gray-500 dark:text-gray-400 mt-1">Create together in real-time.</p>
+                        </h1>
+                        <p className="text-muted-foreground mt-1">Create together in real-time.</p>
                     </div>
                     <div className="flex items-center -space-x-2">
                         {participants.map(p => (

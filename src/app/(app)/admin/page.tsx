@@ -167,7 +167,7 @@ export default function AdminPage() {
             </Modal>
 
             <header className="mb-8">
-                <h2 className="text-3xl font-bold text-foreground flex items-center gap-3"><Icon name="ShieldCheck" /> Admin Center</h2>
+                <h1 className="text-h1 font-bold font-headline flex items-center gap-3"><Icon name="ShieldCheck" /> Admin Center</h1>
                 <p className="text-muted-foreground mt-1">Manage platform safety, integrations, and operations.</p>
             </header>
 

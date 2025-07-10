@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -95,8 +96,8 @@ export default function InspirationGalleryPage() {
                 {modal.children}
             </Modal>
             <header className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Inspiration Gallery</h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">Discover decal designs from the community and start your own remix.</p>
+                <h1 className="text-h1 font-bold font-headline">Inspiration Gallery</h1>
+                <p className="text-muted-foreground mt-1">Discover decal designs from the community and start your own remix.</p>
             </header>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
                 {GALLERY_ITEMS.map(item => (

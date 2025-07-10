@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -99,7 +100,7 @@ export default function DashboardPage() {
             <header className="mb-8 p-8 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 text-white shadow-2xl relative overflow-hidden">
                 <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/30 rounded-full filter blur-3xl"></div>
                 <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-pink-600/30 rounded-full filter blur-3xl"></div>
-                <h2 className="text-3xl font-bold mb-2 relative">Your Design Library</h2>
+                <h1 className="text-h1 font-bold font-headline mb-2 relative">Your Design Library</h1>
                 <p className="text-gray-300 relative">All your unique SurfaceStory designs, ready to be revisited or remixed.</p>
             </header>
             

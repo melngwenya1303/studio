@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -13,6 +14,15 @@ export default {
         body: ['Lato', 'sans-serif'],
         headline: ['Montserrat', 'sans-serif'],
         code: ['monospace'],
+      },
+      fontSize: {
+        'h1': ['32px', { lineHeight: '1.25' }],
+        'h2': ['24px', { lineHeight: '1.3' }],
+        'h3': ['20px', { lineHeight: '1.4' }],
+        'body': ['16px', { lineHeight: '1.5' }],
+        'label': ['14px', { lineHeight: '1.4' }],
+        'button': ['16px', { lineHeight: '1.0' }],
+        'micro': ['12px', { lineHeight: '1.4' }],
       },
       colors: {
         border: 'hsl(var(--border))',

@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -27,10 +28,10 @@ export default function LeaderboardPage() {
     return (
         <div className="p-4 md:p-8 animate-fade-in">
             <header className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
+                <h1 className="text-h1 font-bold font-headline flex items-center gap-3">
                     <Icon name="Trophy" /> Creator Leaderboard
-                </h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">See who's leading the creative charge this week.</p>
+                </h1>
+                <p className="text-muted-foreground mt-1">See who's leading the creative charge this week.</p>
             </header>
             
             <Card>

@@ -272,7 +272,7 @@ export default function DesignStudioPage() {
                 >
                      <Card className="shadow-lg flex flex-col h-full">
                         <CardHeader>
-                            <CardTitle className="text-2xl font-bold text-gray-800 dark:text-white">Creator's Palette</CardTitle>
+                            <CardTitle className="text-h3 font-medium font-headline">Creator's Palette</CardTitle>
                         </CardHeader>
                         <CardContent className="flex flex-col flex-grow">
                              <Tabs defaultValue="design" className="w-full flex flex-col flex-grow">
@@ -285,7 +285,7 @@ export default function DesignStudioPage() {
                                     <div className="space-y-6 py-6 flex-grow">
                                         {/* Step 1: Canvas */}
                                         <div className="space-y-4">
-                                            <h3 className="text-xl font-semibold">1. Select Product</h3>
+                                            <h3 className="text-xl font-semibold font-headline">1. Select Product</h3>
                                             <Select
                                                 value={selectedDevice.name}
                                                 onValueChange={(value) => {
@@ -336,7 +336,7 @@ export default function DesignStudioPage() {
 
                                         {/* Step 2: Vision */}
                                         <div className="space-y-4">
-                                            <h3 className="text-xl font-semibold">2. Describe Your Vision</h3>
+                                            <h3 className="text-xl font-semibold font-headline">2. Describe Your Vision</h3>
                                             <div className="relative">
                                                 <Textarea
                                                     className="w-full p-4 pr-24 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-base text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
@@ -379,7 +379,7 @@ export default function DesignStudioPage() {
 
                                         {/* Step 3: Style */}
                                         <div className="space-y-4">
-                                            <h3 className="text-xl font-semibold">3. Choose Style</h3>
+                                            <h3 className="text-xl font-semibold font-headline">3. Choose Style</h3>
                                             <Carousel opts={{ align: "start", loop: true }} className="w-full">
                                                 <CarouselContent className="-ml-2">
                                                     {STYLES.map((style, index) => (
@@ -532,5 +532,3 @@ export default function DesignStudioPage() {
         </TooltipProvider>
     );
 }
-
-    

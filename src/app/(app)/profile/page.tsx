@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -36,8 +37,8 @@ export default function ProfilePage() {
                             <AvatarFallback>{profileUser.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-grow text-center md:text-left">
-                            <h2 className="text-3xl font-bold">{profileUser.name}</h2>
-                            <p className="text-gray-500 dark:text-gray-400 mt-1">{profileUser.bio}</p>
+                            <h1 className="text-h1 font-bold font-headline">{profileUser.name}</h1>
+                            <p className="text-muted-foreground mt-1">{profileUser.bio}</p>
                             <div className="flex justify-center md:justify-start items-center gap-6 mt-4 text-sm">
                                 <div><span className="font-bold">{creations.length}</span> Creations</div>
                                 <div><span className="font-bold">{profileUser.followers}</span> Followers</div>
@@ -52,7 +53,7 @@ export default function ProfilePage() {
             </header>
 
             <div>
-                <h3 className="text-2xl font-bold mb-4">Creations</h3>
+                <h2 className="text-h2 font-semibold font-headline mb-4">Creations</h2>
                 {creations.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {creations.map((creation, i) => (
