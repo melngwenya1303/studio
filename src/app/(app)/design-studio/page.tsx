@@ -24,6 +24,7 @@ import Link from 'next/link';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export default function DesignStudioPage() {
     const { user, addCreation, remixData, clearRemixData } = useApp();
@@ -275,217 +276,237 @@ export default function DesignStudioPage() {
     );
 
     return (
-        <div className="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
-            <Modal isOpen={modal.isOpen} title={modal.title} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} size={(modal as any).size}>
-                {modal.children}
-            </Modal>
-            <audio ref={audioRef} className="hidden" />
-            <motion.div initial={{ x: -50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5 }} className="lg:col-span-1 flex flex-col space-y-6">
-                <div className="space-y-6">
-                    <h2 className="text-3xl font-bold text-gray-800 dark:text-white font-headline">Design Studio</h2>
-                </div>
-                
-                <Card className="shadow-lg">
-                    <CardHeader>
-                        <Step stepNumber={1} title="Choose Your Canvas" />
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="grid grid-cols-1 gap-4">
-                            {DEVICES.map(device => (
-                                <motion.button key={device.name} onClick={() => handleDeviceSelection(device)}
-                                    className={`flex items-center text-left w-full p-4 rounded-lg transition-all duration-200 border-2 ${selectedDevice.name === device.name ? 'bg-primary/10 text-primary border-primary' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border-transparent'}`}
-                                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
-                                    <Icon name={device.icon as any} className="w-10 h-10 mr-4" />
-                                    <div>
-                                        <p className="text-base font-semibold text-gray-800 dark:text-white">{device.name}</p>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400">{device.description}</p>
-                                    </div>
-                                </motion.button>
-                            ))}
-                        </div>
-                        {selectedDevice.models && selectedDevice.models.length > 0 && (
-                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.3 }} className="space-y-2 overflow-hidden pt-4">
-                                <Label htmlFor="device-model" className="text-base font-semibold text-gray-700 dark:text-gray-200 block">Select a model</Label>
-                                <Select
-                                    value={selectedModel?.name}
-                                    onValueChange={(value) => {
-                                        const model = selectedDevice.models?.find(m => m.name === value);
-                                        if (model) setSelectedModel(model);
-                                    }}
-                                >
-                                    <SelectTrigger id="device-model" className="w-full">
-                                        <SelectValue placeholder="Select a model" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {selectedDevice.models.map(model => (
-                                            <SelectItem key={model.name} value={model.name}>
-                                                {model.name}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </motion.div>
-                        )}
-                    </CardContent>
-                </Card>
-
-                <Card className="shadow-lg">
-                     <CardHeader>
-                        <Step stepNumber={2} title="Describe Your Vision" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="relative">
-                            <Textarea
-                                className="w-full p-4 pr-4 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
-                                placeholder={`A decal for my ${currentCanvas.name}... e.g., 'a serene koi pond'`}
-                                value={prompt}
-                                onChange={(e) => setPrompt(e.target.value)}
-                                rows={4}
-                                disabled={isLoading || isEnhancing || isListening}
-                            />
-                            <div className="absolute top-3 right-3 flex items-center gap-1">
-                                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleToggleListening} disabled={isLoading || isEnhancing}
-                                    className={`p-2 rounded-full bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-300 hover:bg-cyan-200 dark:hover:bg-cyan-900 disabled:opacity-50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}
-                                    title="Speak Your Prompt">
-                                    <Icon name="Mic" className="w-5 h-5" />
-                                </motion.button>
-                                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleTextToSpeech} disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking}
-                                    className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900 disabled:opacity-50"
-                                    title="Listen to Prompt">
-                                    <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
-                                </motion.button>
-                                <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleEnhancePrompt} disabled={isLoading || isEnhancing || !prompt.trim()}
-                                    className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/50 text-primary dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900 disabled:opacity-50"
-                                    title="Enhance with AI ✨">
-                                    <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
-                                </motion.button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
-                
-                <Card className="shadow-lg">
-                    <CardHeader>
-                        <Step stepNumber={3} title="Choose an Artistic Style" />
-                    </CardHeader>
-                    <CardContent>
-                        <Carousel opts={{ align: "start", loop: true }} className="w-full">
-                            <CarouselContent className="-ml-2">
-                                {STYLES.map((style, index) => (
-                                    <CarouselItem key={index} className="pl-2 md:basis-1/2 lg:basis-1/2">
-                                        <div className="p-1">
-                                            <button 
-                                                onClick={() => {
-                                                    setSelectedStyle(style);
-                                                    if (!completedSteps.includes(3)) {
-                                                        setCompletedSteps(prev => [...prev, 3]);
-                                                    }
-                                                }} 
-                                                className={`w-full rounded-lg transition-all duration-200 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'ring-2 ring-primary ring-offset-background ring-offset-2' : ''}`}
-                                                disabled={isLoading}
-                                            >
-                                                <Card className="border-0">
-                                                    <CardContent className="p-0 aspect-video relative">
-                                                        <Image src={style.image} alt={style.name} fill className="object-cover" {...{ 'data-ai-hint': style['data-ai-hint'] }} />
-                                                        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
-                                                    </CardContent>
-                                                </Card>
-                                                <p className={`mt-2 text-sm font-semibold ${selectedStyle.name === style.name ? 'text-primary' : 'text-gray-600 dark:text-gray-300'}`}>{style.name}</p>
-                                            </button>
+        <TooltipProvider>
+            <div className="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-3 gap-8 h-full">
+                <Modal isOpen={modal.isOpen} title={modal.title} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} size={(modal as any).size}>
+                    {modal.children}
+                </Modal>
+                <audio ref={audioRef} className="hidden" />
+                <motion.div initial={{ x: -50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5 }} className="lg:col-span-1 flex flex-col space-y-6">
+                    <div className="space-y-6">
+                        <h2 className="text-3xl font-bold text-gray-800 dark:text-white font-headline">Design Studio</h2>
+                    </div>
+                    
+                    <Card className="shadow-lg">
+                        <CardHeader>
+                            <Step stepNumber={1} title="Choose Your Canvas" />
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="grid grid-cols-1 gap-4">
+                                {DEVICES.map(device => (
+                                    <motion.button key={device.name} onClick={() => handleDeviceSelection(device)}
+                                        className={`flex items-center text-left w-full p-4 rounded-lg transition-all duration-200 border-2 ${selectedDevice.name === device.name ? 'bg-primary/10 text-primary border-primary' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border-transparent'}`}
+                                        whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                                        <Icon name={device.icon as any} className="w-10 h-10 mr-4" />
+                                        <div>
+                                            <p className="text-base font-semibold text-gray-800 dark:text-white">{device.name}</p>
+                                            <p className="text-sm text-gray-500 dark:text-gray-400">{device.description}</p>
                                         </div>
-                                    </CarouselItem>
+                                    </motion.button>
                                 ))}
-                            </CarouselContent>
-                            <CarouselPrevious />
-                            <CarouselNext />
-                        </Carousel>
-                    </CardContent>
-                </Card>
-
-                <div className="mt-auto pt-4 space-y-3">
-                    <div className="flex items-center space-x-2 mb-3">
-                        <Checkbox id="terms" onCheckedChange={(checked) => setPolicyAccepted(Boolean(checked))} />
-                        <label
-                            htmlFor="terms"
-                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                            I have read and agree to the{' '}
-                            <Link href="/privacy-policy" className="underline text-primary" target="_blank">
-                                Privacy Policy
-                            </Link>
-                        </label>
-                    </div>
-
-                    <motion.button onClick={() => handleGenerate(prompt)} disabled={isLoading || !prompt.trim() || !policyAccepted}
-                        className="w-full py-3 px-6 rounded-xl font-semibold text-lg text-white transition-all duration-300 bg-gradient-to-r from-primary to-pink-600 hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
-                        whileHover={{ y: -2 }} whileTap={{ y: 1 }}>
-                        {isLoading ? 'Designing...' : 'Create My Decal'}
-                    </motion.button>
-                    {generatedDecal && (
-                        <>
-                            <div className="flex gap-3">
-                                <Button variant="outline" onClick={handleSaveCreation} disabled={isLoading || isSaving} className="w-full">
-                                    {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
-                                    {isSaving ? 'Saving...' : 'Save Design'}
-                                </Button>
-                                <Button onClick={handleFinalize} className="w-full bg-green-600 hover:bg-green-700">Finalize Design</Button>
                             </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
-                                    {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
-                                    Edit with AI ✨
-                                </Button>
-                                <Button variant="outline" onClick={handleTellStory} disabled={isTellingStory} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
-                                    {isTellingStory ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="BookOpen" />}
-                                    Tell a Story ✨
-                                </Button>
-                            </div>
-                        </>
-                    )}
-                </div>
-            </motion.div>
+                            {selectedDevice.models && selectedDevice.models.length > 0 && (
+                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.3 }} className="space-y-2 overflow-hidden pt-4">
+                                    <Label htmlFor="device-model" className="text-base font-semibold text-gray-700 dark:text-gray-200 block">Select a model</Label>
+                                    <Select
+                                        value={selectedModel?.name}
+                                        onValueChange={(value) => {
+                                            const model = selectedDevice.models?.find(m => m.name === value);
+                                            if (model) setSelectedModel(model);
+                                        }}
+                                    >
+                                        <SelectTrigger id="device-model" className="w-full">
+                                            <SelectValue placeholder="Select a model" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {selectedDevice.models.map(model => (
+                                                <SelectItem key={model.name} value={model.name}>
+                                                    {model.name}
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </motion.div>
+                            )}
+                        </CardContent>
+                    </Card>
 
-            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="lg:col-span-2 flex items-center justify-center">
-                {isLoading ? (
-                    <div className="flex flex-col items-center justify-center h-full text-primary">
-                        <Icon name="Wand2" className="w-16 h-16 animate-pulse" />
-                        <p className="mt-4 font-semibold">AI is creating magic...</p>
-                    </div>
-                ) : (
-                    <div className="relative w-full h-full flex items-center justify-center">
-                        <Image
-                            src={currentCanvas.previewImage}
-                            alt={`${currentCanvas.name} preview`}
-                            width={800}
-                            height={800}
-                            className="object-contain max-w-full max-h-full"
-                            data-ai-hint={currentCanvas['data-ai-hint']}
-                            key={currentCanvas.name}
-                        />
-                        {generatedDecal && (
-                            <motion.div
-                                className="absolute"
-                                initial={{ opacity: 0, scale: 0.8 }}
-                                animate={{ opacity: 1, scale: 1 }}
-                                transition={{ duration: 0.5 }}
-                                style={currentCanvas.decal ? {
-                                    transform: currentCanvas.decal.transform,
-                                    transformOrigin: currentCanvas.decal.transformOrigin,
-                                    width: currentCanvas.decal.width,
-                                    height: currentCanvas.decal.height,
-                                } : {}}
-                            >
-                                <Image
-                                    src={generatedDecal.url}
-                                    alt="Generated Decal"
-                                    fill
-                                    className="object-cover"
+                    <Card className="shadow-lg">
+                         <CardHeader>
+                            <Step stepNumber={2} title="Describe Your Vision" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="relative">
+                                <Textarea
+                                    className="w-full p-4 pr-4 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+                                    placeholder={`A decal for my ${currentCanvas.name}... e.g., 'a serene koi pond'`}
+                                    value={prompt}
+                                    onChange={(e) => setPrompt(e.target.value)}
+                                    rows={4}
+                                    disabled={isLoading || isEnhancing || isListening}
                                 />
-                            </motion.div>
+                                <div className="absolute top-3 right-3 flex items-center gap-1">
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleToggleListening} disabled={isLoading || isEnhancing}
+                                                className={`p-2 rounded-full bg-cyan-100 dark:bg-cyan-900/50 text-cyan-600 dark:text-cyan-300 hover:bg-cyan-200 dark:hover:bg-cyan-900 disabled:opacity-50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}>
+                                                <Icon name="Mic" className="w-5 h-5" />
+                                            </motion.button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Speak Your Prompt</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleTextToSpeech} disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking}
+                                                className="p-2 rounded-full bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-300 hover:bg-blue-200 dark:hover:bg-blue-900 disabled:opacity-50">
+                                                <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
+                                            </motion.button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Listen to Prompt</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleEnhancePrompt} disabled={isLoading || isEnhancing || !prompt.trim()}
+                                                className="p-2 rounded-full bg-purple-100 dark:bg-purple-900/50 text-primary dark:text-purple-300 hover:bg-purple-200 dark:hover:bg-purple-900 disabled:opacity-50">
+                                                <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
+                                            </motion.button>
+                                        </TooltipTrigger>
+                                        <TooltipContent>
+                                            <p>Enhance with AI ✨</p>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                    
+                    <Card className="shadow-lg">
+                        <CardHeader>
+                            <Step stepNumber={3} title="Choose an Artistic Style" />
+                        </CardHeader>
+                        <CardContent>
+                            <Carousel opts={{ align: "start", loop: true }} className="w-full">
+                                <CarouselContent className="-ml-2">
+                                    {STYLES.map((style, index) => (
+                                        <CarouselItem key={index} className="pl-2 md:basis-1/2 lg:basis-1/2">
+                                            <div className="p-1">
+                                                <button 
+                                                    onClick={() => {
+                                                        setSelectedStyle(style);
+                                                        if (!completedSteps.includes(3)) {
+                                                            setCompletedSteps(prev => [...prev, 3]);
+                                                        }
+                                                    }} 
+                                                    className={`w-full rounded-lg transition-all duration-200 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'ring-2 ring-primary ring-offset-background ring-offset-2' : ''}`}
+                                                    disabled={isLoading}
+                                                >
+                                                    <Card className="border-0">
+                                                        <CardContent className="p-0 aspect-video relative">
+                                                            <Image src={style.image} alt={style.name} fill className="object-cover" {...{ 'data-ai-hint': style['data-ai-hint'] }} />
+                                                            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
+                                                        </CardContent>
+                                                    </Card>
+                                                    <p className={`mt-2 text-sm font-semibold ${selectedStyle.name === style.name ? 'text-primary' : 'text-gray-600 dark:text-gray-300'}`}>{style.name}</p>
+                                                </button>
+                                            </div>
+                                        </CarouselItem>
+                                    ))}
+                                </CarouselContent>
+                                <CarouselPrevious />
+                                <CarouselNext />
+                            </Carousel>
+                        </CardContent>
+                    </Card>
+
+                    <div className="mt-auto pt-4 space-y-3">
+                        <div className="flex items-center space-x-2 mb-3">
+                            <Checkbox id="terms" onCheckedChange={(checked) => setPolicyAccepted(Boolean(checked))} />
+                            <label
+                                htmlFor="terms"
+                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                            >
+                                I have read and agree to the{' '}
+                                <Link href="/privacy-policy" className="underline text-primary" target="_blank">
+                                    Privacy Policy
+                                </Link>
+                            </label>
+                        </div>
+
+                        <motion.button onClick={() => handleGenerate(prompt)} disabled={isLoading || !prompt.trim() || !policyAccepted}
+                            className="w-full py-3 px-6 rounded-xl font-semibold text-lg text-white transition-all duration-300 bg-gradient-to-r from-primary to-pink-600 hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
+                            whileHover={{ y: -2 }} whileTap={{ y: 1 }}>
+                            {isLoading ? 'Designing...' : 'Create My Decal'}
+                        </motion.button>
+                        {generatedDecal && (
+                            <>
+                                <div className="flex gap-3">
+                                    <Button variant="outline" onClick={handleSaveCreation} disabled={isLoading || isSaving} className="w-full">
+                                        {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
+                                        {isSaving ? 'Saving...' : 'Save Design'}
+                                    </Button>
+                                    <Button onClick={handleFinalize} className="w-full bg-green-600 hover:bg-green-700">Finalize Design</Button>
+                                </div>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
+                                        {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
+                                        Edit with AI ✨
+                                    </Button>
+                                    <Button variant="outline" onClick={handleTellStory} disabled={isTellingStory} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
+                                        {isTellingStory ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="BookOpen" />}
+                                        Tell a Story ✨
+                                    </Button>
+                                </div>
+                            </>
                         )}
                     </div>
-                )}
-            </motion.div>
-        </div>
+                </motion.div>
+
+                <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="lg:col-span-2 flex items-center justify-center">
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center h-full text-primary">
+                            <Icon name="Wand2" className="w-16 h-16 animate-pulse" />
+                            <p className="mt-4 font-semibold">AI is creating magic...</p>
+                        </div>
+                    ) : (
+                        <div className="relative w-full h-full flex items-center justify-center">
+                            <Image
+                                src={currentCanvas.previewImage}
+                                alt={`${currentCanvas.name} preview`}
+                                width={800}
+                                height={800}
+                                className="object-contain max-w-full max-h-full"
+                                data-ai-hint={currentCanvas['data-ai-hint']}
+                                key={currentCanvas.name}
+                            />
+                            {generatedDecal && (
+                                <motion.div
+                                    className="absolute"
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.5 }}
+                                    style={currentCanvas.decal ? {
+                                        transform: currentCanvas.decal.transform,
+                                        transformOrigin: currentCanvas.decal.transformOrigin,
+                                        width: currentCanvas.decal.width,
+                                        height: currentCanvas.decal.height,
+                                    } : {}}
+                                >
+                                    <Image
+                                        src={generatedDecal.url}
+                                        alt="Generated Decal"
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </motion.div>
+                            )}
+                        </div>
+                    )}
+                </motion.div>
+            </div>
+        </TooltipProvider>
     );
 }

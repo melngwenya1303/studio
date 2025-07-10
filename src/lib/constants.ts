@@ -1,3 +1,4 @@
+
 import type { Device, Style, GalleryItem } from './types';
 
 export const DEVICES: Device[] = [
