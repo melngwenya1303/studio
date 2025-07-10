@@ -25,6 +25,8 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from '@/components/ui/separator';
 
 export default function DesignStudioPage() {
     const { user, addCreation, remixData, clearRemixData } = useApp();
@@ -266,197 +268,212 @@ export default function DesignStudioPage() {
                     initial={{ x: -50, opacity: 0 }} 
                     animate={{ x: 0, opacity: 1 }} 
                     transition={{ duration: 0.5 }} 
-                    className="lg:col-span-1 flex flex-col space-y-6"
+                    className="lg:col-span-1 flex flex-col"
                 >
-                    <div className="space-y-2">
-                        <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Creator's Canvas</h2>
-                        <p className="text-muted-foreground">Design your unique device decal.</p>
-                    </div>
-                    
-                    <Card className="shadow-lg">
+                     <Card className="shadow-lg flex flex-col h-full">
                         <CardHeader>
-                            <CardTitle className="text-xl font-semibold">1. Choose Your Canvas</CardTitle>
+                            <CardTitle className="text-2xl font-bold text-gray-800 dark:text-white">Creator's Palette</CardTitle>
                         </CardHeader>
-                        <CardContent className="space-y-4">
-                            <Select
-                                value={selectedDevice.name}
-                                onValueChange={(value) => {
-                                    const device = DEVICES.find(d => d.name === value);
-                                    if (device) handleDeviceSelection(device);
-                                }}
-                            >
-                                <SelectTrigger className="w-full">
-                                    <SelectValue placeholder="Select a device" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {DEVICES.map(device => (
-                                        <SelectItem key={device.name} value={device.name}>
-                                            <div className="flex items-center gap-2">
-                                                <Icon name={device.icon as any} className="w-4 h-4" />
-                                                {device.name}
+                        <CardContent className="flex flex-col flex-grow">
+                             <Tabs defaultValue="design" className="w-full flex flex-col flex-grow">
+                                <TabsList className="grid w-full grid-cols-3">
+                                    <TabsTrigger value="design">Design</TabsTrigger>
+                                    <TabsTrigger value="layers" disabled>Layers</TabsTrigger>
+                                    <TabsTrigger value="mockups" disabled>Mockups</TabsTrigger>
+                                </TabsList>
+                                <TabsContent value="design" className="flex-grow flex flex-col">
+                                    <div className="space-y-6 py-6 flex-grow">
+                                        {/* Step 1: Canvas */}
+                                        <div className="space-y-4">
+                                            <h3 className="text-xl font-semibold">1. Select Product</h3>
+                                            <Select
+                                                value={selectedDevice.name}
+                                                onValueChange={(value) => {
+                                                    const device = DEVICES.find(d => d.name === value);
+                                                    if (device) handleDeviceSelection(device);
+                                                }}
+                                            >
+                                                <SelectTrigger className="w-full">
+                                                    <SelectValue placeholder="Select a device" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {DEVICES.map(device => (
+                                                        <SelectItem key={device.name} value={device.name}>
+                                                            <div className="flex items-center gap-2">
+                                                                <Icon name={device.icon as any} className="w-4 h-4" />
+                                                                {device.name}
+                                                            </div>
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+
+                                            {selectedDevice.models && selectedDevice.models.length > 0 && (
+                                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.3 }} className="space-y-2 overflow-hidden">
+                                                    <Select
+                                                        value={selectedModel?.name}
+                                                        onValueChange={(value) => {
+                                                            const model = selectedDevice.models?.find(m => m.name === value);
+                                                            if (model) setSelectedModel(model);
+                                                        }}
+                                                    >
+                                                        <SelectTrigger id="device-model" className="w-full">
+                                                            <SelectValue placeholder="Select a model" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {selectedDevice.models.map(model => (
+                                                                <SelectItem key={model.name} value={model.name}>
+                                                                    {model.name}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                </motion.div>
+                                            )}
+                                        </div>
+
+                                        <Separator />
+
+                                        {/* Step 2: Vision */}
+                                        <div className="space-y-4">
+                                            <h3 className="text-xl font-semibold">2. Describe Your Vision</h3>
+                                            <div className="relative">
+                                                <Textarea
+                                                    className="w-full p-4 pr-24 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-base text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+                                                    placeholder={`A decal for my ${currentCanvas.name}...`}
+                                                    value={prompt}
+                                                    onChange={(e) => setPrompt(e.target.value)}
+                                                    rows={4}
+                                                    disabled={isLoading || isEnhancing || isListening}
+                                                />
+                                                <div className="absolute top-3 right-3 flex items-center gap-1">
+                                                     <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button variant="ghost" size="icon" onClick={handleToggleListening} disabled={isLoading || isEnhancing} className={`text-cyan-600 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}>
+                                                                <Icon name="Mic" className="w-5 h-5" />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent><p>Speak Your Prompt</p></TooltipContent>
+                                                    </Tooltip>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button variant="ghost" size="icon" onClick={handleTextToSpeech} disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking} className="text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
+                                                                <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent><p>Listen to Prompt</p></TooltipContent>
+                                                    </Tooltip>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button variant="ghost" size="icon" onClick={handleEnhancePrompt} disabled={isLoading || isEnhancing || !prompt.trim()} className="text-primary dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50">
+                                                                <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent><p>Enhance with AI ✨</p></TooltipContent>
+                                                    </Tooltip>
+                                                </div>
                                             </div>
-                                        </SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
+                                        </div>
 
-                            {selectedDevice.models && selectedDevice.models.length > 0 && (
-                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.3 }} className="space-y-2 overflow-hidden">
-                                    <Label htmlFor="device-model" className="text-sm font-semibold text-gray-700 dark:text-gray-200 block">Select a model</Label>
-                                    <Select
-                                        value={selectedModel?.name}
-                                        onValueChange={(value) => {
-                                            const model = selectedDevice.models?.find(m => m.name === value);
-                                            if (model) setSelectedModel(model);
-                                        }}
-                                    >
-                                        <SelectTrigger id="device-model" className="w-full">
-                                            <SelectValue placeholder="Select a model" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {selectedDevice.models.map(model => (
-                                                <SelectItem key={model.name} value={model.name}>
-                                                    {model.name}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </motion.div>
-                            )}
+                                        <Separator />
+
+                                        {/* Step 3: Style */}
+                                        <div className="space-y-4">
+                                            <h3 className="text-xl font-semibold">3. Choose Style</h3>
+                                            <Carousel opts={{ align: "start", loop: true }} className="w-full">
+                                                <CarouselContent className="-ml-2">
+                                                    {STYLES.map((style, index) => (
+                                                        <CarouselItem key={index} className="pl-2 basis-1/2 md:basis-1/3 lg:basis-1/2">
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <div className="p-1">
+                                                                        <motion.button 
+                                                                            onClick={() => setSelectedStyle(style)}
+                                                                            className={`w-full rounded-lg transition-all duration-200 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'ring-2 ring-primary ring-offset-background ring-offset-2' : ''}`}
+                                                                            disabled={isLoading}
+                                                                            whileHover={{ scale: 1.05 }}
+                                                                            whileTap={{ scale: 0.98 }}
+                                                                        >
+                                                                            <div className="border-0 aspect-video relative">
+                                                                                <Image src={style.image} alt={style.name} fill className="object-cover rounded-md" {...{ 'data-ai-hint': style['data-ai-hint'] }} />
+                                                                                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors rounded-md" />
+                                                                            </div>
+                                                                        </motion.button>
+                                                                    </div>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent><p>{style.name}</p></TooltipContent>
+                                                            </Tooltip>
+                                                        </CarouselItem>
+                                                    ))}
+                                                </CarouselContent>
+                                                <CarouselPrevious className="hidden sm:flex" />
+                                                <CarouselNext className="hidden sm:flex"/>
+                                            </Carousel>
+                                        </div>
+                                    </div>
+                                    
+                                    <div className="mt-auto pt-4 space-y-3">
+                                        <div className="flex items-center space-x-2 mb-3">
+                                            <Checkbox id="terms" onCheckedChange={(checked) => setPolicyAccepted(Boolean(checked))} />
+                                            <label
+                                                htmlFor="terms"
+                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                            >
+                                                I agree to the{' '}
+                                                <Link href="/privacy-policy" className="underline text-primary" target="_blank">
+                                                    Content Policy
+                                                </Link>
+                                            </label>
+                                        </div>
+
+                                        <motion.button onClick={() => handleGenerate(prompt)} disabled={isLoading || !prompt.trim() || !policyAccepted}
+                                            className="w-full py-3 px-6 rounded-xl font-semibold text-lg text-white transition-all duration-300 bg-gradient-to-r from-primary to-pink-600 hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
+                                            whileHover={{ y: -2 }} whileTap={{ y: 1 }}>
+                                            {isLoading ? 'Designing...' : 'Create My Decal'}
+                                        </motion.button>
+                                        
+                                        {generatedDecal && (
+                                            <motion.div 
+                                                initial={{ opacity: 0, y: 10 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className="space-y-3 pt-4 border-t"
+                                            >
+                                                <div className="flex gap-3">
+                                                    <Button variant="outline" onClick={handleSaveCreation} disabled={isLoading || isSaving} className="w-full">
+                                                        {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
+                                                        {isSaving ? 'Saving...' : 'Save Design'}
+                                                    </Button>
+                                                    <Button onClick={handleFinalize} className="w-full bg-green-600 hover:bg-green-700">Finalize Design</Button>
+                                                </div>
+                                                <div className="grid grid-cols-2 gap-3">
+                                                    <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
+                                                        {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
+                                                        Edit with AI ✨
+                                                    </Button>
+                                                    <Button variant="outline" onClick={handleTellStory} disabled={isTellingStory} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
+                                                        {isTellingStory ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="BookOpen" />}
+                                                        Tell a Story ✨
+                                                    </Button>
+                                                </div>
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                </TabsContent>
+                                <TabsContent value="layers">
+                                    <div className="py-6">
+                                        <p className="text-muted-foreground">Layer management is coming soon!</p>
+                                    </div>
+                                </TabsContent>
+                                <TabsContent value="mockups">
+                                    <div className="py-6">
+                                        <p className="text-muted-foreground">Mockup selection is coming soon!</p>
+                                    </div>
+                                </TabsContent>
+                            </Tabs>
                         </CardContent>
                     </Card>
-
-                    <Card className="shadow-lg">
-                         <CardHeader>
-                            <CardTitle className="text-xl font-semibold">2. Describe Your Vision</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="relative">
-                                <Textarea
-                                    className="w-full p-4 pr-24 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-base text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
-                                    placeholder={`A decal for my ${currentCanvas.name}... e.g., 'a serene koi pond'`}
-                                    value={prompt}
-                                    onChange={(e) => setPrompt(e.target.value)}
-                                    rows={4}
-                                    disabled={isLoading || isEnhancing || isListening}
-                                />
-                                <div className="absolute top-3 right-3 flex items-center gap-1">
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button variant="ghost" size="icon" onClick={handleToggleListening} disabled={isLoading || isEnhancing} className={`text-cyan-600 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}>
-                                                <Icon name="Mic" className="w-5 h-5" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent><p>Speak Your Prompt</p></TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button variant="ghost" size="icon" onClick={handleTextToSpeech} disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking} className="text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
-                                                <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent><p>Listen to Prompt</p></TooltipContent>
-                                    </Tooltip>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button variant="ghost" size="icon" onClick={handleEnhancePrompt} disabled={isLoading || isEnhancing || !prompt.trim()} className="text-primary dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50">
-                                                <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent><p>Enhance with AI ✨</p></TooltipContent>
-                                    </Tooltip>
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    
-                    <Card className="shadow-lg">
-                        <CardHeader>
-                            <CardTitle className="text-xl font-semibold">3. Choose an Artistic Style</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <Carousel opts={{ align: "start", loop: true }} className="w-full">
-                                <CarouselContent className="-ml-2">
-                                    {STYLES.map((style, index) => (
-                                        <CarouselItem key={index} className="pl-2 basis-1/2 md:basis-1/3 lg:basis-1/2">
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <div className="p-1">
-                                                        <motion.button 
-                                                            onClick={() => setSelectedStyle(style)}
-                                                            className={`w-full rounded-lg transition-all duration-200 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'ring-2 ring-primary ring-offset-background ring-offset-2' : ''}`}
-                                                            disabled={isLoading}
-                                                            whileHover={{ scale: 1.05 }}
-                                                            whileTap={{ scale: 0.98 }}
-                                                        >
-                                                            <Card className="border-0">
-                                                                <CardContent className="p-0 aspect-video relative">
-                                                                    <Image src={style.image} alt={style.name} fill className="object-cover" {...{ 'data-ai-hint': style['data-ai-hint'] }} />
-                                                                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
-                                                                </CardContent>
-                                                            </Card>
-                                                        </motion.button>
-                                                    </div>
-                                                </TooltipTrigger>
-                                                <TooltipContent><p>{style.name}</p></TooltipContent>
-                                            </Tooltip>
-                                        </CarouselItem>
-                                    ))}
-                                </CarouselContent>
-                                <CarouselPrevious className="hidden sm:flex" />
-                                <CarouselNext className="hidden sm:flex"/>
-                            </Carousel>
-                        </CardContent>
-                    </Card>
-
-                    <div className="mt-auto pt-4 space-y-3">
-                        <div className="flex items-center space-x-2 mb-3">
-                            <Checkbox id="terms" onCheckedChange={(checked) => setPolicyAccepted(Boolean(checked))} />
-                            <label
-                                htmlFor="terms"
-                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                            >
-                                I agree to the{' '}
-                                <Link href="/privacy-policy" className="underline text-primary" target="_blank">
-                                    Content Policy
-                                </Link>
-                            </label>
-                        </div>
-
-                        <motion.button onClick={() => handleGenerate(prompt)} disabled={isLoading || !prompt.trim() || !policyAccepted}
-                            className="w-full py-3 px-6 rounded-xl font-semibold text-lg text-white transition-all duration-300 bg-gradient-to-r from-primary to-pink-600 hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
-                            whileHover={{ y: -2 }} whileTap={{ y: 1 }}>
-                            {isLoading ? 'Designing...' : 'Create My Decal'}
-                        </motion.button>
-                        
-                        {/* Post-Generation Options - Progressive Disclosure */}
-                        {generatedDecal && (
-                            <motion.div 
-                                initial={{ opacity: 0, y: 10 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className="space-y-3 pt-4 border-t"
-                            >
-                                <div className="flex gap-3">
-                                    <Button variant="outline" onClick={handleSaveCreation} disabled={isLoading || isSaving} className="w-full">
-                                        {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
-                                        {isSaving ? 'Saving...' : 'Save Design'}
-                                    </Button>
-                                    <Button onClick={handleFinalize} className="w-full bg-green-600 hover:bg-green-700">Finalize Design</Button>
-                                </div>
-                                <div className="grid grid-cols-2 gap-3">
-                                    <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
-                                        {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
-                                        Edit with AI ✨
-                                    </Button>
-                                    <Button variant="outline" onClick={handleTellStory} disabled={isTellingStory} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
-                                        {isTellingStory ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="BookOpen" />}
-                                        Tell a Story ✨
-                                    </Button>
-                                </div>
-                            </motion.div>
-                        )}
-                    </div>
                 </motion.div>
+
 
                 {/* Right Column: Canvas/Preview */}
                 <motion.div 
@@ -515,3 +532,5 @@ export default function DesignStudioPage() {
         </TooltipProvider>
     );
 }
+
+    
