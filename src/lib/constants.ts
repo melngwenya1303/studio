@@ -12,10 +12,10 @@ export const DEVICES: Device[] = [
                 previewWidth: 500, 
                 previewHeight: 375, 
                 decal: {
-                    transform: 'perspective(1000px) rotateX(25deg) scale(0.8)',
-                    transformOrigin: 'center center',
-                    width: '60%',
-                    height: '60%',
+                    transform: 'perspective(1000px) rotateX(25deg) scale(0.6)',
+                    transformOrigin: 'center 40%',
+                    width: '55%',
+                    height: '55%',
                 }
             },
             { 
@@ -25,10 +25,10 @@ export const DEVICES: Device[] = [
                 previewWidth: 500, 
                 previewHeight: 375, 
                 decal: {
-                    transform: 'perspective(1000px) rotateX(25deg) scale(0.8)',
-                    transformOrigin: 'center center',
-                    width: '60%',
-                    height: '60%',
+                    transform: 'perspective(1000px) rotateX(25deg) scale(0.6)',
+                    transformOrigin: 'center 40%',
+                    width: '55%',
+                    height: '55%',
                 }
             },
             { 
@@ -38,10 +38,10 @@ export const DEVICES: Device[] = [
                 previewWidth: 500, 
                 previewHeight: 375, 
                 decal: {
-                    transform: 'perspective(1000px) rotateX(25deg) scale(0.8)',
-                    transformOrigin: 'center center',
-                    width: '60%',
-                    height: '60%',
+                    transform: 'perspective(1000px) rotateX(25deg) scale(0.6)',
+                    transformOrigin: 'center 40%',
+                    width: '55%',
+                    height: '55%',
                 }
             },
         ],
@@ -50,10 +50,10 @@ export const DEVICES: Device[] = [
         previewWidth: 500, 
         previewHeight: 375,
         decal: {
-            transform: 'perspective(1000px) rotateX(25deg) scale(0.8)',
-            transformOrigin: 'center center',
-            width: '60%',
-            height: '60%',
+            transform: 'perspective(1000px) rotateX(25deg) scale(0.6)',
+            transformOrigin: 'center 40%',
+            width: '55%',
+            height: '55%',
         }
     },
     { 
@@ -69,8 +69,8 @@ export const DEVICES: Device[] = [
                 decal: {
                     transform: 'scale(0.8)',
                     transformOrigin: 'center center',
-                    width: '90%',
-                    height: '90%',
+                    width: '80%',
+                    height: '60%',
                 }
             },
             { 
@@ -82,8 +82,8 @@ export const DEVICES: Device[] = [
                 decal: {
                     transform: 'scale(0.8)',
                     transformOrigin: 'center center',
-                    width: '90%',
-                    height: '90%',
+                    width: '80%',
+                    height: '60%',
                 }
             },
             { 
@@ -95,8 +95,8 @@ export const DEVICES: Device[] = [
                 decal: {
                     transform: 'scale(0.8)',
                     transformOrigin: 'center center',
-                    width: '90%',
-                    height: '90%',
+                    width: '80%',
+                    height: '60%',
                 }
             },
         ],
@@ -107,8 +107,8 @@ export const DEVICES: Device[] = [
         decal: {
             transform: 'scale(0.8)',
             transformOrigin: 'center center',
-            width: '90%',
-            height: '90%',
+            width: '80%',
+            height: '60%',
         }
     },
     { 
@@ -124,8 +124,8 @@ export const DEVICES: Device[] = [
                 decal: {
                     transform: 'scale(0.85)',
                     transformOrigin: 'center center',
-                    width: '90%',
-                    height: '90%',
+                    width: '85%',
+                    height: '70%',
                 }
             },
             { 
@@ -137,8 +137,8 @@ export const DEVICES: Device[] = [
                 decal: {
                     transform: 'scale(0.85)',
                     transformOrigin: 'center center',
-                    width: '90%',
-                    height: '90%',
+                    width: '85%',
+                    height: '70%',
                 }
             },
             { 
@@ -150,8 +150,8 @@ export const DEVICES: Device[] = [
                 decal: {
                     transform: 'scale(0.85)',
                     transformOrigin: 'center center',
-                    width: '90%',
-                    height: '90%',
+                    width: '85%',
+                    height: '70%',
                 }
             },
         ],
@@ -162,8 +162,8 @@ export const DEVICES: Device[] = [
         decal: {
             transform: 'scale(0.85)',
             transformOrigin: 'center center',
-            width: '90%',
-            height: '90%',
+            width: '85%',
+            height: '70%',
         }
     },
 ];

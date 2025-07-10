@@ -404,7 +404,7 @@ export default function DesignStudioPage() {
             </motion.div>
 
             <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="lg:col-span-2 flex items-center justify-center">
-                <Card className="w-full h-full bg-gray-100 dark:bg-gray-900/50 backdrop-blur-sm rounded-2xl p-2 md:p-6 flex items-center justify-center overflow-hidden">
+                <Card className="w-full h-full bg-gray-100 dark:bg-gray-900/50 backdrop-blur-sm rounded-2xl p-0 flex items-center justify-center overflow-hidden">
                     <CardContent className="w-full h-full p-0 relative">
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center h-full text-primary">
