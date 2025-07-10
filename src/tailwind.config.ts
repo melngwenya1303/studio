@@ -11,18 +11,17 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        body: ['Lato', 'sans-serif'],
+        body: ['Inter', 'sans-serif'],
         headline: ['Montserrat', 'sans-serif'],
-        code: ['monospace'],
       },
       fontSize: {
-        'h1': ['32px', { lineHeight: '1.25' }],
-        'h2': ['24px', { lineHeight: '1.3' }],
-        'h3': ['20px', { lineHeight: '1.4' }],
+        'h1': ['39px', { lineHeight: '1.3' }],
+        'h2': ['31px', { lineHeight: '1.4' }],
+        'h3': ['25px', { lineHeight: '1.4' }],
         'body': ['16px', { lineHeight: '1.5' }],
-        'label': ['14px', { lineHeight: '1.4' }],
+        'label': ['16px', { lineHeight: '1.5' }],
         'button': ['16px', { lineHeight: '1.0' }],
-        'micro': ['12px', { lineHeight: '1.4' }],
+        'micro': ['14px', { lineHeight: '1.5' }],
       },
       colors: {
         border: 'hsl(var(--border))',
