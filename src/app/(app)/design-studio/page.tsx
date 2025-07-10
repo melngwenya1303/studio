@@ -404,52 +404,48 @@ export default function DesignStudioPage() {
             </motion.div>
 
             <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="lg:col-span-2 flex items-center justify-center">
-                <div className="w-full h-full flex items-center justify-center">
-                    <div className="w-full h-full relative">
-                        {isLoading ? (
-                            <div className="flex flex-col items-center justify-center h-full text-primary">
-                                <Icon name="Wand2" className="w-16 h-16 animate-pulse" />
-                                <p className="mt-4 font-semibold">AI is creating magic...</p>
-                            </div>
-                        ) : (
-                            <div className="relative w-full h-full flex items-center justify-center">
-                                <Image
-                                    src={currentCanvas.previewImage}
-                                    alt={`${currentCanvas.name} preview`}
-                                    width={currentCanvas.previewWidth}
-                                    height={currentCanvas.previewHeight}
-                                    className="object-contain"
-                                    data-ai-hint={currentCanvas['data-ai-hint']}
-                                    key={currentCanvas.name}
-                                />
-                                {generatedDecal && (
-                                    <motion.div
-                                        className="absolute"
-                                        initial={{ opacity: 0, scale: 0.8 }}
-                                        animate={{ opacity: 1, scale: 1 }}
-                                        transition={{ duration: 0.5 }}
-                                        style={currentCanvas.decal ? {
-                                            transform: currentCanvas.decal.transform,
-                                            transformOrigin: currentCanvas.decal.transformOrigin,
-                                            width: currentCanvas.decal.width,
-                                            height: currentCanvas.decal.height,
-                                        } : {}}
-                                    >
-                                        <Image
-                                            src={generatedDecal.url}
-                                            alt="Generated Decal"
-                                            fill
-                                            className="object-cover"
-                                        />
-                                    </motion.div>
-                                )}
-                            </div>
-                        )}
-                    </div>
+                <div className="w-full h-full relative">
+                    {isLoading ? (
+                        <div className="flex flex-col items-center justify-center h-full text-primary">
+                            <Icon name="Wand2" className="w-16 h-16 animate-pulse" />
+                            <p className="mt-4 font-semibold">AI is creating magic...</p>
+                        </div>
+                    ) : (
+                        <div className="relative w-full h-full flex items-center justify-center">
+                            <Image
+                                src={currentCanvas.previewImage}
+                                alt={`${currentCanvas.name} preview`}
+                                width={currentCanvas.previewWidth}
+                                height={currentCanvas.previewHeight}
+                                className="object-contain"
+                                data-ai-hint={currentCanvas['data-ai-hint']}
+                                key={currentCanvas.name}
+                            />
+                            {generatedDecal && (
+                                <motion.div
+                                    className="absolute"
+                                    initial={{ opacity: 0, scale: 0.8 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    transition={{ duration: 0.5 }}
+                                    style={currentCanvas.decal ? {
+                                        transform: currentCanvas.decal.transform,
+                                        transformOrigin: currentCanvas.decal.transformOrigin,
+                                        width: currentCanvas.decal.width,
+                                        height: currentCanvas.decal.height,
+                                    } : {}}
+                                >
+                                    <Image
+                                        src={generatedDecal.url}
+                                        alt="Generated Decal"
+                                        fill
+                                        className="object-cover"
+                                    />
+                                </motion.div>
+                            )}
+                        </div>
+                    )}
                 </div>
             </motion.div>
         </div>
     );
 }
-
-    

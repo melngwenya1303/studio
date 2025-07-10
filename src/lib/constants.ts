@@ -67,7 +67,7 @@ export const DEVICES: Device[] = [
                 previewWidth: 200, 
                 previewHeight: 400, 
                 decal: {
-                    transform: 'scale(0.8)',
+                    transform: 'perspective(500px) rotateX(15deg) scale(0.8)',
                     transformOrigin: 'center center',
                     width: '80%',
                     height: '60%',
@@ -80,7 +80,7 @@ export const DEVICES: Device[] = [
                 previewWidth: 200, 
                 previewHeight: 400, 
                 decal: {
-                    transform: 'scale(0.8)',
+                    transform: 'perspective(500px) rotateX(15deg) scale(0.8)',
                     transformOrigin: 'center center',
                     width: '80%',
                     height: '60%',
@@ -93,7 +93,7 @@ export const DEVICES: Device[] = [
                 previewWidth: 200, 
                 previewHeight: 400, 
                 decal: {
-                    transform: 'scale(0.8)',
+                    transform: 'perspective(500px) rotateX(15deg) scale(0.8)',
                     transformOrigin: 'center center',
                     width: '80%',
                     height: '60%',
@@ -105,7 +105,7 @@ export const DEVICES: Device[] = [
         previewWidth: 200, 
         previewHeight: 400, 
         decal: {
-            transform: 'scale(0.8)',
+            transform: 'perspective(500px) rotateX(15deg) scale(0.8)',
             transformOrigin: 'center center',
             width: '80%',
             height: '60%',
@@ -122,8 +122,8 @@ export const DEVICES: Device[] = [
                 previewWidth: 300, 
                 previewHeight: 400, 
                 decal: {
-                    transform: 'scale(0.85)',
-                    transformOrigin: 'center center',
+                    transform: 'perspective(800px) rotateX(20deg) scale(0.85)',
+                    transformOrigin: 'center 45%',
                     width: '85%',
                     height: '70%',
                 }
@@ -135,8 +135,8 @@ export const DEVICES: Device[] = [
                 previewWidth: 300, 
                 previewHeight: 400, 
                 decal: {
-                    transform: 'scale(0.85)',
-                    transformOrigin: 'center center',
+                    transform: 'perspective(800px) rotateX(20deg) scale(0.85)',
+                    transformOrigin: 'center 45%',
                     width: '85%',
                     height: '70%',
                 }
@@ -148,8 +148,8 @@ export const DEVICES: Device[] = [
                 previewWidth: 300, 
                 previewHeight: 400, 
                 decal: {
-                    transform: 'scale(0.85)',
-                    transformOrigin: 'center center',
+                    transform: 'perspective(800px) rotateX(20deg) scale(0.85)',
+                    transformOrigin: 'center 45%',
                     width: '85%',
                     height: '70%',
                 }
@@ -160,8 +160,8 @@ export const DEVICES: Device[] = [
         previewWidth: 300, 
         previewHeight: 400, 
         decal: {
-            transform: 'scale(0.85)',
-            transformOrigin: 'center center',
+            transform: 'perspective(800px) rotateX(20deg) scale(0.85)',
+            transformOrigin: 'center 45%',
             width: '85%',
             height: '70%',
         }
@@ -183,5 +183,3 @@ export const GALLERY_ITEMS: GalleryItem[] = [
     { id: 3, prompt: "A bustling cyberpunk city street at night, with neon signs reflected in the rain-slicked pavement.", style: "Cyberpunk", url: "https://placehold.co/400x400.png", 'data-ai-hint': "cyberpunk city", curatorNote: "The vibrant chaos is mesmerizing. A different time of day could completely change the mood." },
     { id: 4, prompt: "A cozy, cluttered library in a cottage, with books stacked high and a cat sleeping by the fireplace.", style: "Dark Academia", url: "https://placehold.co/400x400.png", 'data-ai-hint': "library cat", curatorNote: "The warmth and comfort are perfectly captured. Try adding another animal or a different type of room." },
 ];
-
-    
