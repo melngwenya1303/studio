@@ -434,7 +434,7 @@ export default function DesignStudioPage() {
                                             alt="Generated Decal"
                                             width={currentCanvas.decalWidth}
                                             height={currentCanvas.decalHeight}
-                                            className="object-contain"
+                                            className="object-cover"
                                         />
                                     </motion.div>
                                 )}
