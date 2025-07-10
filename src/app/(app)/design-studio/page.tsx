@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -41,7 +40,7 @@ export default function DesignStudioPage() {
     const [isTellingStory, setIsTellingStory] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
     const [policyAccepted, setPolicyAccepted] = useState(false);
-    const [modal, setModal] = useState({ isOpen: false, title: '', children: <></> });
+    const [modal, setModal] = useState({ isOpen: false, title: '', children: <></>, size: 'md' });
     
     // Accessibility States
     const [isListening, setIsListening] = useState(false);
@@ -212,6 +211,7 @@ export default function DesignStudioPage() {
             <p className="mt-4 font-semibold">Your unique SurfaceStory is ready for the real world!</p>
           </div>
         ),
+        size: 'md',
       });
     };
 
@@ -271,21 +271,21 @@ export default function DesignStudioPage() {
             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg ${completedSteps.includes(stepNumber) ? 'bg-primary text-primary-foreground' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'}`}>
                 {completedSteps.includes(stepNumber) ? '✓' : stepNumber}
             </div>
-            <h3 className={`ml-4 text-2xl font-semibold font-headline ${completedSteps.includes(stepNumber) ? 'text-gray-800 dark:text-white' : 'text-gray-500'}`}>{title}</h3>
+            <h3 className={`ml-4 text-2xl font-semibold ${completedSteps.includes(stepNumber) ? 'text-gray-800 dark:text-white' : 'text-gray-500'}`}>{title}</h3>
         </div>
     );
 
     return (
         <TooltipProvider>
             <div className="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-4 gap-8 h-full">
-                <Modal isOpen={modal.isOpen} title={modal.title} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} size={(modal as any).size}>
+                <Modal isOpen={modal.isOpen} title={modal.title} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} size={modal.size as any}>
                     {modal.children}
                 </Modal>
                 <audio ref={audioRef} className="hidden" />
 
                 <motion.div initial={{ x: -50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} transition={{ duration: 0.5 }} className="lg:col-span-1 flex flex-col space-y-6">
                     <div className="space-y-6">
-                        <h2 className="text-3xl font-bold text-gray-800 dark:text-white font-headline">Creator's Canvas</h2>
+                        <h2 className="text-3xl font-bold text-gray-800 dark:text-white">Creator's Canvas</h2>
                     </div>
                     
                     <Card className="shadow-lg">

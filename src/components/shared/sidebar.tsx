@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -34,12 +33,12 @@ const SidebarContent = () => {
     <>
       <div className="flex items-center space-x-3 mb-10 px-2">
         <motion.div
-          className="w-10 h-10 bg-gradient-to-br from-primary to-pink-600 rounded-lg flex items-center justify-center shadow-lg"
+          className="w-10 h-10 bg-gradient-to-br from-primary to-violet-600 rounded-lg flex items-center justify-center shadow-lg"
           whileHover={{ scale: 1.1, rotate: 10 }}
         >
           <Icon name="Wand2" className="w-6 h-6 text-white" />
         </motion.div>
-        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">SurfaceStory</h1>
+        <h1 className="text-2xl font-bold font-headline text-gray-800 dark:text-white">SkinGen</h1>
       </div>
       <nav className="flex-grow">
         <ul>
@@ -89,7 +88,7 @@ const Sidebar = () => {
         <Sheet>
             <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
-                    <Menu className="h-6 w-6" />
+                    <Icon name="Menu" className="h-6 w-6" />
                 </Button>
             </SheetTrigger>
             <SheetContent side="left" className="w-72 bg-gray-900/80 backdrop-blur-xl border-r border-white/10 p-4 flex flex-col">

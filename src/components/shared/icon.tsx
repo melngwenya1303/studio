@@ -1,11 +1,11 @@
-import { Home, Zap, Brush, LayoutGrid, Settings, Star, Heart, Bot, Image as ImageIcon, Search, X, Sparkles, Wand2, Info, RefreshCcw, BookOpen, Laptop, Smartphone, Tablet, ShieldCheck, KeyRound, PlusCircle, Trash2, Users, Send, Trophy, Mic, Volume2, UserPlus, type LucideProps } from 'lucide-react';
+import { Home, Zap, Brush, LayoutGrid, Settings, Star, Heart, Bot, Image as ImageIcon, Search, X, Sparkles, Wand2, Info, RefreshCcw, BookOpen, Laptop, Smartphone, Tablet, ShieldCheck, KeyRound, PlusCircle, Trash2, Users, Send, Trophy, Mic, Volume2, UserPlus, Menu } from 'lucide-react';
 import type { FC } from 'react';
 
-const icons = { Home, Zap, Brush, LayoutGrid, Settings, Star, Heart, Bot, ImageIcon, Search, X, Sparkles, Wand2, Info, RefreshCcw, BookOpen, Laptop, Smartphone, Tablet, ShieldCheck, KeyRound, PlusCircle, Trash2, Users, Send, Trophy, Mic, Volume2, UserPlus };
+const icons = { Home, Zap, Brush, LayoutGrid, Settings, Star, Heart, Bot, ImageIcon, Search, X, Sparkles, Wand2, Info, RefreshCcw, BookOpen, Laptop, Smartphone, Tablet, ShieldCheck, KeyRound, PlusCircle, Trash2, Users, Send, Trophy, Mic, Volume2, UserPlus, Menu };
 
 export type IconName = keyof typeof icons;
 
-interface IconProps extends LucideProps {
+interface IconProps extends React.ComponentProps<typeof Home> {
     name: IconName;
 }
 
