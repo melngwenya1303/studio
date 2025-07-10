@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -48,18 +49,12 @@ export default function DesignStudioPage() {
     const audioRef = useRef<HTMLAudioElement>(null);
     const recognitionRef = useRef<any>(null);
 
-    // Step tracking
-    const [completedSteps, setCompletedSteps] = useState<number[]>([]);
-
     const handleDeviceSelection = (device: Device) => {
         setSelectedDevice(device);
         if (device.models && device.models.length > 0) {
             setSelectedModel(device.models[0]);
         } else {
             setSelectedModel(null);
-        }
-        if (!completedSteps.includes(1)) {
-            setCompletedSteps(prev => [...prev, 1]);
         }
     };
     
@@ -78,7 +73,6 @@ export default function DesignStudioPage() {
                 style: remixData.style,
                 deviceType: device.name,
             });
-            setCompletedSteps([1, 2, 3]);
             clearRemixData();
         }
     }, [remixData, clearRemixData]);
@@ -107,12 +101,6 @@ export default function DesignStudioPage() {
             };
         }
     }, [toast]);
-    
-    useEffect(() => {
-        if (prompt.trim() && !completedSteps.includes(2)) {
-            setCompletedSteps(prev => [...prev, 2]);
-        }
-    }, [prompt, completedSteps]);
 
     const handleToggleListening = () => {
         if (!recognitionRef.current) {
@@ -143,7 +131,6 @@ export default function DesignStudioPage() {
             setIsSpeaking(false);
         }
     };
-
 
     const handleGenerate = async (basePrompt: string) => {
         if (!basePrompt.trim()) {
@@ -266,15 +253,6 @@ export default function DesignStudioPage() {
         }
     }
     
-    const Step = ({ stepNumber, title }: { stepNumber: number; title: string; }) => (
-        <div className="flex items-center">
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg ${completedSteps.includes(stepNumber) ? 'bg-primary text-primary-foreground' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'}`}>
-                {completedSteps.includes(stepNumber) ? '✓' : stepNumber}
-            </div>
-            <h3 className={`ml-4 text-2xl font-semibold ${completedSteps.includes(stepNumber) ? 'text-gray-800 dark:text-white' : 'text-gray-500'}`}>{title}</h3>
-        </div>
-    );
-
     return (
         <TooltipProvider>
             <div className="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-4 gap-8 h-full">
@@ -290,7 +268,7 @@ export default function DesignStudioPage() {
                     
                     <Card className="shadow-lg">
                         <CardHeader>
-                            <Step stepNumber={1} title="Choose Your Canvas" />
+                            <CardTitle className="text-2xl font-semibold">Choose Your Canvas</CardTitle>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 gap-4">
@@ -334,7 +312,7 @@ export default function DesignStudioPage() {
 
                     <Card className="shadow-lg">
                          <CardHeader>
-                            <Step stepNumber={2} title="Describe Your Vision" />
+                            <CardTitle className="text-2xl font-semibold">Describe Your Vision</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <div className="relative">
@@ -387,7 +365,7 @@ export default function DesignStudioPage() {
                     
                     <Card className="shadow-lg">
                         <CardHeader>
-                            <Step stepNumber={3} title="Choose an Artistic Style" />
+                            <CardTitle className="text-2xl font-semibold">Choose an Artistic Style</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <Carousel opts={{ align: "start", loop: true }} className="w-full">
@@ -396,12 +374,7 @@ export default function DesignStudioPage() {
                                         <CarouselItem key={index} className="pl-2 basis-1/2">
                                             <div className="p-1">
                                                 <button 
-                                                    onClick={() => {
-                                                        setSelectedStyle(style);
-                                                        if (!completedSteps.includes(3)) {
-                                                            setCompletedSteps(prev => [...prev, 3]);
-                                                        }
-                                                    }} 
+                                                    onClick={() => setSelectedStyle(style)}
                                                     className={`w-full rounded-lg transition-all duration-200 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'ring-2 ring-primary ring-offset-background ring-offset-2' : ''}`}
                                                     disabled={isLoading}
                                                 >
