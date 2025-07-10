@@ -113,7 +113,7 @@ export default function AdminPage() {
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel onClick={() => setWordToDelete(null)}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteBlockword(wordToDelete!)}>Delete</AlertDialogAction>
+                        <AlertDialogAction onClick={() => handleDeleteBlockword(wordToDelete!)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -259,7 +259,7 @@ export default function AdminPage() {
                                         <Button variant="outline" size="sm" onClick={() => { setPartnerToEdit(partner); setNewPartnerApiKey('')}}>
                                             <Icon name="RefreshCcw" /> Rotate Key
                                         </Button>
-                                        <Button variant="destructive" size="sm" onClick={() => setPartnerToDelete(partner)}>
+                                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setPartnerToDelete(partner)}>
                                             <Icon name="Trash2" /> Delete
                                         </Button>
                                     </div>
@@ -271,5 +271,6 @@ export default function AdminPage() {
             </div>
         </div>
     );
+}
 
     
