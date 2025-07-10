@@ -16,6 +16,7 @@ const navItems = [
     { href: '/dashboard', name: 'My Designs', icon: 'LayoutGrid' as IconName },
     { href: '/inspiration-gallery', name: 'Inspiration', icon: 'Sparkles' as IconName },
     { href: '/live-share', name: 'Live Share', icon: 'Users' as IconName },
+    { href: '/leaderboard', name: 'Leaderboard', icon: 'Trophy' as IconName },
     { href: '/settings', name: 'Settings', icon: 'Settings' as IconName },
 ];
 
