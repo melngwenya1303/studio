@@ -4,7 +4,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { AppProvider } from '@/contexts/AppContext';
 
 export const metadata: Metadata = {
-  title: 'SkinGen',
+  title: 'SurfaceStory',
   description: 'Design your own device decals.',
 };
 
