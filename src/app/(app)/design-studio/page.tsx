@@ -27,6 +27,7 @@ import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from '@/components/ui/separator';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 
 export default function DesignStudioPage() {
     const { user, addCreation, remixData, clearRemixData } = useApp();
@@ -44,6 +45,7 @@ export default function DesignStudioPage() {
     const [isSaving, setIsSaving] = useState(false);
     const [policyAccepted, setPolicyAccepted] = useState(false);
     const [modal, setModal] = useState({ isOpen: false, title: '', children: <></>, size: 'md' as 'md' | 'lg' | 'xl' });
+    const [previewMode, setPreviewMode] = useState<'2D' | '3D'>('2D');
     
     // Accessibility States
     const [isListening, setIsListening] = useState(false);
@@ -499,59 +501,94 @@ export default function DesignStudioPage() {
                     initial={{ scale: 0.8, opacity: 0 }} 
                     animate={{ scale: 1, opacity: 1 }} 
                     transition={{ duration: 0.7, delay: 0.2 }} 
-                    className="lg:col-span-3 flex items-center justify-center bg-gray-100 dark:bg-black/20 rounded-2xl min-h-[50vh] lg:min-h-0 p-8"
+                    className="lg:col-span-3 flex flex-col items-center justify-center bg-gray-100 dark:bg-black/20 rounded-2xl min-h-[50vh] lg:min-h-0 p-8"
                 >
-                    {isLoading ? (
-                        <div className="flex flex-col items-center justify-center text-primary text-center">
-                            <motion.div
-                                animate={{ rotate: [0, 360], scale: [1, 1.1, 1]}}
-                                transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                            >
-                                <Icon name="Wand2" className="w-16 h-16" />
-                            </motion.div>
-                            <p className="mt-4 font-semibold text-lg">AI is creating magic...</p>
-                            <p className="text-sm text-muted-foreground">This can take up to 30 seconds.</p>
-                        </div>
-                    ) : (
-                        <div className="relative w-full h-full flex items-center justify-center">
-                            <Image
-                                src={currentCanvas.previewImage}
-                                alt={`${currentCanvas.name} preview`}
-                                width={800}
-                                height={800}
-                                className="object-contain max-w-full max-h-full"
-                                data-ai-hint={currentCanvas['data-ai-hint']}
-                                key={currentCanvas.name}
-                            />
-                            {generatedDecal && (
+                    <div className="flex-grow w-full h-full flex items-center justify-center relative">
+                        {isLoading ? (
+                            <div className="flex flex-col items-center justify-center text-primary text-center">
                                 <motion.div
-                                    className="absolute"
-                                    initial={{ opacity: 0, scale: 0.8 }}
-                                    animate={{ opacity: 1, scale: 1 }}
-                                    transition={{ duration: 0.5 }}
-                                    style={currentCanvas.decal ? {
-                                        transform: currentCanvas.decal.transform,
-                                        transformOrigin: currentCanvas.decal.transformOrigin,
-                                        width: currentCanvas.decal.width,
-                                        height: currentCanvas.decal.height,
-                                    } : {}}
+                                    animate={{ rotate: [0, 360], scale: [1, 1.1, 1]}}
+                                    transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
                                 >
-                                    <Image
-                                        src={generatedDecal.url}
-                                        alt="Generated Decal"
-                                        fill
-                                        className="object-cover"
-                                    />
+                                    <Icon name="Wand2" className="w-16 h-16" />
                                 </motion.div>
-                            )}
-                        </div>
-                    )}
+                                <p className="mt-4 font-semibold text-lg">AI is creating magic...</p>
+                                <p className="text-sm text-muted-foreground">This can take up to 30 seconds.</p>
+                            </div>
+                        ) : (
+                            <>
+                                {previewMode === '2D' && (
+                                    <div className="relative w-full h-full flex items-center justify-center">
+                                        <Image
+                                            src={currentCanvas.previewImage}
+                                            alt={`${currentCanvas.name} preview`}
+                                            width={800}
+                                            height={800}
+                                            className="object-contain max-w-full max-h-full"
+                                            data-ai-hint={currentCanvas['data-ai-hint']}
+                                            key={currentCanvas.name}
+                                        />
+                                        {generatedDecal && (
+                                            <motion.div
+                                                className="absolute"
+                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ duration: 0.5 }}
+                                                style={currentCanvas.decal ? {
+                                                    transform: currentCanvas.decal.transform,
+                                                    transformOrigin: currentCanvas.decal.transformOrigin,
+                                                    width: currentCanvas.decal.width,
+                                                    height: currentCanvas.decal.height,
+                                                } : {}}
+                                            >
+                                                <Image
+                                                    src={generatedDecal.url}
+                                                    alt="Generated Decal"
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </motion.div>
+                                        )}
+                                    </div>
+                                )}
+                                {previewMode === '3D' && (
+                                     <div className="text-center text-muted-foreground flex flex-col items-center justify-center gap-4">
+                                        <motion.div
+                                            animate={{
+                                                y: [0, -10, 0],
+                                                rotate: [0, 5, -5, 0],
+                                            }}
+                                            transition={{
+                                                duration: 4,
+                                                repeat: Infinity,
+                                                ease: 'easeInOut',
+                                            }}
+                                        >
+                                            <Icon name="Cube" className="w-24 h-24 text-primary/30" />
+                                        </motion.div>
+                                        <h3 className="text-lg font-semibold">Interactive 3D Preview</h3>
+                                        <p className="max-w-xs">This feature is coming soon! You'll be able to rotate, pan, and zoom to see your design from every angle.</p>
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </div>
+                    <div className="mt-4 w-full flex justify-between items-center">
+                        <ToggleGroup type="single" value={previewMode} onValueChange={(value: '2D' | '3D') => value && setPreviewMode(value)} className="bg-background/50 rounded-lg p-1">
+                            <ToggleGroupItem value="2D" aria-label="2D Preview">
+                               <Icon name="ImageIcon" className="w-4 h-4 mr-2" /> 2D
+                            </ToggleGroupItem>
+                            <ToggleGroupItem value="3D" aria-label="3D Preview">
+                               <Icon name="Cube" className="w-4 h-4 mr-2" /> 3D
+                            </ToggleGroupItem>
+                        </ToggleGroup>
+                        <Button variant="outline" disabled>
+                            <Icon name="Camera" className="w-4 h-4 mr-2" />
+                            View in AR (Coming Soon)
+                        </Button>
+                    </div>
                 </motion.div>
             </div>
         </TooltipProvider>
     );
 }
-
-    
-
-    

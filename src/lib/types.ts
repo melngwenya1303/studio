@@ -31,6 +31,7 @@ export type Device = {
   'data-ai-hint': string;
   models?: DeviceModel[];
   decal?: DecalDetails;
+  previewMode?: '2D' | '3D';
 };
 
 export type Style = {
