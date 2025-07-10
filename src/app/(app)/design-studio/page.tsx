@@ -20,6 +20,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { Checkbox } from '@/components/ui/checkbox';
 import Link from 'next/link';
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
 export default function DesignStudioPage() {
     const { user, addCreation, remixData, clearRemixData } = useApp();
@@ -291,19 +292,31 @@ export default function DesignStudioPage() {
                 
                 <div className="space-y-2">
                     <label className="text-lg font-semibold text-gray-700 dark:text-gray-200 block">3. Choose an artistic style</label>
-                    <div className="grid grid-cols-3 gap-3">
-                        {STYLES.map(style => (
-                            <motion.button key={style.name} onClick={() => setSelectedStyle(style)}
-                                className={`relative group rounded-lg border-2 transition-all duration-200 overflow-hidden focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'border-primary' : 'border-transparent hover:border-primary/50'}`}
-                                disabled={isLoading}
-                                whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                <Image src={style.image} alt={style.name} width={150} height={150} className="w-full h-auto" />
-                                <div className={`absolute inset-0 flex items-center justify-center text-center p-1 text-xs font-semibold text-white transition-opacity duration-200 ${selectedStyle.name === style.name ? 'bg-primary/80' : 'bg-black/50 opacity-0 group-hover:opacity-100'}`}>
-                                    {style.name}
-                                </div>
-                            </motion.button>
-                        ))}
-                    </div>
+                    <Carousel opts={{ align: "start", loop: true }} className="w-full">
+                        <CarouselContent className="-ml-2">
+                            {STYLES.map((style, index) => (
+                                <CarouselItem key={index} className="pl-2 md:basis-1/2 lg:basis-1/2">
+                                    <div className="p-1">
+                                        <button 
+                                            onClick={() => setSelectedStyle(style)} 
+                                            className={`w-full rounded-lg transition-all duration-200 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'ring-2 ring-primary ring-offset-background ring-offset-2' : ''}`}
+                                            disabled={isLoading}
+                                        >
+                                            <Card className="border-0">
+                                                <CardContent className="p-0 aspect-video relative">
+                                                    <Image src={style.image} alt={style.name} fill className="object-cover" {...{ 'data-ai-hint': style['data-ai-hint'] }} />
+                                                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
+                                                </CardContent>
+                                            </Card>
+                                            <p className={`mt-2 text-sm font-semibold ${selectedStyle.name === style.name ? 'text-primary' : 'text-gray-600 dark:text-gray-300'}`}>{style.name}</p>
+                                        </button>
+                                    </div>
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                        <CarouselPrevious />
+                        <CarouselNext />
+                    </Carousel>
                 </div>
 
                 <div className="mt-auto pt-4 space-y-3">

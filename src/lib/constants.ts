@@ -7,12 +7,12 @@ export const DEVICES: Omit<Device, 'model'>[] = [
 ];
 
 export const STYLES: Style[] = [
-    { name: 'Photorealistic', image: 'https://placehold.co/150x150.png' },
-    { name: 'Anime', image: 'https://placehold.co/150x150.png' },
-    { name: 'Cyberpunk', image: 'https://placehold.co/150x150.png' },
-    { name: 'Dark Academia', image: 'https://placehold.co/150x150.png' },
-    { name: 'Cottagecore', image: 'https://placehold.co/150x150.png' },
-    { name: 'Fantasy Art', image: 'https://placehold.co/150x150.png' },
+    { name: 'Photorealistic', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'realistic woman' },
+    { name: 'Anime', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'anime character' },
+    { name: 'Cyberpunk', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'cyberpunk city' },
+    { name: 'Dark Academia', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'library book' },
+    { name: 'Cottagecore', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'cottage garden' },
+    { name: 'Fantasy Art', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'fantasy landscape' },
 ];
 
 export const GALLERY_ITEMS: GalleryItem[] = [

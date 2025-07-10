@@ -9,6 +9,7 @@ export type Device = {
 export type Style = {
   name: string;
   image: string;
+  'data-ai-hint'?: string;
 };
 
 export type Creation = {
