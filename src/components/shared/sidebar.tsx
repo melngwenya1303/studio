@@ -27,12 +27,11 @@ const adminNavItems = [
 // New component for the static header to prevent hydration issues
 const SidebarHeader = () => (
   <div className="flex items-center space-x-3 mb-10 px-2">
-    <motion.div
+    <div
       className="w-10 h-10 bg-gradient-to-br from-primary to-violet-600 rounded-lg flex items-center justify-center shadow-lg"
-      whileHover={{ scale: 1.1, rotate: 10 }}
     >
       <Icon name="Wand2" className="w-6 h-6 text-white" />
-    </motion.div>
+    </div>
     <h1 className="text-2xl font-bold text-gray-800 dark:text-white">SurfaceStory</h1>
   </div>
 );
