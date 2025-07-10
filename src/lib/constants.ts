@@ -36,9 +36,45 @@ export const DEVICES: Device[] = [
         name: 'Tablet', 
         icon: 'Tablet', 
         models: [
-            { name: 'iPad Air', previewImage: 'https://placehold.co/600x800.png', 'data-ai-hint': 'tablet computer', previewWidth: 300, previewHeight: 400, decalWidth: 200, decalHeight: 300 },
-            { name: 'Galaxy Tab S9', previewImage: 'https://placehold.co/600x800.png', 'data-ai-hint': 'tablet computer', previewWidth: 300, previewHeight: 400, decalWidth: 220, decalHeight: 350 },
-            { name: 'Surface Go', previewImage: 'https://placehold.co/600x800.png', 'data-ai-hint': 'tablet computer', previewWidth: 300, previewHeight: 400, decalWidth: 210, decalHeight: 320 },
+            { 
+                name: 'iPad Air', 
+                previewImage: 'https://placehold.co/600x800.png', 
+                'data-ai-hint': 'tablet computer', 
+                previewWidth: 300, 
+                previewHeight: 400, 
+                decal: {
+                    transform: 'perspective(400px) rotateX(2deg) rotateY(-3.5deg) rotateZ(0.2deg) translateX(0px) translateY(0px)',
+                    transformOrigin: 'center center',
+                    width: '78.5%',
+                    height: '84.5%',
+                }
+            },
+            { 
+                name: 'Galaxy Tab S9', 
+                previewImage: 'https://placehold.co/600x800.png', 
+                'data-ai-hint': 'tablet computer', 
+                previewWidth: 300, 
+                previewHeight: 400, 
+                decal: {
+                    transform: 'perspective(400px) rotateX(2deg) rotateY(-3.5deg) rotateZ(0.2deg) translateX(0px) translateY(0px)',
+                    transformOrigin: 'center center',
+                    width: '78.5%',
+                    height: '84.5%',
+                }
+            },
+            { 
+                name: 'Surface Go', 
+                previewImage: 'https://placehold.co/600x800.png', 
+                'data-ai-hint': 'tablet computer', 
+                previewWidth: 300, 
+                previewHeight: 400, 
+                decal: {
+                    transform: 'perspective(400px) rotateX(2deg) rotateY(-3.5deg) rotateZ(0.2deg) translateX(0px) translateY(0px)',
+                    transformOrigin: 'center center',
+                    width: '78.5%',
+                    height: '84.5%',
+                }
+            },
         ],
         previewImage: 'https://placehold.co/600x800.png', 
         'data-ai-hint': 'tablet computer', 
