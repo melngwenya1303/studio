@@ -1,9 +1,42 @@
 import type { Device, Style, GalleryItem } from './types';
 
-export const DEVICES: Omit<Device, 'model'>[] = [
-    { name: 'Laptop', icon: 'Laptop', previewImage: 'https://placehold.co/800x500.png', 'data-ai-hint': 'laptop', previewWidth: 500, previewHeight: 300, decalWidth: 250, decalHeight: 150 },
-    { name: 'Phone', icon: 'Smartphone', previewImage: 'https://placehold.co/400x800.png', 'data-ai-hint': 'phone', previewWidth: 200, previewHeight: 400, decalWidth: 150, decalHeight: 300 },
-    { name: 'Headphones', icon: 'Headphones', previewImage: 'https://placehold.co/600x600.png', 'data-ai-hint': 'headphones', previewWidth: 400, previewHeight: 400, decalWidth: 150, decalHeight: 150 },
+export const DEVICES: Device[] = [
+    { 
+        name: 'Laptop', 
+        icon: 'Laptop', 
+        models: [
+            { name: '13-inch', previewImage: 'https://placehold.co/800x500.png', 'data-ai-hint': 'laptop', previewWidth: 500, previewHeight: 300, decalWidth: 200, decalHeight: 120 },
+            { name: '15-inch', previewImage: 'https://placehold.co/800x500.png', 'data-ai-hint': 'laptop', previewWidth: 500, previewHeight: 300, decalWidth: 250, decalHeight: 150 },
+            { name: '16-inch', previewImage: 'https://placehold.co/800x500.png', 'data-ai-hint': 'laptop', previewWidth: 500, previewHeight: 300, decalWidth: 280, decalHeight: 170 },
+        ],
+        // Default values, can be removed if models are always present
+        previewImage: 'https://placehold.co/800x500.png',
+        'data-ai-hint': 'laptop', 
+        previewWidth: 500, 
+        previewHeight: 300, 
+        decalWidth: 250, 
+        decalHeight: 150
+    },
+    { 
+        name: 'Phone', 
+        icon: 'Smartphone', 
+        previewImage: 'https://placehold.co/400x800.png', 
+        'data-ai-hint': 'phone', 
+        previewWidth: 200, 
+        previewHeight: 400, 
+        decalWidth: 150, 
+        decalHeight: 300 
+    },
+    { 
+        name: 'Headphones', 
+        icon: 'Headphones', 
+        previewImage: 'https://placehold.co/600x600.png', 
+        'data-ai-hint': 'headphones', 
+        previewWidth: 400, 
+        previewHeight: 400, 
+        decalWidth: 150, 
+        decalHeight: 150 
+    },
 ];
 
 export const STYLES: Style[] = [

@@ -12,7 +12,7 @@ import { getCreativeFeedback } from '@/ai/flows/get-creative-feedback';
 import { generateStory } from '@/ai/flows/generate-story';
 import { generateAudio } from '@/ai/flows/generate-audio';
 import { DEVICES, STYLES } from '@/lib/constants';
-import type { Device, Style, Creation } from '@/lib/types';
+import type { Device, Style, Creation, DeviceModel } from '@/lib/types';
 import Icon from '@/components/shared/icon';
 import Modal from '@/components/shared/modal';
 import { Button } from '@/components/ui/button';
@@ -22,13 +22,16 @@ import Image from 'next/image';
 import { Checkbox } from '@/components/ui/checkbox';
 import Link from 'next/link';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
 
 export default function DesignStudioPage() {
     const { user, addCreation, remixData, clearRemixData } = useApp();
     const { toast } = useToast();
 
     const [prompt, setPrompt] = useState('');
-    const [selectedDevice, setSelectedDevice] = useState<Omit<Device, 'model'>>(DEVICES[0]);
+    const [selectedDevice, setSelectedDevice] = useState<Device>(DEVICES[0]);
+    const [selectedModel, setSelectedModel] = useState<DeviceModel | null>(DEVICES[0].models ? DEVICES[0].models[0] : null);
     const [selectedStyle, setSelectedStyle] = useState<Style>(STYLES[0]);
     const [generatedDecal, setGeneratedDecal] = useState<Omit<Creation, 'id' | 'createdAt' | 'title'> | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -45,13 +48,25 @@ export default function DesignStudioPage() {
     const audioRef = useRef<HTMLAudioElement>(null);
     const recognitionRef = useRef<any>(null);
 
+    const handleDeviceSelection = (device: Device) => {
+        setSelectedDevice(device);
+        if (device.models && device.models.length > 0) {
+            setSelectedModel(device.models[0]);
+        } else {
+            setSelectedModel(null);
+        }
+    };
+    
+    const currentCanvas = selectedModel || selectedDevice;
+
     useEffect(() => {
         if (remixData) {
             setPrompt(remixData.prompt);
             const style = STYLES.find(s => s.name === remixData.style) || STYLES[0];
             setSelectedStyle(style);
             const device = DEVICES.find(d => d.name === (remixData as Creation).deviceType) || DEVICES[0];
-            setSelectedDevice(device);
+            handleDeviceSelection(device);
+            // This part might need adjustment if remixData includes model info
             setGeneratedDecal({
                 url: remixData.url,
                 prompt: remixData.prompt,
@@ -128,9 +143,10 @@ export default function DesignStudioPage() {
         setIsLoading(true);
         setGeneratedDecal(null);
         try {
-            const fullPrompt = `A decal design for a ${selectedDevice.name}. ${basePrompt}, in the style of ${selectedStyle.name}, high resolution, clean edges, sticker, vector art`;
+            const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
+            const fullPrompt = `A decal design for a ${deviceName}. ${basePrompt}, in the style of ${selectedStyle.name}, high resolution, clean edges, sticker, vector art`;
             const result = await generateImage({ prompt: fullPrompt });
-            const newDecal = { url: result.media, prompt: basePrompt, style: selectedStyle.name, deviceType: selectedDevice.name };
+            const newDecal = { url: result.media, prompt: basePrompt, style: selectedStyle.name, deviceType: deviceName };
             setGeneratedDecal(newDecal);
         } catch (error) {
             console.error(error);
@@ -144,7 +160,8 @@ export default function DesignStudioPage() {
         if (!prompt.trim()) return;
         setIsEnhancing(true);
         try {
-            const result = await enhancePrompt({ prompt, deviceType: selectedDevice.name, style: selectedStyle.name });
+            const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
+            const result = await enhancePrompt({ prompt, deviceType: deviceName, style: selectedStyle.name });
             setPrompt(result.enhancedPrompt);
             toast({ title: "Prompt Enhanced!", description: "Your prompt has been improved by AI." });
         } catch (error) {
@@ -177,7 +194,7 @@ export default function DesignStudioPage() {
           <div>
             <p className="mb-4">Our system is now preparing your masterpiece for printing and shipping!</p>
             <ul className="list-disc list-inside space-y-2 text-sm bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg">
-              <li>Optimizing resolution for your {selectedDevice.name}...</li>
+              <li>Optimizing resolution for your {currentCanvas.name}...</li>
               <li>Calibrating colors for our premium vinyl...</li>
               <li>Perfectly scaling the design to your device's dimensions...</li>
             </ul>
@@ -251,7 +268,7 @@ export default function DesignStudioPage() {
                     <label className="text-lg font-semibold text-gray-700 dark:text-gray-200 block">1. Choose your canvas</label>
                     <div className="grid grid-cols-3 gap-3">
                         {DEVICES.map(device => (
-                            <motion.button key={device.name} onClick={() => setSelectedDevice(device)}
+                            <motion.button key={device.name} onClick={() => handleDeviceSelection(device)}
                                 className={`flex flex-col items-center justify-center p-4 rounded-lg transition-all duration-200 border-2 ${selectedDevice.name === device.name ? 'bg-primary text-primary-foreground border-primary' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border-transparent'}`}
                                 whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
                                 <Icon name={device.icon as any} className="w-8 h-8 mb-1" />
@@ -261,12 +278,35 @@ export default function DesignStudioPage() {
                     </div>
                 </div>
 
+                {selectedDevice.models && selectedDevice.models.length > 0 && (
+                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.3 }} className="space-y-2 overflow-hidden">
+                        <label className="text-lg font-semibold text-gray-700 dark:text-gray-200 block">1a. Select a model</label>
+                        <RadioGroup 
+                            value={selectedModel?.name} 
+                            onValueChange={(value) => {
+                                const model = selectedDevice.models?.find(m => m.name === value);
+                                if (model) setSelectedModel(model);
+                            }}
+                            className="grid grid-cols-3 gap-3"
+                        >
+                            {selectedDevice.models.map(model => (
+                                <div key={model.name} className="flex items-center">
+                                    <RadioGroupItem value={model.name} id={model.name} className="peer sr-only" />
+                                    <Label htmlFor={model.name} className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary w-full cursor-pointer">
+                                        {model.name}
+                                    </Label>
+                                </div>
+                            ))}
+                        </RadioGroup>
+                    </motion.div>
+                )}
+
                 <div className="space-y-2">
                     <label className="text-lg font-semibold text-gray-700 dark:text-gray-200 block">2. Describe your vision</label>
                     <div className="relative">
                         <Textarea
                             className="w-full p-4 pr-24 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
-                            placeholder={`A decal for my ${selectedDevice.name}... e.g., 'a serene koi pond'`}
+                            placeholder={`A decal for my ${currentCanvas.name}... e.g., 'a serene koi pond'`}
                             value={prompt}
                             onChange={(e) => setPrompt(e.target.value)}
                             rows={4}
@@ -373,12 +413,13 @@ export default function DesignStudioPage() {
                         ) : (
                             <div className="relative w-full h-full flex items-center justify-center">
                                 <Image
-                                    src={selectedDevice.previewImage}
-                                    alt={`${selectedDevice.name} preview`}
-                                    width={selectedDevice.previewWidth}
-                                    height={selectedDevice.previewHeight}
+                                    src={currentCanvas.previewImage}
+                                    alt={`${currentCanvas.name} preview`}
+                                    width={currentCanvas.previewWidth}
+                                    height={currentCanvas.previewHeight}
                                     className="object-contain"
-                                    data-ai-hint={selectedDevice['data-ai-hint']}
+                                    data-ai-hint={currentCanvas['data-ai-hint']}
+                                    key={currentCanvas.name}
                                 />
                                 {generatedDecal && (
                                     <motion.div
@@ -390,8 +431,8 @@ export default function DesignStudioPage() {
                                         <Image
                                             src={generatedDecal.url}
                                             alt="Generated Decal"
-                                            width={selectedDevice.decalWidth}
-                                            height={selectedDevice.decalHeight}
+                                            width={currentCanvas.decalWidth}
+                                            height={currentCanvas.decalHeight}
                                             className="object-contain"
                                         />
                                     </motion.div>

@@ -1,5 +1,15 @@
 import type { ComponentType } from 'react';
 
+export type DeviceModel = {
+  name: string;
+  previewImage: string;
+  previewWidth: number;
+  previewHeight: number;
+  decalWidth: number;
+  decalHeight: number;
+  'data-ai-hint': string;
+}
+
 export type Device = {
   name: string;
   icon: string;
@@ -9,6 +19,7 @@ export type Device = {
   decalWidth: number;
   decalHeight: number;
   'data-ai-hint': string;
+  models?: DeviceModel[];
 };
 
 export type Style = {
