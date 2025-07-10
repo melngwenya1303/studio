@@ -27,23 +27,23 @@
   }
 
   .dark {
-    --background: 0 0% 7.1%; /* #121212 */
-    --foreground: 0 0% 95%; 
-    --card: 0 0% 11.8%; /* #1E1E1E */
+    --background: 0 0% 7.1%; /* #121212 - Base surface */
+    --foreground: 0 0% 95%; /* High-emphasis text */
+    --card: 0 0% 11.8%; /* #1E1E1E - Elevation 1 (e.g., cards) */
     --card-foreground: 0 0% 95%;
-    --popover: 0 0% 17.3%; /* #2C2C2C */
+    --popover: 0 0% 17.3%; /* #2C2C2C - Elevation 2 (e.g., modals, popovers) */
     --popover-foreground: 0 0% 95%;
     --primary: 277 70% 75%; /* Desaturated Indigo for dark mode */
     --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 15%;
+    --secondary: 0 0% 15%; /* Elevated interactive elements */
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%;
-    --muted-foreground: 0 0% 63.9%; 
+    --muted: 0 0% 15%; /* Muted backgrounds */
+    --muted-foreground: 0 0% 63.9%; /* Medium-emphasis text */
     --accent: 266 80% 78%; /* Desaturated Violet for dark mode */
     --accent-foreground: 0 0% 98%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 15%;
+    --border: 0 0% 15%; /* Borders on elevated surfaces */
     --input: 0 0% 15%;
     --ring: 277 70% 75%;
   }
