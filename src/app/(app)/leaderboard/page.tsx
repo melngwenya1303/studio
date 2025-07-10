@@ -40,7 +40,7 @@ export default function LeaderboardPage() {
                         {leaderboardData.map((user, index) => (
                             <motion.div
                                 key={user.name}
-                                className="flex items-center p-4 border-b last:border-b-0 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                                className="flex items-center p-4 border-b last:border-b-0 dark:border-gray-700 hover:bg-muted/50 transition-colors"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: index * 0.1 }}
@@ -56,11 +56,11 @@ export default function LeaderboardPage() {
                                 <div className="w-1/3 flex items-center justify-center gap-6 text-sm">
                                     <div className="text-center">
                                         <p className="font-bold text-lg">{user.creations}</p>
-                                        <p className="text-gray-500 dark:text-gray-400 text-xs">Creations</p>
+                                        <p className="text-muted-foreground text-xs">Creations</p>
                                     </div>
                                     <div className="text-center">
                                         <p className="font-bold text-lg">{user.remixes}</p>
-                                        <p className="text-gray-500 dark:text-gray-400 text-xs">Remixes</p>
+                                        <p className="text-muted-foreground text-xs">Remixes</p>
                                     </div>
                                 </div>
                                 <div className="w-1/3 flex justify-end">
