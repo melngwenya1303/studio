@@ -115,7 +115,7 @@ export default function DesignStudioPage() {
         title: "Finalizing Your Design ✨",
         children: (
           <div>
-            <p className="mb-4">Our system would now prepare your masterpiece for printing and shipping!</p>
+            <p className="mb-4">Our system is now preparing your masterpiece for printing and shipping!</p>
             <ul className="list-disc list-inside space-y-2 text-sm bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg">
               <li>Optimizing resolution for your {selectedDevice.name}...</li>
               <li>Calibrating colors for our premium vinyl...</li>
@@ -193,7 +193,7 @@ export default function DesignStudioPage() {
                     </motion.button>
                     <div className="flex gap-3">
                         <Button variant="outline" onClick={handleSaveCreation} disabled={isLoading || !generatedDecal} className="w-full">Save Design</Button>
-                        <Button onClick={handleFinalize} disabled={isLoading || !generatedDecal} className="w-full bg-green-600 hover:bg-green-700">Add to Cart</Button>
+                        <Button onClick={handleFinalize} disabled={isLoading || !generatedDecal} className="w-full bg-green-600 hover:bg-green-700">Finalize Design</Button>
                     </div>
                 </div>
             </motion.div>
@@ -219,5 +219,4 @@ export default function DesignStudioPage() {
             </motion.div>
         </div>
     );
-
-    
+}
