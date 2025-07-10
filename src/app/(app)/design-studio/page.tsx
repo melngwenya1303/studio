@@ -23,11 +23,10 @@ const ClientScene = dynamic(() => import('@/components/canvas/ClientScene'), {
     ssr: false,
     loading: () => (
         <div className="flex flex-col items-center justify-center h-full w-full text-primary">
-            <Skeleton className="w-full h-full" />
-            <div className="absolute flex flex-col items-center justify-center">
+            <div className="w-full h-full flex items-center justify-center">
                 <Icon name="Laptop" className="w-16 h-16 animate-pulse" />
-                <p className="mt-4 font-semibold">Loading 3D Preview...</p>
             </div>
+            <p className="mt-4 font-semibold absolute bottom-4">Loading 3D Preview...</p>
         </div>
     )
 });

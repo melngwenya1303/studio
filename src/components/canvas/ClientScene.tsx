@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Suspense, useMemo } from 'react';
@@ -7,17 +6,19 @@ import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useTexture, Center } from '@react-three/drei';
 import Icon from '@/components/shared/icon';
 
+const LaptopModel = dynamic(() => import('./LaptopModel').then(mod => mod.LaptopModel), { ssr: false });
+const PhoneModel = dynamic(() => import('./PhoneModel').then(mod => mod.PhoneModel), { ssr: false });
+const HeadphonesModel = dynamic(() => import('./HeadphonesModel').then(mod => mod.HeadphonesModel), { ssr: false });
+
 const modelPaths: Record<string, React.ComponentType<{ decalTexture?: any }>> = {
-    Laptop: dynamic(() => import('./LaptopModel').then(mod => mod.LaptopModel), { ssr: false }),
-    Phone: dynamic(() => import('./PhoneModel').then(mod => mod.PhoneModel), { ssr: false }),
-    Headphones: dynamic(() => import('./HeadphonesModel').then(mod => mod.HeadphonesModel), { ssr: false }),
+    Laptop: LaptopModel,
+    Phone: PhoneModel,
+    Headphones: HeadphonesModel,
 };
 
-function ModelScene({ deviceName, decalUrl }: { deviceName: string, decalUrl:string }) {
-    const decalTexture = useTexture(decalUrl);
-    decalTexture.flipY = false;
+function ModelScene({ deviceName, decalUrl }: { deviceName: string, decalUrl: string }) {
     const DeviceModel = useMemo(() => modelPaths[deviceName] || null, [deviceName]);
-
+    
     if (!DeviceModel) return null;
 
     return (
@@ -26,11 +27,18 @@ function ModelScene({ deviceName, decalUrl }: { deviceName: string, decalUrl:str
             <pointLight position={[10, 10, 10]} intensity={0.8} />
             <pointLight position={[-10, -10, -10]} intensity={0.3} />
             <Center>
-                <DeviceModel decalTexture={decalTexture} />
+                <TexturedModel DeviceModel={DeviceModel} decalUrl={decalUrl} />
             </Center>
             <OrbitControls enableZoom={false} enablePan={false} />
         </>
     );
+}
+
+function TexturedModel({ DeviceModel, decalUrl }: { DeviceModel: React.ComponentType<{ decalTexture?: any }>, decalUrl: string }) {
+    const decalTexture = useTexture(decalUrl);
+    decalTexture.flipY = false;
+    
+    return <DeviceModel decalTexture={decalTexture} />;
 }
 
 export default function ClientScene({ deviceName, decalUrl }: { deviceName: string, decalUrl: string }) {
