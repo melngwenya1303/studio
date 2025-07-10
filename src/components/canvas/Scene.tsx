@@ -4,11 +4,22 @@ import { Suspense } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useTexture, Center } from '@react-three/drei';
 import type { Device } from '@/lib/types';
+import { LaptopModel } from './LaptopModel';
+import { PhoneModel } from './PhoneModel';
+import { HeadphonesModel } from './HeadphonesModel';
 
-function ModelScene({ device, decalUrl }: { device: Device, decalUrl: string }) {
+const models: Record<string, React.ComponentType<{ decalTexture?: any }>> = {
+    Laptop: LaptopModel,
+    Phone: PhoneModel,
+    Headphones: HeadphonesModel,
+};
+
+function ModelScene({ deviceName, decalUrl }: { deviceName: string, decalUrl:string }) {
     const decalTexture = useTexture(decalUrl);
     decalTexture.flipY = false;
-    const DeviceModel = device.model;
+    const DeviceModel = models[deviceName];
+
+    if (!DeviceModel) return null;
 
     return (
         <>
@@ -23,11 +34,11 @@ function ModelScene({ device, decalUrl }: { device: Device, decalUrl: string }) 
     );
 }
 
-export function Scene({ device, decalUrl }: { device: Device, decalUrl: string }) {
+export function Scene({ deviceName, decalUrl }: { deviceName: string, decalUrl: string }) {
     return (
         <Canvas camera={{ position: [0, 0, 2.5], fov: 50 }} dpr={[1, 2]}>
             <Suspense fallback={null}>
-                <ModelScene device={device} decalUrl={decalUrl} />
+                <ModelScene deviceName={deviceName} decalUrl={decalUrl} />
             </Suspense>
         </Canvas>
     );

@@ -1,12 +1,9 @@
-import { LaptopModel } from '@/components/canvas/LaptopModel';
-import { PhoneModel } from '@/components/canvas/PhoneModel';
-import { HeadphonesModel } from '@/components/canvas/HeadphonesModel';
 import type { Device, Style, GalleryItem } from './types';
 
-export const DEVICES: Device[] = [
-    { name: 'Laptop', icon: 'Laptop', model: LaptopModel },
-    { name: 'Phone', icon: 'Smartphone', model: PhoneModel },
-    { name: 'Headphones', icon: 'Headphones', model: HeadphonesModel },
+export const DEVICES: Omit<Device, 'model'>[] = [
+    { name: 'Laptop', icon: 'Laptop' },
+    { name: 'Phone', icon: 'Smartphone' },
+    { name: 'Headphones', icon: 'Headphones' },
 ];
 
 export const STYLES: Style[] = [

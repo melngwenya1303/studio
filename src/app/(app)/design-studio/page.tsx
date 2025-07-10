@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useApp } from '@/context/AppContext';
+import { useApp } from '@/contexts/AppContext';
 import { useToast } from "@/hooks/use-toast";
 import { enhancePrompt } from '@/ai/flows/enhance-prompt';
 import { generateImage } from '@/ai/flows/generate-image';
@@ -22,7 +22,7 @@ export default function DesignStudioPage() {
     const { toast } = useToast();
 
     const [prompt, setPrompt] = useState('');
-    const [selectedDevice, setSelectedDevice] = useState<Device>(DEVICES[0]);
+    const [selectedDevice, setSelectedDevice] = useState<Omit<Device, 'model'>>(DEVICES[0]);
     const [selectedStyle, setSelectedStyle] = useState<Style>(STYLES[0]);
     const [generatedDecal, setGeneratedDecal] = useState<Omit<Creation, 'id' | 'createdAt' | 'title'> | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -190,7 +190,7 @@ export default function DesignStudioPage() {
                                 <p className="mt-4 font-semibold">AI is creating magic...</p>
                             </div>
                         ) : (
-                            <Scene device={selectedDevice} decalUrl={generatedDecal?.url || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='} />
+                            <Scene deviceName={selectedDevice.name} decalUrl={generatedDecal?.url || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='} />
                         )}
                     </CardContent>
                 </Card>
