@@ -360,7 +360,9 @@ export default function DesignStudioPage() {
                                                                     <Icon name="Mic" className="w-5 h-5" />
                                                                 </Button>
                                                             </TooltipTrigger>
-                                                            <TooltipContent><p>Speak Your Prompt</p></TooltipContent>
+                                                            <TooltipContent>
+                                                              <p>Speak Your Prompt</p>
+                                                            </TooltipContent>
                                                         </Tooltip>
                                                         <Tooltip>
                                                             <TooltipTrigger asChild>
@@ -368,7 +370,9 @@ export default function DesignStudioPage() {
                                                                     <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
                                                                 </Button>
                                                             </TooltipTrigger>
-                                                            <TooltipContent><p>Listen to Prompt</p></TooltipContent>
+                                                            <TooltipContent>
+                                                              <p>Listen to Prompt</p>
+                                                            </TooltipContent>
                                                         </Tooltip>
                                                         <Tooltip>
                                                             <TooltipTrigger asChild>
@@ -376,7 +380,9 @@ export default function DesignStudioPage() {
                                                                     <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
                                                                 </Button>
                                                             </TooltipTrigger>
-                                                            <TooltipContent><p>Enhance with AI ✨</p></TooltipContent>
+                                                            <TooltipContent>
+                                                              <p>Enhance with AI ✨</p>
+                                                            </TooltipContent>
                                                         </Tooltip>
                                                     </div>
                                                 </div>
@@ -411,7 +417,9 @@ export default function DesignStudioPage() {
                                                                             </motion.button>
                                                                         </div>
                                                                     </TooltipTrigger>
-                                                                    <TooltipContent><p>{style.name}</p></TooltipContent>
+                                                                    <TooltipContent>
+                                                                      <p>{style.name}</p>
+                                                                    </TooltipContent>
                                                                 </Tooltip>
                                                             </CarouselItem>
                                                         ))}
