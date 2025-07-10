@@ -1,10 +1,11 @@
+
 'use client';
 
 import React, { useState } from 'react';
 import Icon from '@/components/shared/icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useApp } from '@/contexts/AppContext';
 
 export default function AdminPage() {
@@ -33,7 +34,7 @@ export default function AdminPage() {
     const handleAddPodPartner = (e: React.FormEvent) => {
       e.preventDefault();
       if (!newPartnerName.trim() || !newPartnerApiKey.trim()) return;
-      setPodPartners(prev => [...prev, { id: crypto.randomUUID(), name: newPartnerName, apiKey: `...${newPartnerApiKey.slice(-4)}` }]);
+      setPodPartners(prev => [...prev, { id: crypto.randomUUID(), name: newPartnerName, apiKey: newPartnerApiKey }]);
       setNewPartnerName('');
       setNewPartnerApiKey('');
     }
@@ -45,7 +46,7 @@ export default function AdminPage() {
     if (!isAdmin) {
       return (
         <div className="p-8 text-center text-red-500">
-          <h2 className="text-2xl font-bold font-headline">Access Denied</h2>
+          <h2 className="text-2xl font-bold">Access Denied</h2>
           <p>You do not have permission to view this page.</p>
         </div>
       );
@@ -54,14 +55,15 @@ export default function AdminPage() {
     return (
         <div className="p-4 md:p-8 animate-fade-in">
             <header className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-3"><Icon name="ShieldCheck" /> Admin Center</h2>
-                <p className="text-gray-500 dark:text-gray-400 mt-1">Manage platform safety, integrations, and operations.</p>
+                <h2 className="text-3xl font-bold text-foreground flex items-center gap-3"><Icon name="ShieldCheck" /> Admin Center</h2>
+                <p className="text-muted-foreground mt-1">Manage platform safety, integrations, and operations.</p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Icon name="Trash2" /> Prompt Filter Blocklist</CardTitle>
+                        <CardDescription>Add or remove words that should be filtered from user prompts.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleAddBlockword} className="flex gap-2 mb-4">
@@ -70,20 +72,21 @@ export default function AdminPage() {
                                 value={newBlockword}
                                 onChange={(e) => setNewBlockword(e.target.value)}
                                 placeholder="Add a forbidden word"
+                                className="text-base"
                             />
-                            <Button type="submit" size="icon">
+                            <Button type="submit" size="icon" aria-label="Add blockword">
                                 <Icon name="PlusCircle" />
                             </Button>
                         </form>
                         <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
                             {blocklist.length > 0 ? blocklist.map(word => (
-                                <div key={word} className="flex justify-between items-center bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg">
+                                <div key={word} className="flex justify-between items-center bg-muted/50 p-2 rounded-lg">
                                     <span className="font-mono text-sm">{word}</span>
-                                    <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-700" onClick={() => handleDeleteBlockword(word)}>
+                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeleteBlockword(word)} aria-label={`Delete ${word}`}>
                                         <Icon name="Trash2" className="w-4 h-4" />
                                     </Button>
                                 </div>
-                            )) : <p className="text-sm text-gray-500">No blocked words yet.</p>}
+                            )) : <p className="text-sm text-muted-foreground text-center py-4">No blocked words yet.</p>}
                         </div>
                     </CardContent>
                 </Card>
@@ -91,6 +94,7 @@ export default function AdminPage() {
                 <Card>
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><Icon name="KeyRound" /> POD Partner APIs</CardTitle>
+                        <CardDescription>Manage API keys for your Print-on-Demand partners.</CardDescription>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleAddPodPartner} className="space-y-3 mb-4">
@@ -99,29 +103,31 @@ export default function AdminPage() {
                                 value={newPartnerName}
                                 onChange={(e) => setNewPartnerName(e.target.value)}
                                 placeholder="Partner Name (e.g., Printify)"
+                                className="text-base"
                             />
                             <Input 
                                 type="password"
                                 value={newPartnerApiKey}
                                 onChange={(e) => setNewPartnerApiKey(e.target.value)}
                                 placeholder="Partner API Key"
+                                className="text-base"
                             />
-                            <Button type="submit" className="w-full flex items-center justify-center gap-2">
+                            <Button type="submit" className="w-full">
                                 <Icon name="PlusCircle" /> Add Partner
                             </Button>
                         </form>
                         <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
                             {podPartners.length > 0 ? podPartners.map(partner => (
-                                 <div key={partner.id} className="flex justify-between items-center bg-gray-50 dark:bg-gray-700/50 p-2 rounded-lg">
+                                 <div key={partner.id} className="flex justify-between items-center bg-muted/50 p-2 rounded-lg">
                                     <div>
                                         <p className="font-semibold">{partner.name}</p>
-                                        <p className="font-mono text-xs text-gray-500">API Key: ••••••••••••{partner.apiKey.slice(-4)}</p>
+                                        <p className="font-mono text-xs text-muted-foreground">API Key: ••••••••••••{partner.apiKey.slice(-4)}</p>
                                     </div>
-                                    <Button variant="ghost" size="icon" className="text-red-500 hover:text-red-700" onClick={() => handleDeletePodPartner(partner.id)}>
+                                    <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeletePodPartner(partner.id)} aria-label={`Delete ${partner.name}`}>
                                         <Icon name="Trash2" className="w-4 h-4" />
                                     </Button>
                                 </div>
-                            )) : <p className="text-sm text-gray-500">No POD partners configured.</p>}
+                            )) : <p className="text-sm text-muted-foreground text-center py-4">No POD partners configured.</p>}
                         </div>
                     </CardContent>
                 </Card>
