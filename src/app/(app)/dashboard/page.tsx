@@ -1,19 +1,61 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import Icon from '@/components/shared/icon';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import Modal from '@/components/shared/modal';
+import { useToast } from '@/hooks/use-toast';
+import { describeImage } from '@/ai/flows/describe-image';
+import { Creation } from '@/lib/types';
 
 export default function DashboardPage() {
     const { creations, remix } = useApp();
     const router = useRouter();
+    const { toast } = useToast();
+
+    const [modal, setModal] = useState({ isOpen: false, title: '', children: <></> });
+    const [isDescribing, setIsDescribing] = useState<string | null>(null);
+
+    const handleDescribe = async (creation: Creation) => {
+        setIsDescribing(creation.id);
+        try {
+            const result = await describeImage({ imageDataUri: creation.url });
+            setModal({
+                isOpen: true,
+                title: 'AI-Generated Prompts',
+                children: (
+                  <div className="space-y-4">
+                      <p>Here are a few prompts our AI thinks could create an image like this. Click one to remix!</p>
+                      <ul className="space-y-3">
+                          {result.prompts.map((p, i) => (
+                              <li key={i} onClick={() => {
+                                remix({ ...creation, prompt: p });
+                                setModal(prev => ({...prev, isOpen: false}));
+                              }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+                                  <p className="font-mono text-sm">"{p}"</p>
+                              </li>
+                          ))}
+                      </ul>
+                  </div>
+                ),
+            });
+        } catch (error) {
+            console.error('Describe error:', error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not generate descriptions for this image.' });
+        } finally {
+            setIsDescribing(null);
+        }
+    };
 
     return (
         <div className="p-4 md:p-8 animate-fade-in">
+             <Modal isOpen={modal.isOpen} title={modal.title} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}>
+                {modal.children}
+            </Modal>
             <header className="mb-8 p-8 rounded-2xl bg-gradient-to-br from-gray-800 to-gray-900 text-white shadow-2xl relative overflow-hidden">
                 <div className="absolute -top-10 -right-10 w-40 h-40 bg-primary/30 rounded-full filter blur-3xl"></div>
                 <div className="absolute -bottom-10 -left-10 w-40 h-40 bg-pink-600/30 rounded-full filter blur-3xl"></div>
@@ -26,7 +68,7 @@ export default function DashboardPage() {
                     {creations.map((creation, i) => (
                         <motion.div 
                             key={creation.id} 
-                            className="group relative rounded-xl overflow-hidden cursor-pointer shadow-lg aspect-square"
+                            className="group relative rounded-xl overflow-hidden shadow-lg aspect-square"
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: i * 0.05 }}
@@ -34,15 +76,28 @@ export default function DashboardPage() {
                             <Image src={creation.url} alt={creation.title || creation.prompt} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end">
                                 <p className="text-white text-sm font-semibold truncate">{creation.title || creation.prompt}</p>
-                                <motion.button 
-                                    onClick={() => remix(creation)} 
-                                    className="mt-2 text-left self-start px-3 py-1.5 bg-white/20 text-white text-xs font-semibold rounded-full backdrop-blur-md hover:bg-white/30 transition-all opacity-0 group-hover:opacity-100"
-                                    initial={{ y: 10, opacity: 0 }}
-                                    animate={{ y: 0, opacity: 1 }}
-                                    transition={{ delay: 0.1 }}
-                                >
-                                    Remix ✨
-                                </motion.button>
+                                <div className="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <motion.button 
+                                        onClick={() => remix(creation)} 
+                                        className="px-3 py-1.5 bg-white/20 text-white text-xs font-semibold rounded-full backdrop-blur-md hover:bg-white/30 transition-all"
+                                        initial={{ y: 10, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ delay: 0.1 }}
+                                    >
+                                        Remix ✨
+                                    </motion.button>
+                                    <motion.button 
+                                        onClick={() => handleDescribe(creation)}
+                                        disabled={!!isDescribing}
+                                        className="px-3 py-1.5 bg-white/20 text-white text-xs font-semibold rounded-full backdrop-blur-md hover:bg-white/30 transition-all flex items-center gap-1 disabled:opacity-50"
+                                        initial={{ y: 10, opacity: 0 }}
+                                        animate={{ y: 0, opacity: 1 }}
+                                        transition={{ delay: 0.2 }}
+                                    >
+                                        {isDescribing === creation.id ? <Icon name="Wand2" className="w-3 h-3 animate-pulse" /> : <Icon name="BookOpen" className="w-3 h-3" />}
+                                        Describe
+                                    </motion.button>
+                                </div>
                             </div>
                         </motion.div>
                     ))}

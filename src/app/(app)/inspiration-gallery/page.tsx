@@ -1,16 +1,59 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useApp } from '@/contexts/AppContext';
 import { GALLERY_ITEMS } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
+import Modal from '@/components/shared/modal';
+import { useToast } from '@/hooks/use-toast';
+import { describeImage } from '@/ai/flows/describe-image';
+import { GalleryItem } from '@/lib/types';
+import Icon from '@/components/shared/icon';
 
 export default function InspirationGalleryPage() {
     const { remix } = useApp();
+    const { toast } = useToast();
+
+    const [modal, setModal] = useState({ isOpen: false, title: '', children: <></> });
+    const [isDescribing, setIsDescribing] = useState<number | null>(null);
+
+    const handleDescribe = async (item: GalleryItem) => {
+        setIsDescribing(item.id);
+        try {
+            const result = await describeImage({ imageDataUri: item.url });
+            setModal({
+                isOpen: true,
+                title: 'AI-Generated Prompts',
+                children: (
+                  <div className="space-y-4">
+                      <p>Here are a few prompts our AI thinks could create an image like this. Click one to remix!</p>
+                      <ul className="space-y-3">
+                          {result.prompts.map((p, i) => (
+                              <li key={i} onClick={() => {
+                                remix({ ...item, prompt: p });
+                                setModal(prev => ({...prev, isOpen: false}));
+                              }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+                                  <p className="font-mono text-sm">"{p}"</p>
+                              </li>
+                          ))}
+                      </ul>
+                  </div>
+                ),
+            });
+        } catch (error) {
+            console.error('Describe error:', error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not generate descriptions for this image.' });
+        } finally {
+            setIsDescribing(null);
+        }
+    };
 
     return (
         <div className="p-4 md:p-8 animate-fade-in">
+            <Modal isOpen={modal.isOpen} title={modal.title} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}>
+                {modal.children}
+            </Modal>
             <header className="mb-8">
                 <h2 className="text-3xl font-bold text-gray-800 dark:text-white font-headline">Inspiration Gallery</h2>
                 <p className="text-gray-500 dark:text-gray-400 mt-1">Discover decal designs from the community and start your own remix.</p>
@@ -24,8 +67,18 @@ export default function InspirationGalleryPage() {
                        <div className="p-4 flex flex-col flex-grow">
                            <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-2 line-clamp-2" title={item.prompt}>{item.prompt}</p>
                            <p className="text-xs text-gray-500 dark:text-gray-400 italic mb-4 line-clamp-3">Curator's Note: "{item.curatorNote}"</p>
-                           <div className="mt-auto">
+                           <div className="mt-auto flex items-center gap-2">
                             <Button onClick={() => remix(item)} className="w-full">Remix this Design ✨</Button>
+                            <Button 
+                                onClick={() => handleDescribe(item)} 
+                                disabled={!!isDescribing}
+                                variant="outline" 
+                                size="icon" 
+                                className="flex-shrink-0"
+                                title="Describe with AI"
+                            >
+                                {isDescribing === item.id ? <Icon name="Wand2" className="w-4 h-4 animate-pulse" /> : <Icon name="BookOpen" className="w-4 h-4" />}
+                            </Button>
                            </div>
                        </div>
                     </div>
