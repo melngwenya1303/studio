@@ -38,7 +38,7 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }: ModalProps) =>
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-800 dark:text-white font-headline">{title}</h3>
+              <h3 className="text-xl font-bold text-gray-800 dark:text-white">{title}</h3>
               <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
                 <Icon name="X" className="w-6 h-6" />
               </motion.button>

@@ -42,7 +42,7 @@ export default function LiveSharePage() {
             >
                 <header className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-3xl font-bold text-gray-800 dark:text-white font-headline flex items-center gap-3">
+                        <h2 className="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-3">
                             <Icon name="Users" /> Live Session
                         </h2>
                         <p className="text-gray-500 dark:text-gray-400 mt-1">Create together in real-time.</p>
@@ -59,7 +59,7 @@ export default function LiveSharePage() {
 
                 <Card className="flex-grow">
                     <CardHeader>
-                        <CardTitle className="font-headline">Shared Prompt</CardTitle>
+                        <CardTitle>Shared Prompt</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Textarea
@@ -86,7 +86,7 @@ export default function LiveSharePage() {
             >
                 <Card className="h-full flex flex-col">
                     <CardHeader>
-                        <CardTitle className="font-headline">Team Chat</CardTitle>
+                        <CardTitle>Team Chat</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-grow flex flex-col gap-4">
                         <div className="flex-grow space-y-4 overflow-y-auto pr-2">

@@ -271,7 +271,7 @@ export default function DesignStudioPage() {
             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg ${completedSteps.includes(stepNumber) ? 'bg-primary text-primary-foreground' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'}`}>
                 {completedSteps.includes(stepNumber) ? '✓' : stepNumber}
             </div>
-            <h3 className={`ml-4 text-xl font-headline font-semibold ${completedSteps.includes(stepNumber) ? 'text-gray-800 dark:text-white' : 'text-gray-500'}`}>{title}</h3>
+            <h3 className={`ml-4 text-2xl font-semibold font-headline ${completedSteps.includes(stepNumber) ? 'text-gray-800 dark:text-white' : 'text-gray-500'}`}>{title}</h3>
         </div>
     );
 

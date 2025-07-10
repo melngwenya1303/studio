@@ -37,7 +37,7 @@ export default function ProfilePage() {
                             <AvatarFallback>{profileUser.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-grow text-center md:text-left">
-                            <h2 className="text-3xl font-bold font-headline">{profileUser.name}</h2>
+                            <h2 className="text-3xl font-bold">{profileUser.name}</h2>
                             <p className="text-gray-500 dark:text-gray-400 mt-1">{profileUser.bio}</p>
                             <div className="flex justify-center md:justify-start items-center gap-6 mt-4 text-sm">
                                 <div><span className="font-bold">{profileUser.creationsCount}</span> Creations</div>
@@ -53,7 +53,7 @@ export default function ProfilePage() {
             </header>
 
             <div>
-                <h3 className="text-2xl font-bold font-headline mb-4">Creations</h3>
+                <h3 className="text-2xl font-bold mb-4">Creations</h3>
                 {creations.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {creations.map((creation, i) => (
@@ -74,7 +74,7 @@ export default function ProfilePage() {
                 ) : (
                     <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
                         <Icon name="ImageIcon" className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                        <h4 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2 font-headline">{profileUser.name} hasn't created anything yet.</h4>
+                        <h4 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">{profileUser.name} hasn't created anything yet.</h4>
                     </div>
                 )}
             </div>

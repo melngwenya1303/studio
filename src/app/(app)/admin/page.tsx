@@ -54,14 +54,14 @@ export default function AdminPage() {
     return (
         <div className="p-4 md:p-8 animate-fade-in">
             <header className="mb-8">
-                <h2 className="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-3 font-headline"><Icon name="ShieldCheck" /> Admin Center</h2>
+                <h2 className="text-3xl font-bold text-gray-800 dark:text-white flex items-center gap-3"><Icon name="ShieldCheck" /> Admin Center</h2>
                 <p className="text-gray-500 dark:text-gray-400 mt-1">Manage platform safety, integrations, and operations.</p>
             </header>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 font-headline"><Icon name="Trash2" /> Prompt Filter Blocklist</CardTitle>
+                        <CardTitle className="flex items-center gap-2"><Icon name="Trash2" /> Prompt Filter Blocklist</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleAddBlockword} className="flex gap-2 mb-4">
@@ -90,7 +90,7 @@ export default function AdminPage() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 font-headline"><Icon name="KeyRound" /> POD Partner APIs</CardTitle>
+                        <CardTitle className="flex items-center gap-2"><Icon name="KeyRound" /> POD Partner APIs</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleAddPodPartner} className="space-y-3 mb-4">
