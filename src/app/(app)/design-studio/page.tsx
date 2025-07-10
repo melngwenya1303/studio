@@ -263,7 +263,7 @@ export default function DesignStudioPage() {
             <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-lg ${currentStep >= stepNumber ? 'bg-primary text-primary-foreground' : 'bg-gray-200 dark:bg-gray-700 text-gray-500'}`}>
                 {currentStep > stepNumber ? '✓' : stepNumber}
             </div>
-            <h3 className={`ml-4 text-lg font-semibold ${currentStep >= stepNumber ? 'text-gray-800 dark:text-white' : 'text-gray-500'}`}>{title}</h3>
+            <h3 className={`ml-4 text-xl font-headline font-semibold ${currentStep >= stepNumber ? 'text-gray-800 dark:text-white' : 'text-gray-500'}`}>{title}</h3>
         </div>
     );
 
@@ -290,7 +290,7 @@ export default function DesignStudioPage() {
                 
                 <Card className="shadow-lg">
                     <CardHeader>
-                        <Step stepNumber={1} title="Choose your canvas" />
+                        <Step stepNumber={1} title="Choose Your Canvas" />
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="grid grid-cols-1 gap-4">
@@ -334,7 +334,7 @@ export default function DesignStudioPage() {
 
                 <Card className="shadow-lg">
                      <CardHeader>
-                        <Step stepNumber={2} title="Describe your vision" />
+                        <Step stepNumber={2} title="Describe Your Vision" />
                     </CardHeader>
                     <CardContent>
                         <div className="relative">
@@ -369,7 +369,7 @@ export default function DesignStudioPage() {
                 
                 <Card className="shadow-lg">
                     <CardHeader>
-                        <Step stepNumber={3} title="Choose an artistic style" />
+                        <Step stepNumber={3} title="Choose an Artistic Style" />
                     </CardHeader>
                     <CardContent>
                         <Carousel opts={{ align: "start", loop: true }} className="w-full">
@@ -441,7 +441,7 @@ export default function DesignStudioPage() {
                 </div>
             </motion.div>
 
-            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="lg:col-span-2 flex items-center justify-center">
+            <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="lg:col-span-2 bg-gray-100 dark:bg-gray-900/50 p-8 rounded-2xl flex items-center justify-center">
                 {isLoading ? (
                     <div className="flex flex-col items-center justify-center h-full text-primary">
                         <Icon name="Wand2" className="w-16 h-16 animate-pulse" />
@@ -452,8 +452,8 @@ export default function DesignStudioPage() {
                         <Image
                             src={currentCanvas.previewImage}
                             alt={`${currentCanvas.name} preview`}
-                            width={currentCanvas.previewWidth}
-                            height={currentCanvas.previewHeight}
+                            width={500}
+                            height={500}
                             className="object-contain max-w-full max-h-full"
                             data-ai-hint={currentCanvas['data-ai-hint']}
                             key={currentCanvas.name}
