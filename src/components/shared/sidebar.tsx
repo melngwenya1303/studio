@@ -1,9 +1,10 @@
+
 'use client';
 
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import Icon, { IconName } from '@/components/shared/icon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -26,14 +27,19 @@ const adminNavItems = [
 
 // New component for the static header to prevent hydration issues
 const SidebarHeader = () => (
-  <div className="flex items-center space-x-3 mb-10 px-2">
+  <motion.div 
+    className="flex items-center space-x-3 mb-10 px-2"
+    initial={{ opacity: 0, x: -20 }}
+    animate={{ opacity: 1, x: 0 }}
+    transition={{ duration: 0.5, delay: 0.1 }}
+  >
     <div
       className="w-10 h-10 bg-gradient-to-br from-primary to-violet-600 rounded-lg flex items-center justify-center shadow-lg"
     >
       <Icon name="Wand2" className="w-6 h-6 text-white" />
     </div>
     <h1 className="text-2xl font-bold text-gray-800 dark:text-white">SurfaceStory</h1>
-  </div>
+  </motion.div>
 );
 
 
@@ -47,8 +53,14 @@ const SidebarContent = () => {
       <SidebarHeader />
       <nav className="flex-grow">
         <ul>
-          {allNavItems.map(item => (
-            <li key={item.href}>
+        <AnimatePresence>
+          {allNavItems.map((item, i) => (
+            <motion.li 
+              key={item.href}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.4, delay: 0.2 + i * 0.05 }}
+            >
               <Link href={item.href} passHref>
                 <motion.div
                   className={`flex items-center space-x-3 px-4 py-3 my-1 rounded-lg font-semibold transition-all duration-200 group ${
@@ -63,12 +75,18 @@ const SidebarContent = () => {
                   <span>{item.name}</span>
                 </motion.div>
               </Link>
-            </li>
+            </motion.li>
           ))}
+          </AnimatePresence>
         </ul>
       </nav>
       {user && (
-        <div className="mt-auto flex items-center space-x-3 p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors">
+        <motion.div 
+          className="mt-auto flex items-center space-x-3 p-2 rounded-lg hover:bg-white/50 dark:hover:bg-gray-800/50 transition-colors"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.5, delay: 0.8 }}
+        >
           <Avatar>
              <AvatarImage src={`https://i.pravatar.cc/40?u=${user.uid}`} alt="User Avatar" />
              <AvatarFallback>U</AvatarFallback>
@@ -77,7 +95,7 @@ const SidebarContent = () => {
             <p className="font-semibold text-gray-800 dark:text-white text-sm">Creative User {isAdmin && '(Admin)'}</p>
             <p className="text-gray-500 dark:text-gray-400 text-xs truncate">{user.uid}</p>
           </div>
-        </div>
+        </motion.div>
       )}
     </>
   )

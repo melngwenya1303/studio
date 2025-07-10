@@ -111,11 +111,22 @@ export default function DashboardPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: i * 0.05 }}
+                            whileHover={{ y: -5 }}
                         >
                             <Image src={creation.url} alt={creation.title || creation.prompt} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end">
-                                <p className="text-white text-sm font-semibold truncate" title={creation.title}>{creation.title || creation.prompt}</p>
-                                <div className="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                <motion.p 
+                                    className="text-white text-sm font-semibold truncate" 
+                                    title={creation.title}
+                                >
+                                    {creation.title || creation.prompt}
+                                </motion.p>
+                                <motion.div 
+                                    className="flex items-center gap-2 mt-2"
+                                    initial={{ opacity: 0 }}
+                                    whileInView={{ opacity: 1 }}
+                                    transition={{ staggerChildren: 0.1 }}
+                                >
                                     <motion.button 
                                         onClick={() => handleRemix(creation)} 
                                         disabled={!!isRemixing}
@@ -138,7 +149,7 @@ export default function DashboardPage() {
                                         {isDescribing === creation.id ? <Icon name="Wand2" className="w-3 h-3 animate-pulse" /> : <Icon name="BookOpen" className="w-3 h-3" />}
                                         Describe
                                     </motion.button>
-                                </div>
+                                </motion.div>
                             </div>
                         </motion.div>
                     ))}
