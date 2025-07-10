@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -18,14 +19,15 @@ import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 
 const Scene = dynamic(() => import('@/components/canvas/Scene').then(mod => mod.Scene), {
-  ssr: false,
-  loading: () => (
-    <div className="flex flex-col items-center justify-center h-full text-primary">
-      <Icon name="Laptop" className="w-16 h-16 animate-pulse" />
-      <p className="mt-4 font-semibold">Loading 3D Preview...</p>
-    </div>
-  )
+    ssr: false,
+    loading: () => (
+        <div className="flex flex-col items-center justify-center h-full text-primary">
+            <Icon name="Laptop" className="w-16 h-16 animate-pulse" />
+            <p className="mt-4 font-semibold">Loading 3D Preview...</p>
+        </div>
+    )
 });
+
 
 export default function DesignStudioPage() {
     const { user, addCreation, remixData, clearRemixData } = useApp();

@@ -1,23 +1,22 @@
+
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { Canvas } from '@react-three/fiber';
 import { OrbitControls, useTexture, Center } from '@react-three/drei';
-import type { Device } from '@/lib/types';
-import { LaptopModel } from './LaptopModel';
-import { PhoneModel } from './PhoneModel';
-import { HeadphonesModel } from './HeadphonesModel';
+import Icon from '@/components/shared/icon';
 
-const models: Record<string, React.ComponentType<{ decalTexture?: any }>> = {
-    Laptop: LaptopModel,
-    Phone: PhoneModel,
-    Headphones: HeadphonesModel,
+const modelPaths: Record<string, React.ComponentType<{ decalTexture?: any }>> = {
+    Laptop: dynamic(() => import('./LaptopModel').then(mod => mod.LaptopModel), { ssr: false }),
+    Phone: dynamic(() => import('./PhoneModel').then(mod => mod.PhoneModel), { ssr: false }),
+    Headphones: dynamic(() => import('./HeadphonesModel').then(mod => mod.HeadphonesModel), { ssr: false }),
 };
 
 function ModelScene({ deviceName, decalUrl }: { deviceName: string, decalUrl:string }) {
     const decalTexture = useTexture(decalUrl);
     decalTexture.flipY = false;
-    const DeviceModel = models[deviceName];
+    const DeviceModel = useMemo(() => modelPaths[deviceName] || null, [deviceName]);
 
     if (!DeviceModel) return null;
 
@@ -37,7 +36,11 @@ function ModelScene({ deviceName, decalUrl }: { deviceName: string, decalUrl:str
 export function Scene({ deviceName, decalUrl }: { deviceName: string, decalUrl: string }) {
     return (
         <Canvas camera={{ position: [0, 0, 2.5], fov: 50 }} dpr={[1, 2]}>
-            <Suspense fallback={null}>
+            <Suspense fallback={
+                <Center>
+                    <Icon name="Laptop" className="w-16 h-16 animate-pulse text-primary" />
+                </Center>
+            }>
                 <ModelScene deviceName={deviceName} decalUrl={decalUrl} />
             </Suspense>
         </Canvas>
