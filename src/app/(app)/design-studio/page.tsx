@@ -18,6 +18,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
+import { Checkbox } from '@/components/ui/checkbox';
+import Link from 'next/link';
 
 export default function DesignStudioPage() {
     const { user, addCreation, remixData, clearRemixData } = useApp();
@@ -32,6 +34,7 @@ export default function DesignStudioPage() {
     const [isGettingFeedback, setIsGettingFeedback] = useState(false);
     const [isTellingStory, setIsTellingStory] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
+    const [policyAccepted, setPolicyAccepted] = useState(false);
     const [modal, setModal] = useState({ isOpen: false, title: '', children: <></> });
     
     // Accessibility States
@@ -304,7 +307,20 @@ export default function DesignStudioPage() {
                 </div>
 
                 <div className="mt-auto pt-4 space-y-3">
-                    <motion.button onClick={() => handleGenerate(prompt)} disabled={isLoading || !prompt.trim()}
+                    <div className="flex items-center space-x-2 mb-3">
+                        <Checkbox id="terms" onCheckedChange={(checked) => setPolicyAccepted(Boolean(checked))} />
+                        <label
+                            htmlFor="terms"
+                            className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                            I have read and agree to the{' '}
+                            <Link href="/privacy-policy" className="underline text-primary" target="_blank">
+                                Privacy Policy
+                            </Link>
+                        </label>
+                    </div>
+
+                    <motion.button onClick={() => handleGenerate(prompt)} disabled={isLoading || !prompt.trim() || !policyAccepted}
                         className="w-full py-3 px-6 rounded-xl font-semibold text-lg text-white transition-all duration-300 bg-gradient-to-r from-primary to-pink-600 hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
                         whileHover={{ y: -2 }} whileTap={{ y: 1 }}>
                         {isLoading ? 'Designing...' : 'Create My Decal'}
