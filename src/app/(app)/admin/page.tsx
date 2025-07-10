@@ -178,7 +178,6 @@ export default function AdminPage() {
                                  <div key={partner.id} className="flex justify-between items-center bg-muted/50 p-2 rounded-lg">
                                     <div>
                                         <p className="font-semibold">{partner.name}</p>
-                                        <p className="font-mono text-xs text-muted-foreground">API Key: ••••••••••••{partner.apiKey.slice(-4)}</p>
                                     </div>
                                     <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => handleDeletePodPartner(partner.id)} aria-label={`Delete ${partner.name}`}>
                                         <Icon name="Trash2" className="w-4 h-4" />
