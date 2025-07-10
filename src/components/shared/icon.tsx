@@ -15,3 +15,5 @@ const Icon: FC<IconProps> = ({ name, ...props }) => {
 };
 
 export default Icon;
+
+    
