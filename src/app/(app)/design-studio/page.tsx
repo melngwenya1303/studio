@@ -404,8 +404,8 @@ export default function DesignStudioPage() {
             </motion.div>
 
             <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="lg:col-span-2 flex items-center justify-center">
-                <Card className="w-full h-full bg-gray-100 dark:bg-gray-900/50 backdrop-blur-sm rounded-2xl p-0 flex items-center justify-center overflow-hidden">
-                    <CardContent className="w-full h-full p-0 relative">
+                <div className="w-full h-full bg-gray-100 dark:bg-gray-900/50 backdrop-blur-sm rounded-2xl flex items-center justify-center overflow-hidden">
+                    <div className="w-full h-full relative">
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center h-full text-primary">
                                 <Icon name="Wand2" className="w-16 h-16 animate-pulse" />
@@ -445,9 +445,11 @@ export default function DesignStudioPage() {
                                 )}
                             </div>
                         )}
-                    </CardContent>
-                </Card>
+                    </div>
+                </div>
             </motion.div>
         </div>
     );
 }
+
+    
