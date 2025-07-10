@@ -19,6 +19,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 import { Skeleton } from '@/components/ui/skeleton';
 
+/*
 const ClientScene = dynamic(() => import('@/components/canvas/ClientScene'), {
     ssr: false,
     loading: () => (
@@ -30,6 +31,7 @@ const ClientScene = dynamic(() => import('@/components/canvas/ClientScene'), {
         </div>
     )
 });
+*/
 
 
 export default function DesignStudioPage() {
@@ -204,12 +206,18 @@ export default function DesignStudioPage() {
                                 <Icon name="Wand2" className="w-16 h-16 animate-pulse" />
                                 <p className="mt-4 font-semibold">AI is creating magic...</p>
                             </div>
+                        ) : generatedDecal ? (
+                            <Image src={generatedDecal.url} alt="Generated Decal" layout="fill" objectFit="contain" />
                         ) : (
-                            <ClientScene deviceName={selectedDevice.name} decalUrl={generatedDecal?.url || 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII='} />
+                            <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                                <Icon name="ImageIcon" className="w-24 h-24" />
+                                <p className="mt-4 font-semibold text-lg">Your generated design will appear here</p>
+                            </div>
                         )}
                     </CardContent>
                 </Card>
             </motion.div>
         </div>
     );
-}
+
+    
