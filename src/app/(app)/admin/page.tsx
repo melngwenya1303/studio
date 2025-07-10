@@ -45,7 +45,7 @@ export default function AdminPage() {
     if (!isAdmin) {
       return (
         <div className="p-8 text-center text-red-500">
-          <h2 className="text-2xl font-bold">Access Denied</h2>
+          <h2 className="text-2xl font-bold font-headline">Access Denied</h2>
           <p>You do not have permission to view this page.</p>
         </div>
       );
@@ -61,7 +61,7 @@ export default function AdminPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Icon name="Trash2" /> Prompt Filter Blocklist</CardTitle>
+                        <CardTitle className="flex items-center gap-2 font-headline"><Icon name="Trash2" /> Prompt Filter Blocklist</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleAddBlockword} className="flex gap-2 mb-4">
@@ -90,7 +90,7 @@ export default function AdminPage() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Icon name="KeyRound" /> POD Partner APIs</CardTitle>
+                        <CardTitle className="flex items-center gap-2 font-headline"><Icon name="KeyRound" /> POD Partner APIs</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <form onSubmit={handleAddPodPartner} className="space-y-3 mb-4">

@@ -59,7 +59,7 @@ export default function LiveSharePage() {
 
                 <Card className="flex-grow">
                     <CardHeader>
-                        <CardTitle>Shared Prompt</CardTitle>
+                        <CardTitle className="font-headline">Shared Prompt</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <Textarea
@@ -86,7 +86,7 @@ export default function LiveSharePage() {
             >
                 <Card className="h-full flex flex-col">
                     <CardHeader>
-                        <CardTitle>Team Chat</CardTitle>
+                        <CardTitle className="font-headline">Team Chat</CardTitle>
                     </CardHeader>
                     <CardContent className="flex-grow flex flex-col gap-4">
                         <div className="flex-grow space-y-4 overflow-y-auto pr-2">

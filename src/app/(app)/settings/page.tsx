@@ -13,7 +13,7 @@ export default function SettingsPage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Coming Soon</CardTitle>
+                    <CardTitle className="font-headline">Coming Soon</CardTitle>
                 </CardHeader>
                 <CardContent>
                     <p>This section is under construction. Check back later for account management features!</p>
