@@ -286,30 +286,34 @@ export default function DesignStudioPage() {
                                         {/* Step 1: Canvas */}
                                         <div className="space-y-4">
                                             <h3 className="text-xl font-semibold font-headline">1. Select Product</h3>
-                                            <Select
-                                                value={selectedDevice.name}
-                                                onValueChange={(value) => {
-                                                    const device = DEVICES.find(d => d.name === value);
-                                                    if (device) handleDeviceSelection(device);
-                                                }}
-                                            >
-                                                <SelectTrigger className="w-full">
-                                                    <SelectValue placeholder="Select a device" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {DEVICES.map(device => (
-                                                        <SelectItem key={device.name} value={device.name}>
-                                                            <div className="flex items-center gap-2">
-                                                                <Icon name={device.icon as any} className="w-4 h-4" />
-                                                                {device.name}
-                                                            </div>
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="device-type">Product Type</Label>
+                                                <Select
+                                                    value={selectedDevice.name}
+                                                    onValueChange={(value) => {
+                                                        const device = DEVICES.find(d => d.name === value);
+                                                        if (device) handleDeviceSelection(device);
+                                                    }}
+                                                >
+                                                    <SelectTrigger id="device-type" className="w-full">
+                                                        <SelectValue placeholder="Select a device" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        {DEVICES.map(device => (
+                                                            <SelectItem key={device.name} value={device.name}>
+                                                                <div className="flex items-center gap-2">
+                                                                    <Icon name={device.icon as any} className="w-4 h-4" />
+                                                                    {device.name}
+                                                                </div>
+                                                            </SelectItem>
+                                                        ))}
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
 
                                             {selectedDevice.models && selectedDevice.models.length > 0 && (
                                                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.3 }} className="space-y-2 overflow-hidden">
+                                                    <Label htmlFor="device-model">Model</Label>
                                                     <Select
                                                         value={selectedModel?.name}
                                                         onValueChange={(value) => {
@@ -337,40 +341,44 @@ export default function DesignStudioPage() {
                                         {/* Step 2: Vision */}
                                         <div className="space-y-4">
                                             <h3 className="text-xl font-semibold font-headline">2. Describe Your Vision</h3>
-                                            <div className="relative">
-                                                <Textarea
-                                                    className="w-full p-4 pr-24 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-base text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
-                                                    placeholder={`A decal for my ${currentCanvas.name}...`}
-                                                    value={prompt}
-                                                    onChange={(e) => setPrompt(e.target.value)}
-                                                    rows={4}
-                                                    disabled={isLoading || isEnhancing || isListening}
-                                                />
-                                                <div className="absolute top-3 right-3 flex items-center gap-1">
-                                                     <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button variant="ghost" size="icon" onClick={handleToggleListening} disabled={isLoading || isEnhancing} className={`text-cyan-600 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}>
-                                                                <Icon name="Mic" className="w-5 h-5" />
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent><p>Speak Your Prompt</p></TooltipContent>
-                                                    </Tooltip>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button variant="ghost" size="icon" onClick={handleTextToSpeech} disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking} className="text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
-                                                                <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent><p>Listen to Prompt</p></TooltipContent>
-                                                    </Tooltip>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button variant="ghost" size="icon" onClick={handleEnhancePrompt} disabled={isLoading || isEnhancing || !prompt.trim()} className="text-primary dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50">
-                                                                <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent><p>Enhance with AI ✨</p></TooltipContent>
-                                                    </Tooltip>
+                                             <div className="space-y-2">
+                                                <Label htmlFor="prompt-input">Prompt</Label>
+                                                <div className="relative">
+                                                    <Textarea
+                                                        id="prompt-input"
+                                                        className="w-full p-4 pr-24 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-base text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+                                                        placeholder={`A decal for my ${currentCanvas.name}...`}
+                                                        value={prompt}
+                                                        onChange={(e) => setPrompt(e.target.value)}
+                                                        rows={4}
+                                                        disabled={isLoading || isEnhancing || isListening}
+                                                    />
+                                                    <div className="absolute top-3 right-3 flex items-center gap-1">
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button variant="ghost" size="icon" onClick={handleToggleListening} disabled={isLoading || isEnhancing} className={`text-cyan-600 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}>
+                                                                    <Icon name="Mic" className="w-5 h-5" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent><p>Speak Your Prompt</p></TooltipContent>
+                                                        </Tooltip>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button variant="ghost" size="icon" onClick={handleTextToSpeech} disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking} className="text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
+                                                                    <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent><p>Listen to Prompt</p></TooltipContent>
+                                                        </Tooltip>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button variant="ghost" size="icon" onClick={handleEnhancePrompt} disabled={isLoading || isEnhancing || !prompt.trim()} className="text-primary dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50">
+                                                                    <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent><p>Enhance with AI ✨</p></TooltipContent>
+                                                        </Tooltip>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -380,35 +388,38 @@ export default function DesignStudioPage() {
                                         {/* Step 3: Style */}
                                         <div className="space-y-4">
                                             <h3 className="text-xl font-semibold font-headline">3. Choose Style</h3>
-                                            <Carousel opts={{ align: "start", loop: true }} className="w-full">
-                                                <CarouselContent className="-ml-2">
-                                                    {STYLES.map((style, index) => (
-                                                        <CarouselItem key={index} className="pl-2 basis-1/2 md:basis-1/3 lg:basis-1/2">
-                                                            <Tooltip>
-                                                                <TooltipTrigger asChild>
-                                                                    <div className="p-1">
-                                                                        <motion.button 
-                                                                            onClick={() => setSelectedStyle(style)}
-                                                                            className={`w-full rounded-lg transition-all duration-200 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'ring-2 ring-primary ring-offset-background ring-offset-2' : ''}`}
-                                                                            disabled={isLoading}
-                                                                            whileHover={{ scale: 1.05 }}
-                                                                            whileTap={{ scale: 0.98 }}
-                                                                        >
-                                                                            <div className="border-0 aspect-video relative">
-                                                                                <Image src={style.image} alt={style.name} fill className="object-cover rounded-md" {...{ 'data-ai-hint': style['data-ai-hint'] }} />
-                                                                                <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors rounded-md" />
-                                                                            </div>
-                                                                        </motion.button>
-                                                                    </div>
-                                                                </TooltipTrigger>
-                                                                <TooltipContent><p>{style.name}</p></TooltipContent>
-                                                            </Tooltip>
-                                                        </CarouselItem>
-                                                    ))}
-                                                </CarouselContent>
-                                                <CarouselPrevious className="hidden sm:flex" />
-                                                <CarouselNext className="hidden sm:flex"/>
-                                            </Carousel>
+                                            <div className="space-y-2">
+                                                <Label>Selected Style: {selectedStyle.name}</Label>
+                                                <Carousel opts={{ align: "start", loop: true }} className="w-full">
+                                                    <CarouselContent className="-ml-2">
+                                                        {STYLES.map((style, index) => (
+                                                            <CarouselItem key={index} className="pl-2 basis-1/2 md:basis-1/3 lg:basis-1/2">
+                                                                <Tooltip>
+                                                                    <TooltipTrigger asChild>
+                                                                        <div className="p-1">
+                                                                            <motion.button 
+                                                                                onClick={() => setSelectedStyle(style)}
+                                                                                className={`w-full rounded-lg transition-all duration-200 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'ring-2 ring-primary ring-offset-background ring-offset-2' : ''}`}
+                                                                                disabled={isLoading}
+                                                                                whileHover={{ scale: 1.05 }}
+                                                                                whileTap={{ scale: 0.98 }}
+                                                                            >
+                                                                                <div className="border-0 aspect-video relative">
+                                                                                    <Image src={style.image} alt={style.name} fill className="object-cover rounded-md" {...{ 'data-ai-hint': style['data-ai-hint'] }} />
+                                                                                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors rounded-md" />
+                                                                                </div>
+                                                                            </motion.button>
+                                                                        </div>
+                                                                    </TooltipTrigger>
+                                                                    <TooltipContent><p>{style.name}</p></TooltipContent>
+                                                                </Tooltip>
+                                                            </CarouselItem>
+                                                        ))}
+                                                    </CarouselContent>
+                                                    <CarouselPrevious className="hidden sm:flex" />
+                                                    <CarouselNext className="hidden sm:flex"/>
+                                                </Carousel>
+                                            </div>
                                         </div>
                                     </div>
                                     
