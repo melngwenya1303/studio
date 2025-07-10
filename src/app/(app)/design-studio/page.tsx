@@ -239,7 +239,7 @@ export default function DesignStudioPage() {
                         </ul>
                     </div>
                 ),
-                size: 'lg'
+                size: 'lg',
             });
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'Could not get AI feedback at this time.' });
@@ -511,5 +511,3 @@ export default function DesignStudioPage() {
         </TooltipProvider>
     );
 }
-
-    
