@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Icon from '@/components/shared/icon';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useApp } from '@/contexts/AppContext';
@@ -15,7 +15,6 @@ const profileUser = {
     avatar: 'https://i.pravatar.cc/150?u=prophet',
     followers: 1234,
     following: 56,
-    creationsCount: 124,
     bio: 'Digital artist exploring the intersection of dreams and code. Turning imagination into tangible surfaces.',
 };
 
@@ -40,7 +39,7 @@ export default function ProfilePage() {
                             <h2 className="text-3xl font-bold">{profileUser.name}</h2>
                             <p className="text-gray-500 dark:text-gray-400 mt-1">{profileUser.bio}</p>
                             <div className="flex justify-center md:justify-start items-center gap-6 mt-4 text-sm">
-                                <div><span className="font-bold">{profileUser.creationsCount}</span> Creations</div>
+                                <div><span className="font-bold">{creations.length}</span> Creations</div>
                                 <div><span className="font-bold">{profileUser.followers}</span> Followers</div>
                                 <div><span className="font-bold">{profileUser.following}</span> Following</div>
                             </div>
