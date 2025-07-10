@@ -428,7 +428,7 @@ export default function DesignStudioPage() {
                                         initial={{ opacity: 0, scale: 0.8 }}
                                         animate={{ opacity: 1, scale: 1 }}
                                         transition={{ duration: 0.5 }}
-                                        style={currentCanvas.decal?.transform ? {
+                                        style={currentCanvas.decal ? {
                                             transform: currentCanvas.decal.transform,
                                             transformOrigin: currentCanvas.decal.transformOrigin,
                                             width: currentCanvas.decal.width,

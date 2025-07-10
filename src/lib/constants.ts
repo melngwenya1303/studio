@@ -5,32 +5,111 @@ export const DEVICES: Device[] = [
         name: 'Laptop', 
         icon: 'Laptop', 
         models: [
-            { name: 'MacBook Air 13"', previewImage: 'https://placehold.co/800x500.png', 'data-ai-hint': 'laptop', previewWidth: 500, previewHeight: 300, decalWidth: 200, decalHeight: 120 },
-            { name: 'Surface Pro 15"', previewImage: 'https://placehold.co/800x500.png', 'data-ai-hint': 'laptop', previewWidth: 500, previewHeight: 300, decalWidth: 250, decalHeight: 150 },
-            { name: 'Dell XPS 16"', previewImage: 'https://placehold.co/800x500.png', 'data-ai-hint': 'laptop', previewWidth: 500, previewHeight: 300, decalWidth: 280, decalHeight: 170 },
+            { 
+                name: 'MacBook Air 13"', 
+                previewImage: 'https://placehold.co/800x600.png', 
+                'data-ai-hint': 'laptop back', 
+                previewWidth: 500, 
+                previewHeight: 375, 
+                decal: {
+                    transform: 'perspective(1000px) rotateX(25deg) scale(0.8)',
+                    transformOrigin: 'center center',
+                    width: '60%',
+                    height: '60%',
+                }
+            },
+            { 
+                name: 'Surface Pro 15"', 
+                previewImage: 'https://placehold.co/800x600.png', 
+                'data-ai-hint': 'laptop back', 
+                previewWidth: 500, 
+                previewHeight: 375, 
+                decal: {
+                    transform: 'perspective(1000px) rotateX(25deg) scale(0.8)',
+                    transformOrigin: 'center center',
+                    width: '60%',
+                    height: '60%',
+                }
+            },
+            { 
+                name: 'Dell XPS 16"', 
+                previewImage: 'https://placehold.co/800x600.png', 
+                'data-ai-hint': 'laptop back', 
+                previewWidth: 500, 
+                previewHeight: 375, 
+                decal: {
+                    transform: 'perspective(1000px) rotateX(25deg) scale(0.8)',
+                    transformOrigin: 'center center',
+                    width: '60%',
+                    height: '60%',
+                }
+            },
         ],
-        // Default values, can be removed if models are always present
-        previewImage: 'https://placehold.co/800x500.png',
-        'data-ai-hint': 'laptop', 
+        previewImage: 'https://placehold.co/800x600.png',
+        'data-ai-hint': 'laptop back', 
         previewWidth: 500, 
-        previewHeight: 300, 
-        decalWidth: 250, 
-        decalHeight: 150
+        previewHeight: 375,
+        decal: {
+            transform: 'perspective(1000px) rotateX(25deg) scale(0.8)',
+            transformOrigin: 'center center',
+            width: '60%',
+            height: '60%',
+        }
     },
     { 
         name: 'Phone', 
         icon: 'Smartphone', 
         models: [
-            { name: 'iPhone 15 Pro', previewImage: 'https://placehold.co/400x800.png', 'data-ai-hint': 'phone', previewWidth: 200, previewHeight: 400, decalWidth: 140, decalHeight: 280 },
-            { name: 'Pixel 8 Pro', previewImage: 'https://placehold.co/400x800.png', 'data-ai-hint': 'phone', previewWidth: 200, previewHeight: 400, decalWidth: 150, decalHeight: 300 },
-            { name: 'Galaxy S24', previewImage: 'https://placehold.co/400x800.png', 'data-ai-hint': 'phone', previewWidth: 200, previewHeight: 400, decalWidth: 145, decalHeight: 290 },
+            { 
+                name: 'iPhone 15 Pro', 
+                previewImage: 'https://placehold.co/400x800.png', 
+                'data-ai-hint': 'phone back', 
+                previewWidth: 200, 
+                previewHeight: 400, 
+                decal: {
+                    transform: 'scale(0.8)',
+                    transformOrigin: 'center center',
+                    width: '90%',
+                    height: '90%',
+                }
+            },
+            { 
+                name: 'Pixel 8 Pro', 
+                previewImage: 'https://placehold.co/400x800.png', 
+                'data-ai-hint': 'phone back', 
+                previewWidth: 200, 
+                previewHeight: 400, 
+                decal: {
+                    transform: 'scale(0.8)',
+                    transformOrigin: 'center center',
+                    width: '90%',
+                    height: '90%',
+                }
+            },
+            { 
+                name: 'Galaxy S24', 
+                previewImage: 'https://placehold.co/400x800.png', 
+                'data-ai-hint': 'phone back', 
+                previewWidth: 200, 
+                previewHeight: 400, 
+                decal: {
+                    transform: 'scale(0.8)',
+                    transformOrigin: 'center center',
+                    width: '90%',
+                    height: '90%',
+                }
+            },
         ],
         previewImage: 'https://placehold.co/400x800.png', 
-        'data-ai-hint': 'phone', 
+        'data-ai-hint': 'phone back', 
         previewWidth: 200, 
         previewHeight: 400, 
-        decalWidth: 150, 
-        decalHeight: 300 
+        decal: {
+            transform: 'scale(0.8)',
+            transformOrigin: 'center center',
+            width: '90%',
+            height: '90%',
+        }
     },
     { 
         name: 'Tablet', 
@@ -39,49 +118,53 @@ export const DEVICES: Device[] = [
             { 
                 name: 'iPad Air', 
                 previewImage: 'https://placehold.co/600x800.png', 
-                'data-ai-hint': 'tablet computer', 
+                'data-ai-hint': 'tablet back', 
                 previewWidth: 300, 
                 previewHeight: 400, 
                 decal: {
-                    transform: 'perspective(400px) rotateX(2deg) rotateY(-3.5deg) rotateZ(0.2deg) translateX(0px) translateY(0px)',
+                    transform: 'scale(0.85)',
                     transformOrigin: 'center center',
-                    width: '78.5%',
-                    height: '84.5%',
+                    width: '90%',
+                    height: '90%',
                 }
             },
             { 
                 name: 'Galaxy Tab S9', 
                 previewImage: 'https://placehold.co/600x800.png', 
-                'data-ai-hint': 'tablet computer', 
+                'data-ai-hint': 'tablet back', 
                 previewWidth: 300, 
                 previewHeight: 400, 
                 decal: {
-                    transform: 'perspective(400px) rotateX(2deg) rotateY(-3.5deg) rotateZ(0.2deg) translateX(0px) translateY(0px)',
+                    transform: 'scale(0.85)',
                     transformOrigin: 'center center',
-                    width: '78.5%',
-                    height: '84.5%',
+                    width: '90%',
+                    height: '90%',
                 }
             },
             { 
                 name: 'Surface Go', 
                 previewImage: 'https://placehold.co/600x800.png', 
-                'data-ai-hint': 'tablet computer', 
+                'data-ai-hint': 'tablet back', 
                 previewWidth: 300, 
                 previewHeight: 400, 
                 decal: {
-                    transform: 'perspective(400px) rotateX(2deg) rotateY(-3.5deg) rotateZ(0.2deg) translateX(0px) translateY(0px)',
+                    transform: 'scale(0.85)',
                     transformOrigin: 'center center',
-                    width: '78.5%',
-                    height: '84.5%',
+                    width: '90%',
+                    height: '90%',
                 }
             },
         ],
         previewImage: 'https://placehold.co/600x800.png', 
-        'data-ai-hint': 'tablet computer', 
+        'data-ai-hint': 'tablet back', 
         previewWidth: 300, 
         previewHeight: 400, 
-        decalWidth: 220, 
-        decalHeight: 350 
+        decal: {
+            transform: 'scale(0.85)',
+            transformOrigin: 'center center',
+            width: '90%',
+            height: '90%',
+        }
     },
 ];
 
