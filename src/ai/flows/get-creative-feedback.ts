@@ -1,7 +1,7 @@
 'use server';
 
 /**
- * @fileOverview An AI agent that provides creative feedback on a design prompt.
+ * @fileOverview An AI agent that provides creative feedback and prompt editing suggestions.
  *
  * - getCreativeFeedback - A function that returns feedback for a given prompt.
  * - GetCreativeFeedbackInput - The input type for the getCreativeFeedback function.
@@ -17,7 +17,9 @@ const GetCreativeFeedbackInputSchema = z.object({
 export type GetCreativeFeedbackInput = z.infer<typeof GetCreativeFeedbackInputSchema>;
 
 const GetCreativeFeedbackOutputSchema = z.object({
-  feedback: z.string().describe('The AI-generated creative feedback and suggestions.'),
+  suggestions: z
+    .array(z.string())
+    .describe('An array of 3 distinct, actionable suggestions to edit or enhance the prompt.'),
 });
 export type GetCreativeFeedbackOutput = z.infer<typeof GetCreativeFeedbackOutputSchema>;
 
@@ -29,13 +31,13 @@ const prompt = ai.definePrompt({
   name: 'getCreativeFeedbackPrompt',
   input: {schema: GetCreativeFeedbackInputSchema},
   output: {schema: GetCreativeFeedbackOutputSchema},
-  prompt: `You are an AI Creative Coach and expert art director. A user has created an image based on the following prompt:
+  prompt: `You are an AI Prompt Editor. A user has created an image based on the following prompt:
 
 "{{{prompt}}}"
 
-Analyze this prompt and provide constructive, inspiring, and actionable feedback. Your goal is to help the user explore new creative directions. Offer 2-3 specific suggestions. For example, suggest different subjects, compositions, color palettes, artistic styles, or moods. Keep the feedback concise and encouraging.
+Your goal is to help the user iterate and refine their idea. Provide 3 specific, creative, and actionable suggestions for how they could edit this prompt. The suggestions should be short, complete phrases that could be used as a new prompt. For example, if the prompt is "a cat", you might suggest "a cat wearing a tiny hat" or "a cyberpunk cat in a neon-lit alley".
 
-Return only the feedback text.`,
+Return only the suggestions.`,
 });
 
 const getCreativeFeedbackFlow = ai.defineFlow(
@@ -46,6 +48,9 @@ const getCreativeFeedbackFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output) {
+      throw new Error('The AI failed to generate any suggestions.');
+    }
+    return output;
   }
 );

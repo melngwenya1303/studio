@@ -124,8 +124,22 @@ export default function DesignStudioPage() {
             const result = await getCreativeFeedback({ prompt: generatedDecal.prompt });
             setModal({
                 isOpen: true,
-                title: 'AI Creative Coach',
-                children: <p>{result.feedback}</p>,
+                title: 'AI Prompt Editor',
+                children: (
+                    <div className="space-y-4">
+                        <p>Our AI coach has some ideas to refine your prompt. Click one to try it out!</p>
+                        <ul className="space-y-3">
+                            {result.suggestions.map((p, i) => (
+                                <li key={i} onClick={() => {
+                                  setPrompt(p);
+                                  setModal(prev => ({...prev, isOpen: false}));
+                                }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+                                    <p className="font-mono text-sm">"{p}"</p>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                ),
                 size: 'lg'
             });
         } catch (error) {
@@ -228,7 +242,7 @@ export default function DesignStudioPage() {
                         <div className="grid grid-cols-2 gap-3">
                             <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
                                 {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
-                                AI Coach ✨
+                                Edit with AI ✨
                             </Button>
                              <Button variant="outline" onClick={handleTellStory} disabled={isTellingStory} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
                                 {isTellingStory ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="BookOpen" />}
