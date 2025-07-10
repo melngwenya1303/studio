@@ -200,6 +200,7 @@ export default function DesignStudioPage() {
       setModal({
         isOpen: true,
         title: "Finalizing Your Design ✨",
+        size: 'md',
         children: (
           <div>
             <p className="mb-4">Our system is now preparing your masterpiece for printing and shipping!</p>
@@ -211,7 +212,6 @@ export default function DesignStudioPage() {
             <p className="mt-4 font-semibold">Your unique SurfaceStory is ready for the real world!</p>
           </div>
         ),
-        size: 'md',
       });
     };
 
@@ -223,6 +223,7 @@ export default function DesignStudioPage() {
             setModal({
                 isOpen: true,
                 title: 'AI Prompt Editor',
+                size: 'lg',
                 children: (
                     <div className="space-y-4">
                         <p>Our AI coach has some ideas to refine your prompt. Click one to try it out!</p>
@@ -239,7 +240,6 @@ export default function DesignStudioPage() {
                         </ul>
                     </div>
                 ),
-                size: 'lg',
             });
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'Could not get AI feedback at this time.' });
@@ -256,8 +256,8 @@ export default function DesignStudioPage() {
             setModal({
                 isOpen: true,
                 title: 'A Creation\'s Story',
-                children: <p className="leading-relaxed">{result.story}</p>,
-                size: 'lg'
+                size: 'lg',
+                children: <p className="leading-relaxed">{result.story}</p>
             });
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'Could not generate a story at this time.' });

@@ -38,7 +38,7 @@ const SidebarContent = () => {
         >
           <Icon name="Wand2" className="w-6 h-6 text-white" />
         </motion.div>
-        <h1 className="text-2xl font-bold font-headline text-gray-800 dark:text-white">SkinGen</h1>
+        <h1 className="text-2xl font-bold text-gray-800 dark:text-white">SkinGen</h1>
       </div>
       <nav className="flex-grow">
         <ul>
