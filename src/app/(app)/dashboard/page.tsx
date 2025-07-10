@@ -122,33 +122,27 @@ export default function DashboardPage() {
                                     {creation.title || creation.prompt}
                                 </motion.p>
                                 <motion.div 
-                                    className="flex items-center gap-2 mt-2"
-                                    initial={{ opacity: 0 }}
-                                    whileInView={{ opacity: 1 }}
-                                    transition={{ staggerChildren: 0.1 }}
+                                    className="flex items-center gap-2 mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+                                    initial={{ y: 10 }}
+                                    animate={{ y: 0 }}
+                                    transition={{ staggerChildren: 0.1, delay: 0.1 }}
                                 >
-                                    <motion.button 
+                                    <Button
                                         onClick={() => handleRemix(creation)} 
                                         disabled={!!isRemixing}
                                         className="px-3 py-1.5 bg-white/20 text-white text-xs font-semibold rounded-full backdrop-blur-md hover:bg-white/30 transition-all flex items-center gap-1 disabled:opacity-50"
-                                        initial={{ y: 10, opacity: 0 }}
-                                        animate={{ y: 0, opacity: 1 }}
-                                        transition={{ delay: 0.1 }}
                                     >
                                         {isRemixing === creation.id ? <Icon name="Wand2" className="w-3 h-3 animate-pulse" /> : <Icon name="Sparkles" className="w-3 h-3" />}
                                         Remix
-                                    </motion.button>
-                                    <motion.button 
+                                    </Button>
+                                    <Button
                                         onClick={() => handleDescribe(creation)}
                                         disabled={!!isDescribing}
                                         className="px-3 py-1.5 bg-white/20 text-white text-xs font-semibold rounded-full backdrop-blur-md hover:bg-white/30 transition-all flex items-center gap-1 disabled:opacity-50"
-                                        initial={{ y: 10, opacity: 0 }}
-                                        animate={{ y: 0, opacity: 1 }}
-                                        transition={{ delay: 0.2 }}
                                     >
                                         {isDescribing === creation.id ? <Icon name="Wand2" className="w-3 h-3 animate-pulse" /> : <Icon name="BookOpen" className="w-3 h-3" />}
                                         Describe
-                                    </motion.button>
+                                    </Button>
                                 </motion.div>
                             </div>
                         </motion.div>
