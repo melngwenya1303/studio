@@ -1,9 +1,9 @@
 import type { Device, Style, GalleryItem } from './types';
 
 export const DEVICES: Omit<Device, 'model'>[] = [
-    { name: 'Laptop', icon: 'Laptop' },
-    { name: 'Phone', icon: 'Smartphone' },
-    { name: 'Headphones', icon: 'Headphones' },
+    { name: 'Laptop', icon: 'Laptop', previewImage: 'https://placehold.co/800x500.png', 'data-ai-hint': 'laptop', previewWidth: 500, previewHeight: 300, decalWidth: 250, decalHeight: 150 },
+    { name: 'Phone', icon: 'Smartphone', previewImage: 'https://placehold.co/400x800.png', 'data-ai-hint': 'phone', previewWidth: 200, previewHeight: 400, decalWidth: 150, decalHeight: 300 },
+    { name: 'Headphones', icon: 'Headphones', previewImage: 'https://placehold.co/600x600.png', 'data-ai-hint': 'headphones', previewWidth: 400, previewHeight: 400, decalWidth: 150, decalHeight: 150 },
 ];
 
 export const STYLES: Style[] = [

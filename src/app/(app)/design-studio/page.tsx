@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef, Suspense } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from "@/hooks/use-toast";
@@ -22,12 +22,6 @@ import Image from 'next/image';
 import { Checkbox } from '@/components/ui/checkbox';
 import Link from 'next/link';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
-import dynamic from 'next/dynamic';
-
-const ClientScene = dynamic(() => import('@/components/canvas/ClientScene'), {
-    ssr: false,
-    loading: () => <div className="flex items-center justify-center h-full"><Icon name="Laptop" className="w-16 h-16 animate-pulse text-primary" /></div>
-});
 
 export default function DesignStudioPage() {
     const { user, addCreation, remixData, clearRemixData } = useApp();
@@ -370,14 +364,39 @@ export default function DesignStudioPage() {
 
             <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.7, delay: 0.2 }} className="lg:col-span-2 flex items-center justify-center">
                 <Card className="w-full h-full bg-gray-100 dark:bg-gray-900/50 backdrop-blur-sm rounded-2xl p-2 md:p-6 flex items-center justify-center overflow-hidden">
-                    <CardContent className="w-full h-full p-0">
+                    <CardContent className="w-full h-full p-0 relative">
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center h-full text-primary">
                                 <Icon name="Wand2" className="w-16 h-16 animate-pulse" />
                                 <p className="mt-4 font-semibold">AI is creating magic...</p>
                             </div>
                         ) : (
-                             <ClientScene deviceName={selectedDevice.name} decalUrl={generatedDecal?.url || '/placeholder.png'} />
+                            <div className="relative w-full h-full flex items-center justify-center">
+                                <Image
+                                    src={selectedDevice.previewImage}
+                                    alt={`${selectedDevice.name} preview`}
+                                    width={selectedDevice.previewWidth}
+                                    height={selectedDevice.previewHeight}
+                                    className="object-contain"
+                                    data-ai-hint={selectedDevice['data-ai-hint']}
+                                />
+                                {generatedDecal && (
+                                    <motion.div
+                                        className="absolute"
+                                        initial={{ opacity: 0, scale: 0.8 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ duration: 0.5 }}
+                                    >
+                                        <Image
+                                            src={generatedDecal.url}
+                                            alt="Generated Decal"
+                                            width={selectedDevice.decalWidth}
+                                            height={selectedDevice.decalHeight}
+                                            className="object-contain"
+                                        />
+                                    </motion.div>
+                                )}
+                            </div>
                         )}
                     </CardContent>
                 </Card>

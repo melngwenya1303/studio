@@ -3,7 +3,12 @@ import type { ComponentType } from 'react';
 export type Device = {
   name: string;
   icon: string;
-  model: ComponentType<{ decalTexture?: any }>;
+  previewImage: string;
+  previewWidth: number;
+  previewHeight: number;
+  decalWidth: number;
+  decalHeight: number;
+  'data-ai-hint': string;
 };
 
 export type Style = {
