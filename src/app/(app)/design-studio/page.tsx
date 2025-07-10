@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from "@/hooks/use-toast";
@@ -13,9 +14,19 @@ import Icon from '@/components/shared/icon';
 import Modal from '@/components/shared/modal';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Scene } from '@/components/canvas/Scene';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
+
+const Scene = dynamic(() => import('@/components/canvas/Scene').then(mod => mod.Scene), { 
+    ssr: false,
+    loading: () => (
+        <div className="flex flex-col items-center justify-center h-full text-primary">
+            <Icon name="Laptop" className="w-16 h-16 animate-pulse" />
+            <p className="mt-4 font-semibold">Loading 3D Preview...</p>
+        </div>
+    )
+});
+
 
 export default function DesignStudioPage() {
     const { user, addCreation, remixData, clearRemixData } = useApp();
