@@ -33,7 +33,7 @@ function ModelScene({ deviceName, decalUrl }: { deviceName: string, decalUrl:str
     );
 }
 
-export function Scene({ deviceName, decalUrl }: { deviceName: string, decalUrl: string }) {
+export default function Scene({ deviceName, decalUrl }: { deviceName: string, decalUrl: string }) {
     return (
         <Canvas camera={{ position: [0, 0, 2.5], fov: 50 }} dpr={[1, 2]}>
             <Suspense fallback={

@@ -18,7 +18,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent } from '@/components/ui/card';
 import Image from 'next/image';
 
-const Scene = dynamic(() => import('@/components/canvas/Scene').then(mod => mod.Scene), {
+const Scene = dynamic(() => import('@/components/canvas/Scene'), {
     ssr: false,
     loading: () => (
         <div className="flex flex-col items-center justify-center h-full text-primary">
