@@ -81,8 +81,3 @@ export default function ProfilePage() {
         </div>
     );
 }
-
-// Adding UserPlus icon to the icon component
-// Note: This would normally require a change in icon.tsx, but I'm showing how to do it conceptually if it were missing.
-// For now, I'll assume UserPlus exists or I'll add it.
-// I see UserPlus is not in my icon list. I'll add it.
