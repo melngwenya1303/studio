@@ -261,7 +261,7 @@ export default function DesignStudioPage() {
                 </Modal>
                 <audio ref={audioRef} className="hidden" />
 
-                {/* Left Column: Controls */}
+                {/* Left Column: Palette / Controls */}
                 <motion.div 
                     initial={{ x: -50, opacity: 0 }} 
                     animate={{ x: 0, opacity: 1 }} 
@@ -382,10 +382,12 @@ export default function DesignStudioPage() {
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
                                                     <div className="p-1">
-                                                        <button 
+                                                        <motion.button 
                                                             onClick={() => setSelectedStyle(style)}
                                                             className={`w-full rounded-lg transition-all duration-200 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'ring-2 ring-primary ring-offset-background ring-offset-2' : ''}`}
                                                             disabled={isLoading}
+                                                            whileHover={{ scale: 1.05 }}
+                                                            whileTap={{ scale: 0.98 }}
                                                         >
                                                             <Card className="border-0">
                                                                 <CardContent className="p-0 aspect-video relative">
@@ -393,7 +395,7 @@ export default function DesignStudioPage() {
                                                                     <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors" />
                                                                 </CardContent>
                                                             </Card>
-                                                        </button>
+                                                        </motion.button>
                                                     </div>
                                                 </TooltipTrigger>
                                                 <TooltipContent><p>{style.name}</p></TooltipContent>
@@ -513,3 +515,5 @@ export default function DesignStudioPage() {
         </TooltipProvider>
     );
 }
+
+    
