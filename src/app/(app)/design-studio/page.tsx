@@ -293,18 +293,21 @@ export default function DesignStudioPage() {
                         <Step stepNumber={1} title="Choose your canvas" />
                     </CardHeader>
                     <CardContent className="space-y-4">
-                        <div className="grid grid-cols-3 gap-3">
+                        <div className="grid grid-cols-1 gap-4">
                             {DEVICES.map(device => (
                                 <motion.button key={device.name} onClick={() => handleDeviceSelection(device)}
-                                    className={`flex flex-col items-center justify-center p-4 rounded-lg transition-all duration-200 border-2 ${selectedDevice.name === device.name ? 'bg-primary text-primary-foreground border-primary' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border-transparent'}`}
-                                    whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
-                                    <Icon name={device.icon as any} className="w-8 h-8 mb-1" />
-                                    <span className="text-sm font-medium">{device.name}</span>
+                                    className={`flex items-center text-left w-full p-4 rounded-lg transition-all duration-200 border-2 ${selectedDevice.name === device.name ? 'bg-primary/10 text-primary border-primary' : 'bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 dark:hover:bg-gray-700 border-transparent'}`}
+                                    whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+                                    <Icon name={device.icon as any} className="w-10 h-10 mr-4" />
+                                    <div>
+                                        <p className="text-base font-semibold text-gray-800 dark:text-white">{device.name}</p>
+                                        <p className="text-sm text-gray-500 dark:text-gray-400">{device.description}</p>
+                                    </div>
                                 </motion.button>
                             ))}
                         </div>
                         {selectedDevice.models && selectedDevice.models.length > 0 && (
-                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.3 }} className="space-y-2 overflow-hidden">
+                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.3 }} className="space-y-2 overflow-hidden pt-4">
                                 <Label htmlFor="device-model" className="text-base font-semibold text-gray-700 dark:text-gray-200 block">Select a model</Label>
                                 <Select
                                     value={selectedModel?.name}
@@ -336,7 +339,7 @@ export default function DesignStudioPage() {
                     <CardContent>
                         <div className="relative">
                             <Textarea
-                                className="w-full p-4 pr-24 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+                                className="w-full p-4 pr-4 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
                                 placeholder={`A decal for my ${currentCanvas.name}... e.g., 'a serene koi pond'`}
                                 value={prompt}
                                 onChange={(e) => setPrompt(e.target.value)}

@@ -21,6 +21,7 @@ export type DeviceModel = {
 export type Device = {
   name: string;
   icon: string;
+  description: string;
   previewImage: string;
   previewWidth: number;
   previewHeight: number;

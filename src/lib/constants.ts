@@ -4,6 +4,7 @@ export const DEVICES: Device[] = [
     { 
         name: 'Laptop', 
         icon: 'Laptop', 
+        description: 'Skins for your mobile workstation.',
         models: [
             { 
                 name: 'MacBook Air 13"', 
@@ -59,6 +60,7 @@ export const DEVICES: Device[] = [
     { 
         name: 'Phone', 
         icon: 'Smartphone', 
+        description: 'Personalize your pocket companion.',
         models: [
             { 
                 name: 'iPhone 15 Pro', 
@@ -114,6 +116,7 @@ export const DEVICES: Device[] = [
     { 
         name: 'Tablet', 
         icon: 'Tablet', 
+        description: 'Decals for your digital canvas.',
         models: [
             { 
                 name: 'iPad Air', 
