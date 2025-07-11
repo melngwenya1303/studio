@@ -45,11 +45,11 @@ export default function DesignStudioPage() {
         >
             <div className="mb-8">
                 <motion.div
-                    className="w-24 h-24 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-2xl mx-auto mb-6"
-                    animate={{ rotate: [0, 15, -10, 0] }}
-                    transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
+                    className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4"
+                    animate={{ rotate: [0, 10, -5, 0] }}
+                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                 >
-                    <Icon name="Wand2" className="w-12 h-12 text-white" />
+                    <Icon name="Wand2" className="w-8 h-8 text-white" />
                 </motion.div>
                 <h1 className="text-h1 font-headline mb-2">Start Your Creation</h1>
                 <p className="text-muted-foreground max-w-md mx-auto text-body">

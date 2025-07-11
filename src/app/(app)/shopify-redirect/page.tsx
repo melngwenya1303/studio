@@ -5,6 +5,7 @@ import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Icon from '@/components/shared/icon';
 import { useApp } from '@/contexts/AppContext';
+import { motion } from 'framer-motion';
 
 export default function ShopifyRedirectPage() {
     const router = useRouter();
@@ -27,7 +28,12 @@ export default function ShopifyRedirectPage() {
     return (
         <div className="flex flex-col items-center justify-center h-full text-center p-8 bg-background">
             <div className="flex items-center gap-4 mb-6">
-                <Icon name="Wand2" className="w-12 h-12 text-primary" />
+                <motion.div
+                    className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center shadow-lg"
+                    whileHover={{ scale: 1.1, rotate: 10 }}
+                    >
+                    <Icon name="Wand2" className="w-7 h-7 text-white" />
+                </motion.div>
                 <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-gray-400">
                     <path d="M4 12H20M20 12L14 6M20 12L14 18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
@@ -60,4 +66,3 @@ export default function ShopifyRedirectPage() {
         </div>
     );
 }
-

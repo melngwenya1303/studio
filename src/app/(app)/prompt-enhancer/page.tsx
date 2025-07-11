@@ -64,7 +64,7 @@ export default function PromptEnhancerPage() {
                             animate={{ rotate: [0, 10, -5, 0] }}
                             transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                         >
-                            <Icon name="Sparkles" className="w-8 h-8 text-white" />
+                            <Icon name="Wand2" className="w-8 h-8 text-white" />
                         </motion.div>
                         <CardTitle>AI Prompt Enhancer</CardTitle>
                         <CardDescription>Turn a simple idea into a rich, descriptive prompt for better creations.</CardDescription>
