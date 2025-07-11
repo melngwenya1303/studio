@@ -12,6 +12,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import Icon from '@/components/shared/icon';
 import { useToast } from '@/hooks/use-toast';
+import { motion } from 'framer-motion';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -63,9 +64,20 @@ export default function LoginPage() {
     <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-background">
       <Card className="w-full max-w-md mx-4">
         <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4">
-              <Icon name="Wand2" className="w-8 h-8 text-white" />
-            </div>
+            <motion.div 
+              className="flex items-center justify-center space-x-3 mb-4"
+              initial={{ opacity: 0, y: -20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+            >
+              <motion.div
+                className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg"
+                whileHover={{ scale: 1.1, rotate: 10 }}
+              >
+                <Icon name="Wand2" className="w-7 h-7 text-white" />
+              </motion.div>
+              <h1 className="text-3xl font-bold font-headline text-foreground">SurfaceStory</h1>
+            </motion.div>
           <CardTitle>{isSignUp ? 'Create an Account' : 'Welcome Back'}</CardTitle>
           <CardDescription>
             {isSignUp ? 'Join to start creating your unique designs.' : 'Sign in to access your creations.'}
@@ -104,7 +116,7 @@ export default function LoginPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">Or continue with</span>
+              <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
             </div>
           </div>
           <Button variant="outline" className="w-full" onClick={handleGoogleSignIn}>
