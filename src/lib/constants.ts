@@ -165,11 +165,11 @@ export const DEVICES: Device[] = [
 ];
 
 export const STYLES: Style[] = [
-    { name: 'Photorealistic', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'realistic woman' },
+    { name: 'Photorealistic', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'photorealistic woman' },
     { name: 'Anime', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'anime character' },
     { name: 'Cyberpunk', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'cyberpunk city' },
-    { name: 'Dark Academia', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'library book' },
-    { name: 'Cottagecore', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'cottage garden' },
+    { name: 'Dark Academia', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'dark library' },
+    { name: 'Cottagecore', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'cozy cottage' },
     { name: 'Fantasy Art', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'fantasy landscape' },
 ];
 
