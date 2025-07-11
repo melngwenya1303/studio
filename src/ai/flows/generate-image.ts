@@ -11,6 +11,8 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { getFirestore, collection, getDocs } from "firebase/firestore";
+import { firebaseApp } from '@/lib/firebase';
 
 const GenerateImageInputSchema = z.object({
   prompt: z.string().describe('The prompt to use to generate the decal image.'),
@@ -26,15 +28,11 @@ const GenerateImageOutputSchema = z.object({
 });
 export type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
 
-// In a real app, this would come from a database or a managed configuration.
-const PROHIBITED_WORDS = [
-    'disney', 'marvel', 'badword1', 'badword2', 'unwanted',
-];
-
+// This tool now fetches the blocklist dynamically from Firestore.
 const checkForProhibitedContent = ai.defineTool(
     {
         name: 'checkForProhibitedContent',
-        description: 'Checks if the user prompt contains any prohibited words.',
+        description: 'Checks if the user prompt contains any prohibited words by querying the Firestore blocklist.',
         inputSchema: z.object({ prompt: z.string() }),
         outputSchema: z.object({
             is_prohibited: z.boolean(),
@@ -42,8 +40,14 @@ const checkForProhibitedContent = ai.defineTool(
         }),
     },
     async (input) => {
-        const words = input.prompt.toLowerCase().split(/\s+/);
-        const matched = PROHIBITED_WORDS.filter(prohibited => words.includes(prohibited));
+        const db = getFirestore(firebaseApp);
+        const blocklistCol = collection(db, 'blocklist');
+        const blocklistSnapshot = await getDocs(blocklistCol);
+        const prohibitedWords = blocklistSnapshot.docs.map(doc => doc.data().word.toLowerCase());
+
+        const wordsInPrompt = input.prompt.toLowerCase().split(/\s+/);
+        const matched = prohibitedWords.filter(prohibited => wordsInPrompt.includes(prohibited));
+        
         return {
             is_prohibited: matched.length > 0,
             matched_words: matched,
@@ -122,14 +126,12 @@ const generateImageFlow = ai.defineFlow(
        throw new Error('The AI failed to generate an image. This can happen with unusual prompts or if the content violates safety policies. Please try again with a different idea.');
     }
     
-    // After generating the main image, check if a mockup is requested.
     let mockupMediaUrl: string | undefined = undefined;
     if (input.mockupPrompt && media.url) {
         try {
             mockupMediaUrl = await generateMockupImage({ baseImageUrl: media.url, mockupPrompt: input.mockupPrompt });
         } catch (e) {
             console.warn("Could not generate mockup image.", e);
-            // Non-fatal, we can proceed without the mockup.
         }
     }
 

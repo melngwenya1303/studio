@@ -1,6 +1,8 @@
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import { getFirestore, collection, doc, addDoc, getDocs, deleteDoc, setDoc } from 'firebase/firestore';
+import { firebaseApp } from '@/lib/firebase';
 import Icon from '@/components/shared/icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,31 +38,17 @@ const mockOrders = [
   { id: 'SS-1021', customer: 'VectorVixen', date: '2023-10-24', status: 'Delivered', total: '$34.98', items: 1 },
 ];
 
-const initialUsers = [
-    { id: 'usr_1', name: 'PixelProphet', email: 'prophet@surfacestory.com', role: 'Admin', status: 'Active', creations: 124, avatar: `https://i.pravatar.cc/40?u=prophet` },
-    { id: 'usr_2', name: 'ArtfulAntics', email: 'antics@surfacestory.com', role: 'User', status: 'Active', creations: 98, avatar: `https://i.pravatar.cc/40?u=antics` },
-    { id: 'usr_3', name: 'VectorVixen', email: 'vixen@surfacestory.com', role: 'User', status: 'Suspended', creations: 150, avatar: `https://i.pravatar.cc/40?u=vixen` },
-    { id: 'usr_4', name: 'DesignDroid', email: 'droid@surfacestory.com', role: 'User', status: 'Active', creations: 80, avatar: `https://i.pravatar.cc/40?u=droid` },
-    { id: 'usr_5', name: 'StaticSpark', email: 'spark@surfacestory.com', role: 'User', status: 'Active', creations: 110, avatar: `https://i.pravatar.cc/40?u=spark` },
-]
-
 export default function AdminPage() {
-    const { isAdmin } = useApp();
+    const { isAdmin, user } = useApp();
     const { toast } = useToast();
+    const db = getFirestore(firebaseApp);
     
-    // Blocklist state
-    const [blocklist, setBlocklist] = useState([
-        { word: 'disney', category: 'Copyright Infringement' },
-        { word: 'marvel', category: 'Copyright Infringement' },
-        { word: 'badword1', category: 'Offensive Content' },
-        { word: 'badword2', category: 'Hate Speech' },
-        { word: 'unwanted', category: 'General' },
-    ]);
+    const [blocklist, setBlocklist] = useState<{ id: string, word: string, category: string }[]>([]);
     const [newBlockword, setNewBlockword] = useState('');
     const [newBlockwordCategory, setNewBlockwordCategory] = useState(BLOCKLIST_CATEGORIES[4]);
     const [bulkWords, setBulkWords] = useState('');
     const [blocklistSearchTerm, setBlocklistSearchTerm] = useState('');
-    const [wordToDelete, setWordToDelete] = useState<string | null>(null);
+    const [wordToDelete, setWordToDelete] = useState<{ id: string, word: string } | null>(null);
     const [categoryFilter, setCategoryFilter] = useState('All');
     
     // POD Partner State
@@ -75,45 +63,97 @@ export default function AdminPage() {
     const [newlyAddedPartner, setNewlyAddedPartner] = useState<{id: string, name: string, apiKey: string} | null>(null);
 
     // User Management State
-    const [users, setUsers] = useState(initialUsers);
+    const [users, setUsers] = useState<{ id: string; name: string; email: string; role: string; status: string; creations: number; avatar: string; }[]>([]);
     const [userSearchTerm, setUserSearchTerm] = useState('');
     const [userAction, setUserAction] = useState<{action: 'delete' | 'suspend' | 'promote', userId: string, userName: string} | null>(null);
 
+    const fetchBlocklist = useCallback(async () => {
+        const blocklistCol = collection(db, 'blocklist');
+        const snapshot = await getDocs(blocklistCol);
+        const list = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as { id: string, word: string, category: string }));
+        setBlocklist(list.sort((a, b) => a.word.localeCompare(b.word)));
+    }, [db]);
 
-    const handleAddBlockword = useCallback((e: React.FormEvent) => {
-        e.preventDefault();
-        const word = newBlockword.trim();
-        if (!word || blocklist.some(item => item.word === word)) return;
-        setBlocklist(prev => [...prev, { word, category: newBlockwordCategory }].sort((a, b) => a.word.localeCompare(b.word)));
-        setNewBlockword('');
-    }, [newBlockword, blocklist, newBlockwordCategory]);
-    
-    const handleBulkAdd = useCallback((e: React.FormEvent) => {
-        e.preventDefault();
-        const words = bulkWords.split(',').map(w => w.trim()).filter(Boolean);
-        const newWords = words
-            .filter(w => !blocklist.some(item => item.word === w))
-            .map(w => ({ word: w, category: 'General' }));
-        if (newWords.length > 0) {
-            setBlocklist(prev => [...prev, ...newWords].sort((a, b) => a.word.localeCompare(b.word)));
+    const fetchUsers = useCallback(async () => {
+         const usersCol = collection(db, 'users');
+         const snapshot = await getDocs(usersCol);
+         const userList = snapshot.docs.map(doc => {
+            const data = doc.data();
+            return {
+                id: doc.id,
+                name: data.email, // Placeholder, real name not stored yet
+                email: data.email,
+                role: data.isAdmin ? 'Admin' : 'User',
+                status: 'Active', // Placeholder
+                creations: 0, // Placeholder
+                avatar: `https://i.pravatar.cc/40?u=${doc.id}`
+            };
+         });
+         setUsers(userList);
+    }, [db]);
+
+    useEffect(() => {
+        if (isAdmin) {
+            fetchBlocklist();
+            fetchUsers();
         }
-        setBulkWords('');
-    }, [bulkWords, blocklist]);
+    }, [isAdmin, fetchBlocklist, fetchUsers]);
 
-    const handleDeleteBlockword = useCallback((word: string) => {
-        setBlocklist(prev => prev.filter(item => item.word !== word));
-        setWordToDelete(null);
-    }, []);
+
+    const handleAddBlockword = useCallback(async (e: React.FormEvent) => {
+        e.preventDefault();
+        const word = newBlockword.trim().toLowerCase();
+        if (!word || blocklist.some(item => item.word === word)) return;
+        
+        try {
+            await addDoc(collection(db, 'blocklist'), { word, category: newBlockwordCategory });
+            toast({ title: "Word Added", description: `"${word}" has been added to the blocklist.` });
+            setNewBlockword('');
+            fetchBlocklist(); // Refresh list
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not add word to blocklist.' });
+        }
+    }, [newBlockword, blocklist, newBlockwordCategory, db, fetchBlocklist, toast]);
+    
+    const handleBulkAdd = useCallback(async (e: React.FormEvent) => {
+        e.preventDefault();
+        const words = bulkWords.split(',').map(w => w.trim().toLowerCase()).filter(Boolean);
+        const newWords = words.filter(w => !blocklist.some(item => item.word === w));
+
+        if (newWords.length > 0) {
+            try {
+                for (const word of newWords) {
+                    await addDoc(collection(db, 'blocklist'), { word, category: 'General' });
+                }
+                toast({ title: 'Bulk Add Success', description: `${newWords.length} new words added to the blocklist.` });
+                setBulkWords('');
+                fetchBlocklist();
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Could not add bulk words.' });
+            }
+        }
+    }, [bulkWords, blocklist, db, fetchBlocklist, toast]);
+
+    const handleDeleteBlockword = useCallback(async (id: string, word: string) => {
+        try {
+            await deleteDoc(doc(db, 'blocklist', id));
+            toast({ title: "Word Removed", description: `"${word}" has been removed from the blocklist.` });
+            setWordToDelete(null);
+            fetchBlocklist();
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not remove word.' });
+        }
+    }, [db, fetchBlocklist, toast]);
 
     const handleAddOrUpdatePartner = useCallback((e: React.FormEvent) => {
         e.preventDefault();
         if (!newPartnerName.trim() || !newPartnerApiKey.trim()) return;
 
-        if (partnerToEdit) { // This is an update (key rotation)
+        if (partnerToEdit) {
             setPodPartners(prev => prev.map(p => p.id === partnerToEdit.id ? {...p, apiKey: newPartnerApiKey} : p));
             toast({ title: 'Success!', description: `API Key for ${partnerToEdit.name} has been updated.`});
             setPartnerToEdit(null);
-        } else { // This is a new partner
+        } else {
             const newPartner = { id: crypto.randomUUID(), name: newPartnerName.trim(), apiKey: newPartnerApiKey.trim() };
             setPodPartners(prev => [...prev, newPartner]);
             setNewlyAddedPartner(newPartner);
@@ -135,24 +175,35 @@ export default function AdminPage() {
         toast({ title: 'Copied!', description: 'The API key has been copied to your clipboard.' });
     }, [newlyAddedPartner, toast]);
 
-    const handleConfirmUserAction = useCallback(() => {
-        if (!userAction) return;
+    const handleConfirmUserAction = useCallback(async () => {
+        if (!userAction || !user) return;
         const { action, userId, userName } = userAction;
 
         if (action === 'delete') {
+            // Deleting users is complex and requires a Cloud Function for safety.
+            // We'll simulate it on the client for now.
             setUsers(prev => prev.filter(u => u.id !== userId));
-            toast({ title: 'User Deleted', description: `${userName} has been removed from the platform.` });
+            toast({ title: 'User Deleted (Simulated)', description: `${userName} has been removed from the platform.` });
         } else if (action === 'suspend') {
-            setUsers(prev => prev.map(u => u.id === userId ? {...u, status: u.status === 'Active' ? 'Suspended' : 'Active'} : u));
+            // Suspending users in Firebase Auth is a server-side action.
+            // We'll simulate it on the client for now.
+             setUsers(prev => prev.map(u => u.id === userId ? {...u, status: u.status === 'Active' ? 'Suspended' : 'Active'} : u));
             const newStatus = users.find(u => u.id === userId)?.status === 'Active' ? 'Suspended' : 'Active';
-            toast({ title: `User ${newStatus}`, description: `${userName}'s account is now ${newStatus.toLowerCase()}.` });
+            toast({ title: `User ${newStatus} (Simulated)`, description: `${userName}'s account is now ${newStatus.toLowerCase()}.` });
         } else if (action === 'promote') {
-            setUsers(prev => prev.map(u => u.id === userId ? {...u, role: u.role === 'Admin' ? 'User' : 'Admin'} : u));
-            const newRole = users.find(u => u.id === userId)?.role === 'Admin' ? 'User' : 'Admin';
-            toast({ title: `Role Changed`, description: `${userName} is now a ${newRole}.` });
+            const userDocRef = doc(db, "users", userId);
+            const targetUser = users.find(u => u.id === userId);
+            const newIsAdmin = targetUser?.role !== 'Admin';
+            try {
+                await setDoc(userDocRef, { isAdmin: newIsAdmin }, { merge: true });
+                toast({ title: `Role Changed`, description: `${userName} is now a ${newIsAdmin ? 'Admin' : 'User'}.` });
+                fetchUsers();
+            } catch (error) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Could not update user role.' });
+            }
         }
         setUserAction(null);
-    }, [userAction, users, toast]);
+    }, [userAction, users, user, db, fetchUsers, toast]);
 
     const getAlertDialogContent = useCallback(() => {
         if (!userAction) return { title: '', description: ''};
@@ -220,11 +271,11 @@ export default function AdminPage() {
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>This action cannot be undone. This will permanently remove "{wordToDelete}" from the blocklist.</AlertDialogDescription>
+                        <AlertDialogDescription>This action cannot be undone. This will permanently remove "{wordToDelete?.word}" from the blocklist.</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel onClick={() => setWordToDelete(null)}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={() => handleDeleteBlockword(wordToDelete!)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
+                        <AlertDialogAction onClick={() => handleDeleteBlockword(wordToDelete!.id, wordToDelete!.word)} className="bg-destructive hover:bg-destructive/90">Delete</AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
@@ -497,12 +548,12 @@ export default function AdminPage() {
                                 </div>
                               <div className="space-y-2 max-h-60 overflow-y-auto pr-2 border rounded-lg p-2">
                                   {filteredBlocklist.length > 0 ? filteredBlocklist.map(item => (
-                                      <div key={item.word} className="flex justify-between items-center bg-muted/50 p-2 rounded-lg">
+                                      <div key={item.id} className="flex justify-between items-center bg-muted/50 p-2 rounded-lg">
                                           <div className="flex items-center gap-2">
                                             <span className="font-mono text-sm">{item.word}</span>
                                             <Badge variant={getCategoryVariant(item.category)}>{item.category}</Badge>
                                           </div>
-                                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setWordToDelete(item.word)} aria-label={`Delete ${item.word}`}>
+                                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setWordToDelete({ id: item.id, word: item.word })} aria-label={`Delete ${item.word}`}>
                                               <Icon name="Trash2" className="w-4 h-4" />
                                           </Button>
                                       </div>

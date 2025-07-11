@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import type { Creation, User, GalleryItem } from '@/lib/types';
 import { onAuthStateChanged, getAuth } from 'firebase/auth';
 import { firebaseApp } from '@/lib/firebase';
-import { getFirestore, collection, addDoc, query, where, serverTimestamp, onSnapshot, doc, getDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, where, serverTimestamp, onSnapshot, doc, getDoc, setDoc } from "firebase/firestore";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 
 interface AppContextType {
@@ -39,13 +39,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const userDocRef = doc(db, "users", firebaseUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        let finalIsAdmin = false;
-        if (userDoc.exists() && userDoc.data().isAdmin) {
-          finalIsAdmin = true;
-        } else if (firebaseUser.email === 'admin@surfacestory.com') {
-           finalIsAdmin = true;
+        let userDoc = await getDoc(userDocRef);
+
+        // Create user document if it doesn't exist
+        if (!userDoc.exists()) {
+          await setDoc(userDocRef, { 
+            email: firebaseUser.email,
+            isAdmin: firebaseUser.email === 'admin@surfacestory.com', // Default admin
+          });
+          userDoc = await getDoc(userDocRef); // Re-fetch the document
         }
+
+        const userData = userDoc.data();
+        const finalIsAdmin = userData?.isAdmin || false;
         
         setUser({ uid: firebaseUser.uid, isAnonymous: firebaseUser.isAnonymous, email: firebaseUser.email });
         setIsAdmin(finalIsAdmin); 
@@ -68,7 +74,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         querySnapshot.forEach((doc) => {
           userCreations.push({ id: doc.id, ...doc.data() } as Creation);
         });
-        // Sort by creation date, newest first
         userCreations.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
         setCreations(userCreations);
       });
@@ -80,17 +85,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const addCreation = useCallback(async (creationData: Omit<Creation, 'id' | 'createdAt'>) => {
     if (!user) throw new Error("You must be logged in to save a creation.");
     
-    // 1. Upload image to Cloud Storage
     const imageId = crypto.randomUUID();
     const storageRef = ref(storage, `creations/${user.uid}/${imageId}.png`);
-    // The `url` from the creation data is a data URI (e.g., "data:image/png;base64,...")
     const uploadResult = await uploadString(storageRef, creationData.url, 'data_url');
     const downloadURL = await getDownloadURL(uploadResult.ref);
     
-    // 2. Create Firestore document with the storage URL
     const creationPayload = {
       ...creationData,
-      url: downloadURL, // Overwrite with the public storage URL
+      url: downloadURL, 
       userId: user.uid,
       createdAt: serverTimestamp(),
     };
@@ -101,7 +103,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       ...creationData,
       id: docRef.id,
       url: downloadURL,
-      createdAt: new Date(), // Return a client-side date for immediate UI update
+      createdAt: new Date(),
     };
   }, [user, db, storage]);
   
@@ -120,7 +122,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         id: crypto.randomUUID(),
         createdAt: new Date(),
     };
-    // For now, the cart only holds one item for a simple checkout
     setCart([newCartItem]);
   }, []);
 
