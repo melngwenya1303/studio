@@ -89,15 +89,16 @@ export default function LoginPage() {
     }
 
     return (
-        <div className="flex h-screen w-full items-center justify-center bg-gray-100 dark:bg-background p-4">
-             <Card className="w-full max-w-md">
+        <div className="relative flex min-h-screen w-full flex-col items-center justify-center bg-gray-100 dark:bg-background p-4">
+            <div className="absolute top-6 left-6 flex items-center space-x-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center shadow-lg">
+                    <Icon name="Wand2" className="w-6 h-6 text-white" />
+                </div>
+                <h1 className="text-2xl font-bold font-headline text-foreground">SurfaceStory</h1>
+            </div>
+
+            <Card className="w-full max-w-md">
                 <CardHeader>
-                     <div className="flex items-center space-x-3 mb-4">
-                        <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center shadow-lg">
-                            <Icon name="Wand2" className="w-6 h-6 text-white" />
-                        </div>
-                        <h1 className="text-2xl font-bold font-headline text-foreground">SurfaceStory</h1>
-                    </div>
                     <CardTitle>Welcome Back</CardTitle>
                     <CardDescription>Sign in or create an account to begin.</CardDescription>
                 </CardHeader>
