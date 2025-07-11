@@ -43,9 +43,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
         // Create user document if it doesn't exist
         if (!userDoc.exists()) {
+          const isDefaultAdmin = firebaseUser.email === 'admin@surfacestoryai.com';
           await setDoc(userDocRef, { 
             email: firebaseUser.email,
-            isAdmin: firebaseUser.email === 'admin@surfacestoryai.com', // Default admin
+            isAdmin: isDefaultAdmin, 
           });
           userDoc = await getDoc(userDocRef); // Re-fetch the document
         }
