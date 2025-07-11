@@ -38,29 +38,30 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const auth = getAuth(firebaseApp);
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
-        const userDocRef = doc(db, "users", firebaseUser.uid);
-        let userDoc = await getDoc(userDocRef);
+        const userDocRef = doc(db, 'users', firebaseUser.uid);
+        let userDocSnap = await getDoc(userDocRef);
+        let userData;
 
-        // Create user document if it doesn't exist
-        if (!userDoc.exists()) {
+        if (!userDocSnap.exists()) {
           const isDefaultAdmin = firebaseUser.email === 'admin@surfacestoryai.com';
-          await setDoc(userDocRef, { 
+          const newUserPayload = {
             email: firebaseUser.email,
-            isAdmin: isDefaultAdmin, 
-          });
-          userDoc = await getDoc(userDocRef); // Re-fetch the document
+            isAdmin: isDefaultAdmin,
+          };
+          await setDoc(userDocRef, newUserPayload);
+          userData = newUserPayload;
+        } else {
+          userData = userDocSnap.data();
         }
 
-        const userData = userDoc.data();
         const finalIsAdmin = userData?.isAdmin || false;
         
         setUser({ uid: firebaseUser.uid, isAnonymous: firebaseUser.isAnonymous, email: firebaseUser.email });
-        setIsAdmin(finalIsAdmin); 
-
+        setIsAdmin(finalIsAdmin);
       } else {
         setUser(null);
         setIsAdmin(false);
-        setCreations([]); // Clear creations on logout
+        setCreations([]);
       }
     });
 
