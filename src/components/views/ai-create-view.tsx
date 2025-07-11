@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { enhancePrompt } from '@/ai/flows/enhance-prompt';
 import { generateUiSpec } from '@/ai/flows/generate-ui-spec';
 import { getCreativeFeedback } from '@/ai/flows/get-creative-feedback';
+import { getRemixSuggestions } from '@/ai/flows/get-remix-suggestions';
 import { generateAudio } from '@/ai/flows/generate-audio';
 import { DEVICES, STYLES } from '@/lib/constants';
 import type { Device, Style, Creation, DeviceModel } from '@/lib/types';
@@ -46,6 +47,8 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     const [isLoading, setIsLoading] = useState(false);
     const [isEnhancing, setIsEnhancing] = useState(false);
     const [isGettingFeedback, setIsGettingFeedback] = useState(false);
+    const [remixSuggestions, setRemixSuggestions] = useState<string[]>([]);
+    const [isGettingRemix, setIsGettingRemix] = useState(false);
     const [story, setStory] = useState<string | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [policyAccepted, setPolicyAccepted] = useState(false);
@@ -185,6 +188,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         setIsLoading(true);
         setGeneratedDecal(null);
         setStory(null);
+        setRemixSuggestions([]);
         try {
             const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
             const fullPrompt = `A decal design for a ${deviceName}. ${basePrompt}, in the style of ${selectedStyle.name}, high resolution, clean edges, sticker, vector art`;
@@ -286,6 +290,20 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
             setIsGettingFeedback(false);
         }
     }
+    
+    const handleGetRemixSuggestions = async () => {
+        if (!prompt.trim()) return;
+        setIsGettingRemix(true);
+        setRemixSuggestions([]);
+        try {
+            const result = await getRemixSuggestions({ prompt });
+            setRemixSuggestions(result.suggestions);
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Could not get suggestions', description: error.message });
+        } finally {
+            setIsGettingRemix(false);
+        }
+    };
 
     const handleTellStory = async () => {
         if (!story) return;
@@ -306,6 +324,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         setStory(null);
         setIsLoading(false);
         setPolicyAccepted(false);
+        setRemixSuggestions([]);
         toast({ title: 'Canvas Cleared', description: 'Ready for your next great idea!' });
     };
 
@@ -465,6 +484,40 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
+                                        
+                                        {/* AI Coach */}
+                                        <div className="space-y-3 p-3 bg-muted/50 rounded-lg">
+                                            <div className="flex items-center justify-between">
+                                              <h4 className="font-semibold text-sm flex items-center gap-2"><Icon name="Bot" className="text-primary" /> AI Coach</h4>
+                                              <Button variant="outline" size="sm" onClick={handleGetRemixSuggestions} disabled={!prompt.trim() || isGettingRemix}>
+                                                  {isGettingRemix ? 'Getting ideas...' : 'Get Remix Ideas'}
+                                              </Button>
+                                            </div>
+                                            {remixSuggestions.length > 0 && (
+                                                <motion.div 
+                                                    initial={{opacity: 0, y: -10}} animate={{opacity: 1, y: 0}}
+                                                    className="text-sm text-muted-foreground space-y-2"
+                                                >
+                                                    <p className="text-xs">Try one of these creative directions:</p>
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {remixSuggestions.map((suggestion, i) => (
+                                                            <motion.button 
+                                                                key={i}
+                                                                className="px-3 py-1 bg-background rounded-full text-xs hover:bg-primary/10 border"
+                                                                onClick={() => {
+                                                                    setPrompt(suggestion);
+                                                                    handleGenerate(suggestion);
+                                                                    setRemixSuggestions([]);
+                                                                }}
+                                                                whileHover={{scale: 1.05}} whileTap={{scale: 0.95}}
+                                                            >
+                                                                "{suggestion}"
+                                                            </motion.button>
+                                                        ))}
+                                                    </div>
+                                                </motion.div>
+                                            )}
                                         </div>
 
                                         <Separator />
