@@ -13,6 +13,9 @@ interface AppContextType {
   startRemix: (item: Creation | GalleryItem) => void;
   remixData: Creation | GalleryItem | null;
   clearRemixData: () => void;
+  cart: Creation[];
+  addToCart: (item: Omit<Creation, 'id' | 'createdAt'>) => void;
+  clearCart: () => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -23,6 +26,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [isAdmin, setIsAdmin] = useState(true);
   const [creations, setCreations] = useState<Creation[]>([]);
   const [remixData, setRemixData] = useState<Creation | GalleryItem | null>(null);
+  const [cart, setCart] = useState<Creation[]>([]);
 
   const addCreation = (creationData: Omit<Creation, 'id' | 'createdAt'>) => {
     const newCreation: Creation = {
@@ -31,6 +35,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       createdAt: new Date(),
     };
     setCreations(prev => [newCreation, ...prev]);
+    return newCreation;
   };
   
   const startRemix = useCallback((item: Creation | GalleryItem) => {
@@ -42,8 +47,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setRemixData(null);
   }, []);
 
+  const addToCart = (item: Omit<Creation, 'id' | 'createdAt'>) => {
+    const newCartItem: Creation = {
+        ...item,
+        id: crypto.randomUUID(),
+        createdAt: new Date(),
+    };
+    // For now, the cart only holds one item for a simple checkout
+    setCart([newCartItem]);
+    router.push('/checkout');
+  };
+
+  const clearCart = () => {
+    setCart([]);
+  }
+
   return (
-    <AppContext.Provider value={{ user, isAdmin, creations, addCreation, startRemix, remixData, clearRemixData }}>
+    <AppContext.Provider value={{ user, isAdmin, creations, addCreation, startRemix, remixData, clearRemixData, cart, addToCart, clearCart }}>
       {children}
     </AppContext.Provider>
   );

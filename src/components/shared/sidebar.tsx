@@ -10,7 +10,9 @@ import Icon, { IconName } from '@/components/shared/icon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { useIsMobile } from '@/hooks/use-mobile';
+
 
 const navItems = [
     { href: '/design-studio', name: 'Design Studio', icon: 'Brush' as IconName },
@@ -48,24 +50,31 @@ const SidebarHeader = () => (
 
 const SidebarContent = () => {
   const pathname = usePathname();
-  const { user, isAdmin } = useApp();
+  const { user, isAdmin, cart } = useApp();
   
   const allNavItems = isAdmin ? [...navItems, ...adminNavItems] : navItems;
-  const allBottomNavItems = bottomNavItems;
+  const allBottomNavItems = [...bottomNavItems];
+
+  const cartItem = { href: '/checkout', name: 'Cart', icon: 'ShoppingCart' as IconName, count: cart.length };
 
 
-  const NavLink: React.FC<{ item: { href: string; name: string; icon: IconName } }> = ({ item }) => (
+  const NavLink: React.FC<{ item: { href: string; name: string; icon: IconName, count?: number } }> = ({ item }) => (
       <Link href={item.href} passHref>
           <motion.div
-              className={`flex items-center space-x-3 px-4 py-3 my-1 rounded-lg font-semibold transition-all duration-200 group ${pathname.startsWith(item.href)
+              className={`flex items-center justify-between space-x-3 px-4 py-3 my-1 rounded-lg font-semibold transition-all duration-200 group ${pathname.startsWith(item.href)
                   ? 'bg-primary text-primary-foreground shadow-lg'
                   : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   }`}
               whileHover={{ x: 5 }}
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
+            <div className="flex items-center gap-3">
               <Icon name={item.icon} className={`w-5 h-5 transition-transform duration-200 ${!pathname.startsWith(item.href) && 'group-hover:scale-110'}`} />
               <span className="text-button font-normal">{item.name}</span>
+            </div>
+             {item.count !== undefined && item.count > 0 && (
+                <Badge variant={pathname.startsWith(item.href) ? 'secondary' : 'default'} className="h-6 w-6 flex items-center justify-center p-0">{item.count}</Badge>
+            )}
           </motion.div>
       </Link>
   );
@@ -87,6 +96,14 @@ const SidebarContent = () => {
           ))}
         </ul>
         <ul>
+        <motion.li
+             key={cartItem.href}
+             initial={{ opacity: 0, x: -20 }}
+             animate={{ opacity: 1, x: 0 }}
+             transition={{ duration: 0.4, delay: 0.2 + (allNavItems.length * 0.05) }}
+        >
+             <NavLink item={cartItem} />
+        </motion.li>
         {allBottomNavItems.map((item) => (
             <motion.li 
               key={item.href}
@@ -121,25 +138,30 @@ const SidebarContent = () => {
 }
 
 const Sidebar = () => {
-  return (
-    <>
+    const isMobile = useIsMobile();
+    
+    if (isMobile) {
+        return (
+            <div className="p-4 fixed top-0 left-0 z-50">
+              <Sheet>
+                  <SheetTrigger asChild>
+                      <Button variant="ghost" size="icon">
+                          <Icon name="Menu" className="h-6 w-6" />
+                      </Button>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="w-72 bg-background/90 backdrop-blur-xl border-r border-border/50 p-4 flex flex-col">
+                    <SidebarContent />
+                  </SheetContent>
+              </Sheet>
+            </div>
+        );
+    }
+    
+    return (
       <aside className="w-64 bg-background/80 backdrop-blur-xl border-r border-border/50 flex-col p-4 hidden md:flex">
         <SidebarContent />
       </aside>
-      <div className="md:hidden p-4 fixed top-0 left-0 z-50">
-          <Sheet>
-              <SheetTrigger asChild>
-                  <Button variant="ghost" size="icon">
-                      <Icon name="Menu" className="h-6 w-6" />
-                  </Button>
-              </SheetTrigger>
-              <SheetContent side="left" className="w-72 bg-background/90 backdrop-blur-xl border-r border-border/50 p-4 flex flex-col">
-                <SidebarContent />
-              </SheetContent>
-          </Sheet>
-      </div>
-    </>
-  );
+    );
 };
 
 export default Sidebar;

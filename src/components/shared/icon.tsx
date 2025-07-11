@@ -1,7 +1,7 @@
-import { Home, Zap, Brush, LayoutGrid, Settings, Star, Heart, Bot, Image as ImageIcon, Search, X, Sparkles, Wand2, Info, RefreshCcw, BookOpen, Laptop, Smartphone, Tablet, ShieldCheck, KeyRound, PlusCircle, Trash2, Users, Send, Trophy, Mic, Volume2, UserPlus, Menu, Box, Camera, List, Filter, Truck, PieChart, BarChart3, Undo2 } from 'lucide-react';
+import { Home, Zap, Brush, LayoutGrid, Settings, Star, Heart, Bot, Image as ImageIcon, Search, X, Sparkles, Wand2, Info, RefreshCcw, BookOpen, Laptop, Smartphone, Tablet, ShieldCheck, KeyRound, PlusCircle, Trash2, Users, Send, Trophy, Mic, Volume2, UserPlus, Menu, Box, Camera, List, Filter, Truck, PieChart, BarChart3, Undo2, ShoppingCart } from 'lucide-react';
 import type { FC } from 'react';
 
-const icons = { Home, Zap, Brush, LayoutGrid, Settings, Star, Heart, Bot, ImageIcon, Search, X, Sparkles, Wand2, Info, RefreshCcw, BookOpen, Laptop, Smartphone, Tablet, ShieldCheck, KeyRound, PlusCircle, Trash2, Users, Send, Trophy, Mic, Volume2, UserPlus, Menu, Box, Camera, List, Filter, Truck, PieChart, BarChart3, Undo2 };
+const icons = { Home, Zap, Brush, LayoutGrid, Settings, Star, Heart, Bot, ImageIcon, Search, X, Sparkles, Wand2, Info, RefreshCcw, BookOpen, Laptop, Smartphone, Tablet, ShieldCheck, KeyRound, PlusCircle, Trash2, Users, Send, Trophy, Mic, Volume2, UserPlus, Menu, Box, Camera, List, Filter, Truck, PieChart, BarChart3, Undo2, ShoppingCart };
 
 export type IconName = keyof typeof icons;
 

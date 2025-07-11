@@ -36,7 +36,7 @@ type AiCreateViewProps = {
 };
 
 export default function AiCreateView({ onBack }: AiCreateViewProps) {
-    const { user, addCreation, remixData, clearRemixData } = useApp();
+    const { user, addCreation, remixData, clearRemixData, addToCart } = useApp();
     const { toast } = useToast();
 
     const [prompt, setPrompt] = useState('');
@@ -226,12 +226,12 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         }
     };
 
-    const handleSaveCreation = async () => {
+    const handleSaveCreation = () => {
         if (!generatedDecal || !user) return;
         setIsSaving(true);
         try {
-            addCreation(generatedDecal);
-            toast({ title: 'Success!', description: 'Your design has been saved to My Designs.' });
+            const savedCreation = addCreation(generatedDecal);
+            toast({ title: 'Success!', description: `'${savedCreation.title}' has been saved to My Designs.` });
         } catch (error: any) {
             toast({ variant: "destructive", title: "Save Error", description: error.message });
         } finally {
@@ -239,23 +239,9 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         }
     };
 
-    const handleFinalize = () => {
-      setModal({
-        isOpen: true,
-        title: "Finalizing Your Design ✨",
-        size: 'md',
-        children: (
-          <div>
-            <p className="mb-4">Our system is now preparing your masterpiece for printing and shipping!</p>
-            <ul className="list-disc list-inside space-y-2 text-sm bg-muted p-4 rounded-lg">
-              <li>Optimizing resolution for your {currentCanvas.name}...</li>
-              <li>Calibrating colors for our premium vinyl...</li>
-              <li>Perfectly scaling the design to your device's dimensions...</li>
-            </ul>
-            <p className="mt-4 font-semibold">Your unique SurfaceStory is ready for the real world!</p>
-          </div>
-        ),
-      });
+    const handlePurchase = () => {
+      if (!generatedDecal) return;
+      addToCart(generatedDecal);
     };
 
     const handleGetFeedback = async () => {
@@ -605,7 +591,9 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                         {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
                                                         {isSaving ? 'Saving...' : 'Save Design'}
                                                     </Button>
-                                                    <Button onClick={handleFinalize} className="w-full bg-green-600 hover:bg-green-700">Finalize Design</Button>
+                                                    <Button onClick={handlePurchase} className="w-full bg-green-600 hover:bg-green-700">
+                                                        <Icon name="ShoppingCart" /> Purchase
+                                                    </Button>
                                                 </div>
                                                 <div className="grid grid-cols-2 gap-3">
                                                     <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
@@ -816,5 +804,3 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         </TooltipProvider>
     );
 }
-
-    

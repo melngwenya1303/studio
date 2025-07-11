@@ -27,7 +27,7 @@ type UploadViewProps = {
 };
 
 export default function UploadView({ onBack }: UploadViewProps) {
-    const { user, addCreation } = useApp();
+    const { user, addCreation, addToCart } = useApp();
     const { toast } = useToast();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -93,7 +93,7 @@ export default function UploadView({ onBack }: UploadViewProps) {
         }
     };
 
-    const handleSaveCreation = async () => {
+    const handleSaveCreation = () => {
         if (!uploadedImage || !user) return;
         setIsSaving(true);
         try {
@@ -105,8 +105,8 @@ export default function UploadView({ onBack }: UploadViewProps) {
                 style: 'Custom',
                 deviceType: deviceName,
             };
-            addCreation(newCreation);
-            toast({ title: 'Success!', description: 'Your design has been saved to My Designs.' });
+            const savedCreation = addCreation(newCreation);
+            toast({ title: 'Success!', description: `'${savedCreation.title}' has been saved to My Designs.` });
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Save Error', description: error.message });
         } finally {
@@ -114,8 +114,17 @@ export default function UploadView({ onBack }: UploadViewProps) {
         }
     };
     
-    const handleFinalize = () => {
-        toast({ title: 'Design Finalized!', description: "We're preparing your uploaded design for production." });
+    const handlePurchase = () => {
+        if (!uploadedImage) return;
+        const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
+        const cartItem = {
+            url: uploadedImage,
+            prompt: 'User Uploaded Artwork',
+            title: 'My Uploaded Design',
+            style: 'Custom',
+            deviceType: deviceName,
+        };
+        addToCart(cartItem);
     };
 
     const currentCanvas = selectedModel || selectedDevice;
@@ -219,7 +228,9 @@ export default function UploadView({ onBack }: UploadViewProps) {
                                                 {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
                                                 {isSaving ? 'Saving...' : 'Save Design'}
                                             </Button>
-                                            <Button onClick={handleFinalize} disabled={!uploadedImage} className="w-full bg-green-600 hover:bg-green-700">Finalize Design</Button>
+                                            <Button onClick={handlePurchase} disabled={!uploadedImage} className="w-full bg-green-600 hover:bg-green-700">
+                                                <Icon name="ShoppingCart" /> Purchase
+                                            </Button>
                                         </div>
                                     </div>
                                 </TabsContent>
@@ -380,5 +391,3 @@ export default function UploadView({ onBack }: UploadViewProps) {
         </TooltipProvider>
     );
 }
-
-    
