@@ -28,9 +28,6 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  devIndicators: {
-    buildActivity: false,
-  },
   experimental: {
     // This allows the Next.js dev server to accept requests from the
     // Firebase Studio preview window.

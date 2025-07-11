@@ -1,12 +1,21 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import Icon from '@/components/shared/icon';
-import AiCreateView from '@/components/views/ai-create-view';
-import UploadView from '@/components/views/upload-view';
 import { useApp } from '@/contexts/AppContext';
+import dynamic from 'next/dynamic';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const AiCreateView = dynamic(() => import('@/components/views/ai-create-view'), { 
+    suspense: true, 
+    loading: () => <div className="w-full h-full flex items-center justify-center"><Skeleton className="w-full h-[80vh]"/></div> 
+});
+const UploadView = dynamic(() => import('@/components/views/upload-view'), { 
+    suspense: true, 
+    loading: () => <div className="w-full h-full flex items-center justify-center"><Skeleton className="w-full h-[80vh]"/></div> 
+});
 
 type Flow = 'ai' | 'upload' | null;
 
@@ -89,9 +98,9 @@ export default function DesignStudioPage() {
     const renderFlow = () => {
         switch (flow) {
             case 'ai':
-                return <AiCreateView onBack={handleResetFlow} />;
+                return <Suspense fallback={<div className="w-full h-full flex items-center justify-center"><Skeleton className="w-full h-full"/></div>}><AiCreateView onBack={handleResetFlow} /></Suspense>;
             case 'upload':
-                return <UploadView onBack={handleResetFlow} />;
+                return <Suspense fallback={<div className="w-full h-full flex items-center justify-center"><Skeleton className="w-full h-full"/></div>}><UploadView onBack={handleResetFlow} /></Suspense>;
             default:
                 return <SelectionScreen />;
         }

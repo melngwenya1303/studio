@@ -107,6 +107,7 @@ export default function LoginPage() {
                             value={password}
                             onChange={(e) => setPassword(e.target.value)}
                             disabled={isLoading}
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleAuthAction('signIn')}}
                         />
                     </div>
                 </CardContent>
