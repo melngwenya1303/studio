@@ -260,6 +260,17 @@ export default function DesignStudioPage() {
         }
     }
     
+    const handleStartOver = () => {
+        setPrompt('');
+        setSelectedDevice(DEVICES[0]);
+        setSelectedModel(DEVICES[0].models ? DEVICES[0].models[0] : null);
+        setSelectedStyle(STYLES[0]);
+        setGeneratedDecal(null);
+        setIsLoading(false);
+        setPolicyAccepted(false);
+        toast({ title: 'Canvas Cleared', description: 'Ready for your next great idea!' });
+    };
+
     return (
         <TooltipProvider>
             <div className="flex h-full">
@@ -438,7 +449,7 @@ export default function DesignStudioPage() {
                                     
                                     <div className="mt-auto pt-4 space-y-3">
                                         <div className="flex items-center space-x-2 mb-3">
-                                            <Checkbox id="terms" onCheckedChange={(checked) => setPolicyAccepted(Boolean(checked))} />
+                                            <Checkbox id="terms" checked={policyAccepted} onCheckedChange={(checked) => setPolicyAccepted(Boolean(checked))} />
                                             <label
                                                 htmlFor="terms"
                                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -449,12 +460,21 @@ export default function DesignStudioPage() {
                                                 </Link>
                                             </label>
                                         </div>
-
-                                        <motion.button onClick={() => handleGenerate(prompt)} disabled={isLoading || !prompt.trim() || !policyAccepted}
-                                            className="w-full py-3 px-6 rounded-xl font-semibold text-lg text-white transition-all duration-300 bg-gradient-to-r from-primary to-accent hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
-                                            whileHover={{ y: -2 }} whileTap={{ y: 1 }}>
-                                            {isLoading ? 'Designing...' : 'Create My Design'}
-                                        </motion.button>
+                                        <div className="flex items-center gap-2">
+                                            <motion.button onClick={() => handleGenerate(prompt)} disabled={isLoading || !prompt.trim() || !policyAccepted}
+                                                className="flex-grow py-3 px-6 rounded-xl font-semibold text-lg text-white transition-all duration-300 bg-gradient-to-r from-primary to-accent hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
+                                                whileHover={{ y: -2 }} whileTap={{ y: 1 }}>
+                                                {isLoading ? 'Designing...' : 'Create My Design'}
+                                            </motion.button>
+                                             <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="ghost" size="icon" onClick={handleStartOver} disabled={isLoading}>
+                                                        <Icon name="Undo2" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent><p>Start Over</p></TooltipContent>
+                                            </Tooltip>
+                                        </div>
                                         
                                         {generatedDecal && (
                                             <motion.div 
