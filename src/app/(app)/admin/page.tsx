@@ -266,7 +266,7 @@ export default function AdminPage() {
                 </Card>
             </div>
 
-            <Tabs defaultValue="analytics">
+            <Tabs defaultValue="fulfillment">
                 <TabsList className="grid w-full grid-cols-3">
                     <TabsTrigger value="analytics"><Icon name="PieChart" /> Analytics</TabsTrigger>
                     <TabsTrigger value="content"><Icon name="Filter" /> Content Moderation</TabsTrigger>
@@ -343,12 +343,12 @@ export default function AdminPage() {
                 <TabsContent value="fulfillment">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Icon name="KeyRound" /> POD Partner APIs</CardTitle>
-                            <CardDescription>Manage API keys for your Print-on-Demand partners.</CardDescription>
+                            <CardTitle className="flex items-center gap-2"><Icon name="KeyRound" /> POD Partner Integrations</CardTitle>
+                            <CardDescription>Manage API keys for Shopify and other Print-on-Demand partners.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <form onSubmit={handleAddOrUpdatePartner} className="space-y-3 mb-4 p-4 border rounded-lg">
-                                 <Input type="text" value={newPartnerName} onChange={(e) => setNewPartnerName(e.target.value)} placeholder="Partner Name (e.g., Printify)" className="text-base"/>
+                                 <Input type="text" value={newPartnerName} onChange={(e) => setNewPartnerName(e.target.value)} placeholder="Partner Name (e.g., Shopify, Printify)" className="text-base"/>
                                 <Input type="password" value={newPartnerApiKey} onChange={(e) => setNewPartnerApiKey(e.target.value)} placeholder="Partner API Key" className="text-base" />
                                 <Button type="submit" className="w-full"><Icon name="PlusCircle" /> Add New Partner</Button>
                             </form>
@@ -365,7 +365,7 @@ export default function AdminPage() {
                                             </Button>
                                         </div>
                                     </div>
-                                )) : <p className="text-sm text-muted-foreground text-center py-4">No POD partners configured.</p>}
+                                )) : <p className="text-sm text-muted-foreground text-center py-4">No fulfillment partners configured.</p>}
                             </div>
                         </CardContent>
                     </Card>
@@ -374,5 +374,3 @@ export default function AdminPage() {
         </div>
     );
 }
-
-    
