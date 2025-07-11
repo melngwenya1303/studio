@@ -108,7 +108,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
   const fetchInitialCreations = useCallback(async () => {
     // Use the bypassed admin user's UID for fetching data if no other user is set.
-    const userId = user?.uid || 'admin-bypass-uid';
+    const userId = user?.uid;
     if (!userId) return;
 
 
@@ -129,6 +129,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setIsLoadingCreations(false);
   }, [user, db]);
 
+  // Gallery Fetching Logic
+  const fetchInitialGalleryItems = useCallback(async () => {
+    setIsLoadingGalleryItems(true);
+    const galleryQuery = query(
+        collection(db, "gallery"),
+        orderBy("likes", "desc"),
+        limit(GALLERY_PAGE_SIZE)
+    );
+    const documentSnapshots = await getDocs(galleryQuery);
+    const items = documentSnapshots.docs.map(doc => ({ ...doc.data() } as GalleryItem));
+    
+    setGalleryItems(items);
+    setLastVisibleGalleryItem(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
+    setHasMoreGalleryItems(documentSnapshots.docs.length === GALLERY_PAGE_SIZE);
+    setIsLoadingGalleryItems(false);
+  }, [db]);
+
   useEffect(() => {
     // Reset and fetch initial creations when user changes
     setCreations([]);
@@ -136,11 +153,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setHasMoreCreations(true);
     if (user) {
         fetchInitialCreations();
+        fetchInitialGalleryItems();
     }
-  }, [user, fetchInitialCreations]);
+  }, [user, fetchInitialCreations, fetchInitialGalleryItems]);
 
   const fetchMoreCreations = useCallback(async () => {
-    const userId = user?.uid || 'admin-bypass-uid';
+    const userId = user?.uid;
     if (!userId || !lastVisibleCreation || !hasMoreCreations) return;
 
     setIsLoadingCreations(true);
@@ -163,7 +181,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
 
   const addCreation = useCallback(async (creationData: Omit<Creation, 'id' | 'createdAt'>) => {
-    const userId = user?.uid || 'admin-bypass-uid';
+    const userId = user?.uid;
     if (!userId) throw new Error("You must be logged in to save a creation.");
     
     const imageId = crypto.randomUUID();
@@ -215,27 +233,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const clearCart = useCallback(() => {
     setCart([]);
   }, []);
-
-  // Gallery Fetching Logic
-  const fetchInitialGalleryItems = useCallback(async () => {
-    setIsLoadingGalleryItems(true);
-    const galleryQuery = query(
-        collection(db, "gallery"),
-        orderBy("likes", "desc"),
-        limit(GALLERY_PAGE_SIZE)
-    );
-    const documentSnapshots = await getDocs(galleryQuery);
-    const items = documentSnapshots.docs.map(doc => ({ ...doc.data() } as GalleryItem));
-    
-    setGalleryItems(items);
-    setLastVisibleGalleryItem(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
-    setHasMoreGalleryItems(documentSnapshots.docs.length === GALLERY_PAGE_SIZE);
-    setIsLoadingGalleryItems(false);
-  }, [db]);
-
-  useEffect(() => {
-    fetchInitialGalleryItems();
-  }, [fetchInitialGalleryItems]);
 
   const fetchMoreGalleryItems = useCallback(async () => {
       if (!lastVisibleGalleryItem || !hasMoreGalleryItems) return;
