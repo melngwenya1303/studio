@@ -29,7 +29,8 @@ export default function LeaderboardPage() {
             setIsLoading(true);
             const db = getFirestore(firebaseApp);
             const usersRef = collection(db, 'users');
-            const q = query(usersRef, orderBy('creationsCount', 'desc'), limit(10));
+            // Fetch users, but don't order by creationsCount in the query yet as it may not exist for all users
+            const q = query(usersRef, limit(10));
             
             try {
                 const querySnapshot = await getDocs(q);
@@ -38,12 +39,13 @@ export default function LeaderboardPage() {
                     return {
                         id: doc.id,
                         name: data.name || data.email,
-                        creationsCount: data.creationsCount || Math.floor(Math.random() * 100), // Add mock data for testing
-                        remixesCount: data.remixesCount || Math.floor(Math.random() * 50), // Add mock data for testing
+                        // Add mock data for testing if counts are zero or don't exist
+                        creationsCount: data.creationsCount || Math.floor(Math.random() * 100), 
+                        remixesCount: data.remixesCount || Math.floor(Math.random() * 50),
                         avatar: `https://i.pravatar.cc/40?u=${doc.id}`,
                     };
                 });
-                // Sort client-side since our counts are mocked for now
+                // Sort client-side for reliable demonstration with mock data
                 users.sort((a, b) => (b.creationsCount + b.remixesCount) - (a.creationsCount + a.remixesCount));
                 setLeaderboardData(users);
             } catch (error) {

@@ -107,18 +107,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const userDocRef = doc(db, 'users', firebaseUser.uid);
-        const userDocSnap = await getDoc(userDocRef);
+        let userDocSnap = await getDoc(userDocRef);
 
         let finalIsAdmin = false;
-        if (userDocSnap.exists()) {
-          finalIsAdmin = userDocSnap.data()?.isAdmin || false;
-        } else {
-          // This logic now runs only once when a new user signs up
+        // If user document doesn't exist, create it.
+        if (!userDocSnap.exists()) {
           const isDefaultAdmin = firebaseUser.email === 'admin@surfacestoryai.com';
           const newUserPayload = {
             email: firebaseUser.email,
             isAdmin: isDefaultAdmin,
-            name: firebaseUser.displayName || firebaseUser.email,
+            name: firebaseUser.email, // Default name to email
             createdAt: serverTimestamp(),
             creationsCount: 0,
             remixesCount: 0,
@@ -126,8 +124,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             following: 0,
             bio: 'A new SurfaceStory creator exploring the digital canvas.',
           };
-          await setDoc(userDocRef, newUserPayload);
+          await setDoc(userDocRef, newUserPayload, { merge: true });
+          // Re-fetch the document to have a consistent object
+          userDocSnap = await getDoc(userDocRef);
           finalIsAdmin = isDefaultAdmin;
+        } else {
+           finalIsAdmin = userDocSnap.data()?.isAdmin || false;
         }
         
         const currentUser = { uid: firebaseUser.uid, email: firebaseUser.email, name: firebaseUser.displayName };
@@ -135,6 +137,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setIsAdmin(finalIsAdmin);
 
         fetchInitialCreations(firebaseUser.uid);
+        // Only fetch gallery if it hasn't been fetched before to avoid re-fetching on every auth change
         if (galleryItems.length === 0) {
             fetchInitialGalleryItems();
         }
@@ -144,6 +147,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setCreations([]);
         setLastVisibleCreation(null);
         setHasMoreCreations(true);
+        // If logged out and gallery is empty, fetch it.
         if (galleryItems.length === 0) {
             fetchInitialGalleryItems();
         }
