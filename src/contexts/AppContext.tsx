@@ -133,7 +133,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
         // Fetch data *after* user is confirmed
         fetchInitialCreations(firebaseUser.uid);
-        fetchInitialGalleryItems();
+        if (galleryItems.length === 0) {
+            fetchInitialGalleryItems();
+        }
       } else {
         // Handle user sign-out
         setUser(null);
@@ -148,34 +150,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       }
     });
 
-    // Bypassing login for development
-    const setupBypass = async () => {
-        const adminUid = 'admin-bypass-uid';
-        const adminEmail = 'admin@surfacestoryai.com';
-        const adminUser = {
-            uid: adminUid,
-            email: adminEmail,
-            name: 'Admin User',
-        };
-        setUser(adminUser);
-        setIsAdmin(true);
-
-        // Fetch data for the bypassed user
-        await fetchInitialCreations(adminUid);
-        await fetchInitialGalleryItems();
-    };
-    
-    // Comment out the line below to use real Firebase Auth
-    setupBypass();
-
-
     return () => {
-        // Disabling the real auth listener cleanup if bypass is active
-        if (typeof unsubscribe === 'function') {
-            unsubscribe();
-        }
+        unsubscribe();
     };
-  }, [db, fetchInitialCreations, fetchInitialGalleryItems]);
+  }, [db, fetchInitialCreations, fetchInitialGalleryItems, galleryItems.length]);
 
 
   const fetchMoreCreations = useCallback(async () => {
@@ -239,14 +217,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       ...creationPayload,
       id: docRef.id,
       createdAt: new Date(),
-    }, ...prev]);
+    } as Creation, ...prev]);
 
     return {
       ...creationData,
       id: docRef.id,
       url: uploadURL,
       createdAt: new Date(),
-    };
+    } as Creation;
   }, [user, db, storage]);
   
   const startRemix = useCallback((item: Partial<Creation & GalleryItem>) => {

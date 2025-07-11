@@ -21,7 +21,7 @@ export default function LoginPage() {
     const auth = getAuth();
 
     const [email, setEmail] = useState('admin@surfacestoryai.com');
-    const [password, setPassword] = useState('');
+    const [password, setPassword] = useState('password');
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState('');
 
