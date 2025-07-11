@@ -43,10 +43,10 @@ export default function SettingsPage() {
 
             <Tabs defaultValue="profile" className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
-                    <TabsTrigger value="profile"><Icon name="UserPlus" /> Profile</TabsTrigger>
+                    <TabsTrigger value="profile"><Icon name="UserCircle" /> Profile</TabsTrigger>
                     <TabsTrigger value="shipping"><Icon name="Home" /> Shipping</TabsTrigger>
-                    <TabsTrigger value="billing"><Icon name="KeyRound" /> Billing</TabsTrigger>
-                    <TabsTrigger value="orders"><Icon name="Box" /> Order History</TabsTrigger>
+                    <TabsTrigger value="billing"><Icon name="CreditCard" /> Billing</TabsTrigger>
+                    <TabsTrigger value="orders"><Icon name="Package" /> Order History</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="profile" className="mt-6">
@@ -123,7 +123,7 @@ export default function SettingsPage() {
                              {mockPaymentMethods.map(pm => (
                                 <div key={pm.id} className="p-4 rounded-lg border flex justify-between items-center bg-muted/50">
                                     <div className="flex items-center gap-4">
-                                        <Icon name="KeyRound" className="w-8 h-8 text-muted-foreground" />
+                                        <Icon name="CreditCard" className="w-8 h-8 text-muted-foreground" />
                                         <div>
                                             <p className="font-semibold">{pm.type} ending in {pm.last4}</p>
                                             <p className="text-muted-foreground text-sm">Expires {pm.expiry}</p>

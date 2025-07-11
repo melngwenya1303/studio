@@ -55,7 +55,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
     // For now, the cart only holds one item for a simple checkout
     setCart([newCartItem]);
-    router.push('/checkout');
   };
 
   const clearCart = () => {

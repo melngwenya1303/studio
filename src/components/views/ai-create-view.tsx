@@ -115,7 +115,9 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     }, [remixData, clearRemixData]);
 
     useEffect(() => {
+        // @ts-ignore
         if (typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window)) {
+            // @ts-ignore
             const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
             recognitionRef.current = new SpeechRecognition();
             const recognition = recognitionRef.current;

@@ -463,10 +463,10 @@ export default function AdminPage() {
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuItem onClick={() => setUserAction({action: 'promote', userId: user.id, userName: user.name})}>
-                                                            <Icon name={user.role === 'Admin' ? 'User' : 'ShieldCheck'} /> {user.role === 'Admin' ? 'Demote to User' : 'Promote to Admin'}
+                                                            <Icon name={user.role === 'Admin' ? 'UserPlus' : 'ShieldCheck'} /> {user.role === 'Admin' ? 'Demote to User' : 'Promote to Admin'}
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem onClick={() => setUserAction({action: 'suspend', userId: user.id, userName: user.name})}>
-                                                            <Icon name="ShieldCheck" /> {user.status === 'Active' ? 'Suspend' : 'Unsuspend'}
+                                                            <Icon name="Ban" /> {user.status === 'Active' ? 'Suspend' : 'Unsuspend'}
                                                         </DropdownMenuItem>
                                                         <DropdownMenuItem onClick={() => setUserAction({action: 'delete', userId: user.id, userName: user.name})} className="text-destructive">
                                                             <Icon name="Trash2" /> Delete User

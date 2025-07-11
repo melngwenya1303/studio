@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { useRouter } from 'next/navigation';
 
 
 type UploadViewProps = {
@@ -29,6 +30,7 @@ type UploadViewProps = {
 export default function UploadView({ onBack }: UploadViewProps) {
     const { user, addCreation, addToCart } = useApp();
     const { toast } = useToast();
+    const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [selectedDevice, setSelectedDevice] = useState<Device>(DEVICES[0]);
@@ -125,6 +127,7 @@ export default function UploadView({ onBack }: UploadViewProps) {
             deviceType: deviceName,
         };
         addToCart(cartItem);
+        router.push('/checkout');
     };
 
     const currentCanvas = selectedModel || selectedDevice;
