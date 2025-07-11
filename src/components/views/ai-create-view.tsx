@@ -10,6 +10,7 @@ import { generateImage } from '@/ai/flows/generate-image';
 import { getCreativeFeedback } from '@/ai/flows/get-creative-feedback';
 import { getRemixSuggestions } from '@/ai/flows/get-remix-suggestions';
 import { generateAudio } from '@/ai/flows/generate-audio';
+import { generateCreativePrompt } from '@/ai/flows/generate-creative-prompt';
 import { DEVICES, STYLES } from '@/lib/constants';
 import type { Device, Style, Creation, DeviceModel } from '@/lib/types';
 import Icon from '@/components/shared/icon';
@@ -58,6 +59,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     const [mockupPrompt, setMockupPrompt] = useState('');
     const [isGeneratingMockup, setIsGeneratingMockup] = useState(false);
     const [generatedMockup, setGeneratedMockup] = useState<string | null>(null);
+    const [isGettingCreativePrompt, setIsGettingCreativePrompt] = useState(false);
     
     // AR State
     const [isPreviewingAr, setIsPreviewingAr] = useState<boolean>(false);
@@ -200,6 +202,19 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
             setIsSpeaking(false);
         }
     };
+    
+    const handleCreativePrompt = async () => {
+        setIsGettingCreativePrompt(true);
+        try {
+            const result = await generateCreativePrompt();
+            setPrompt(result.prompt);
+            toast({ title: "Prompt Generated!", description: "A new idea has been sparked." });
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Could not get prompt", description: error.message });
+        } finally {
+            setIsGettingCreativePrompt(false);
+        }
+    };
 
     const handleGenerate = useCallback(async (basePrompt: string) => {
         if (!basePrompt.trim()) {
@@ -246,14 +261,20 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         return;
       }
       setIsGeneratingMockup(true);
+      setGeneratedMockup(null);
       try {
         const result = await generateImage({
           prompt: mockupPrompt,
           baseImageUrl: generatedDecal.url
         });
-        if (result.media) {
-          setGeneratedMockup(result.media);
+        
+        if (result.blocked || !result.media) {
+          toast({ variant: "destructive", title: "Mockup Generation Failed", description: result.reason || 'An unexpected error occurred.' });
+          setIsGeneratingMockup(false);
+          return;
         }
+        setGeneratedMockup(result.media);
+        
       } catch (error: any) {
         toast({ variant: "destructive", title: "Mockup Generation Failed", description: error.message, duration: 5000 });
       } finally {
@@ -466,6 +487,9 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                 </div>
                                  <div className="space-y-2">
                                     <Label htmlFor="prompt-input">Prompt</Label>
+                                     <Button variant="link" className="p-0 h-auto text-sm" onClick={handleCreativePrompt} disabled={isGettingCreativePrompt || isLoading}>
+                                         {isGettingCreativePrompt ? 'Thinking...' : 'Not sure? Get a random idea!'}
+                                     </Button>
                                     <div className="relative">
                                         <Textarea
                                             id="prompt-input"
