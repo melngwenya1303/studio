@@ -546,6 +546,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                 </TabsContent>
                                 <TabsContent value="mockups">
                                     <div className="py-6 space-y-4">
+                                        <h3 className="text-xl font-semibold font-headline">Change Background</h3>
                                         <p className="text-muted-foreground">Change the product color to see how your design looks.</p>
                                         <div className="flex flex-wrap gap-3">
                                             {[

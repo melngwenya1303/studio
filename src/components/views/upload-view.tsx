@@ -109,13 +109,16 @@ export default function UploadView({ onBack }: UploadViewProps) {
                                     <div className="space-y-6 py-6 flex-grow">
                                         <div className="space-y-4">
                                             <h3 className="text-xl font-semibold font-headline">1. Upload Your Image</h3>
-                                            <Button variant="outline" className="w-full h-32 border-dashed" onClick={() => fileInputRef.current?.click()}>
-                                                <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                                                    <Icon name="ImageIcon" className="w-8 h-8" />
-                                                    <span>Click to upload</span>
-                                                    <span className="text-xs">PNG, JPG, GIF</span>
-                                                </div>
-                                            </Button>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="upload-button">Artwork File</Label>
+                                                <Button id="upload-button" variant="outline" className="w-full h-32 border-dashed" onClick={() => fileInputRef.current?.click()}>
+                                                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                                                        <Icon name="ImageIcon" className="w-8 h-8" />
+                                                        <span>Click to upload</span>
+                                                        <span className="text-xs">PNG, JPG, GIF</span>
+                                                    </div>
+                                                </Button>
+                                            </div>
                                             <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
                                         </div>
                                         
@@ -174,7 +177,7 @@ export default function UploadView({ onBack }: UploadViewProps) {
                                         </div>
                                     </div>
                                     
-                                    <div className="mt-auto pt-4 space-y-3">
+                                    <div className="mt-auto pt-4 space-y-3 border-t">
                                         <div className="flex gap-3">
                                             <Button variant="outline" onClick={handleSaveCreation} disabled={isSaving || !uploadedImage} className="w-full">
                                                 {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
@@ -186,6 +189,7 @@ export default function UploadView({ onBack }: UploadViewProps) {
                                 </TabsContent>
                                 <TabsContent value="mockups">
                                      <div className="py-6 space-y-4">
+                                        <h3 className="text-xl font-semibold font-headline">Change Background</h3>
                                         <p className="text-muted-foreground">Change the product color to see how your design looks.</p>
                                         <div className="flex flex-wrap gap-3">
                                             {[
