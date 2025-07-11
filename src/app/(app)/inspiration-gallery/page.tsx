@@ -22,6 +22,148 @@ import { Card, CardContent, CardFooter } from '@/components/ui/card';
 type CategoryFilter = 'all' | 'trending' | 'popular' | 'recent';
 type ViewMode = 'grid' | 'list';
 
+const GalleryCard = React.memo(function GalleryCard({ 
+    item, 
+    isDescribing, 
+    isRemixing, 
+    onLike, 
+    onDescribe, 
+    onRemix 
+}: { 
+    item: GalleryItem;
+    isDescribing: boolean;
+    isRemixing: boolean;
+    onLike: (id: number) => void;
+    onDescribe: (item: GalleryItem) => void;
+    onRemix: (item: GalleryItem) => void;
+}) {
+    return (
+        <Card className="group h-full flex flex-col">
+            <CardContent className="p-0 relative">
+               <div className="w-full aspect-square relative">
+                 <Image src={item.url} alt={item.prompt} fill className="object-cover rounded-t-lg" {...{ 'data-ai-hint': item['data-ai-hint'] }} />
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                         <Button
+                            onClick={() => onLike(item.id)}
+                            size="icon"
+                            variant="ghost"
+                            className="absolute top-2 right-2 bg-black/30 text-white backdrop-blur-sm rounded-full hover:bg-black/50 hover:text-pink-400"
+                          >
+                           <Icon name="Heart" />
+                         </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>Like</p></TooltipContent>
+                  </Tooltip>
+               </div>
+            </CardContent>
+           <div className="p-4 flex flex-col flex-grow">
+                <p className="text-base font-semibold text-card-foreground mb-2 line-clamp-2" title={item.prompt}>{item.prompt}</p>
+                <p className="text-sm text-muted-foreground italic mb-4 line-clamp-2">Curator's Note: "{item.curatorNote}"</p>
+                <div className="flex items-center gap-2 text-sm mt-auto">
+                   <Badge variant="outline" className="flex-shrink-0">{item.style}</Badge>
+                   <div className="flex items-center gap-1.5 text-muted-foreground">
+                       <Icon name="Heart" className="text-pink-500"/>
+                       <span>{item.likes}</span>
+                   </div>
+               </div>
+           </div>
+           <CardFooter className="p-4 pt-0 flex justify-end gap-2">
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                         <Button 
+                            onClick={() => onDescribe(item)} 
+                            disabled={isDescribing}
+                            variant="outline" 
+                            size="icon" 
+                            className="flex-shrink-0"
+                        >
+                            {isDescribing ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="BookOpen" />}
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>Describe with AI</p></TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                    <TooltipTrigger asChild>
+                        <Button onClick={() => onRemix(item)} disabled={isRemixing} className="flex-grow">
+                            {isRemixing ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
+                            Remix
+                        </Button>
+                    </TooltipTrigger>
+                    <TooltipContent><p>Remix with AI</p></TooltipContent>
+                </Tooltip>
+           </CardFooter>
+        </Card>
+    );
+});
+    
+const GalleryListItem = React.memo(function GalleryListItem({ 
+    item, 
+    isDescribing, 
+    isRemixing, 
+    onLike, 
+    onDescribe, 
+    onRemix 
+}: { 
+    item: GalleryItem;
+    isDescribing: boolean;
+    isRemixing: boolean;
+    onLike: (id: number) => void;
+    onDescribe: (item: GalleryItem) => void;
+    onRemix: (item: GalleryItem) => void;
+}) {
+    return (
+        <Card className="group flex flex-col md:flex-row items-center w-full">
+            <div className="w-full md:w-48 h-48 md:h-auto md:self-stretch flex-shrink-0 relative">
+                <Image src={item.url} alt={item.prompt} fill className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-r-none" {...{ 'data-ai-hint': item['data-ai-hint'] }} />
+            </div>
+            <div className="p-4 flex flex-col flex-grow self-stretch">
+                <p className="text-base font-semibold text-card-foreground mb-2 line-clamp-2" title={item.prompt}>{item.prompt}</p>
+                <p className="text-sm text-muted-foreground italic mb-4 line-clamp-2">Curator's Note: "{item.curatorNote}"</p>
+                <div className="flex-grow"></div>
+                <div className="flex items-center justify-between mt-auto">
+                    <div className="flex items-center gap-2 text-sm">
+                        <Badge variant="outline">{item.style}</Badge>
+                        <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <Icon name="Heart" className="text-pink-500"/>
+                            <span>{item.likes}</span>
+                        </div>
+                    </div>
+                     <div className="flex items-center gap-2">
+                        <Tooltip>
+                            <TooltipTrigger asChild><Button onClick={() => onLike(item.id)} variant="outline" size="icon"><Icon name="Heart" /></Button></TooltipTrigger>
+                            <TooltipContent><p>Like</p></TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                 <Button 
+                                    onClick={() => onDescribe(item)} 
+                                    disabled={isDescribing}
+                                    variant="outline" 
+                                    size="icon" 
+                                    className="flex-shrink-0"
+                                >
+                                    {isDescribing ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="BookOpen" />}
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent><p>Describe with AI</p></TooltipContent>
+                        </Tooltip>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button onClick={() => onRemix(item)} disabled={isRemixing}>
+                                    {isRemixing ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
+                                    Remix
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent><p>Remix with AI</p></TooltipContent>
+                        </Tooltip>
+                    </div>
+                </div>
+            </div>
+        </Card>
+    );
+});
+
 export default function InspirationGalleryPage() {
     const { startRemix } = useApp();
     const { toast } = useToast();
@@ -121,116 +263,6 @@ export default function InspirationGalleryPage() {
         toast({ title: 'Liked!', description: 'You liked this design.' });
     }, [toast]);
 
-    const GalleryCard = ({ item }: { item: GalleryItem }) => (
-        <Card className="group h-full flex flex-col">
-            <CardContent className="p-0 relative">
-               <div className="w-full aspect-square relative">
-                 <Image src={item.url} alt={item.prompt} fill className="object-cover rounded-t-lg" {...{ 'data-ai-hint': item['data-ai-hint'] }} />
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                         <Button
-                            onClick={() => handleLike(item.id)}
-                            size="icon"
-                            variant="ghost"
-                            className="absolute top-2 right-2 bg-black/30 text-white backdrop-blur-sm rounded-full hover:bg-black/50 hover:text-pink-400"
-                          >
-                           <Icon name="Heart" />
-                         </Button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>Like</p></TooltipContent>
-                  </Tooltip>
-               </div>
-            </CardContent>
-           <div className="p-4 flex flex-col flex-grow">
-                <p className="text-base font-semibold text-card-foreground mb-2 line-clamp-2" title={item.prompt}>{item.prompt}</p>
-                <p className="text-sm text-muted-foreground italic mb-4 line-clamp-2">Curator's Note: "{item.curatorNote}"</p>
-                <div className="flex items-center gap-2 text-sm mt-auto">
-                   <Badge variant="outline" className="flex-shrink-0">{item.style}</Badge>
-                   <div className="flex items-center gap-1.5 text-muted-foreground">
-                       <Icon name="Heart" className="text-pink-500"/>
-                       <span>{item.likes}</span>
-                   </div>
-               </div>
-           </div>
-           <CardFooter className="p-4 pt-0 flex justify-end gap-2">
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                         <Button 
-                            onClick={() => handleDescribe(item)} 
-                            disabled={!!isDescribing}
-                            variant="outline" 
-                            size="icon" 
-                            className="flex-shrink-0"
-                        >
-                            {isDescribing === item.id ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="BookOpen" />}
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>Describe with AI</p></TooltipContent>
-                </Tooltip>
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button onClick={() => handleRemix(item)} disabled={!!isRemixing} className="flex-grow">
-                            {isRemixing === item.id ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
-                            Remix
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent><p>Remix with AI</p></TooltipContent>
-                </Tooltip>
-           </CardFooter>
-        </Card>
-    );
-    
-    const GalleryListItem = ({ item }: { item: GalleryItem }) => (
-        <Card className="group flex flex-col md:flex-row items-center w-full">
-            <div className="w-full md:w-48 h-48 md:h-auto md:self-stretch flex-shrink-0 relative">
-                <Image src={item.url} alt={item.prompt} fill className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-r-none" {...{ 'data-ai-hint': item['data-ai-hint'] }} />
-            </div>
-            <div className="p-4 flex flex-col flex-grow self-stretch">
-                <p className="text-base font-semibold text-card-foreground mb-2 line-clamp-2" title={item.prompt}>{item.prompt}</p>
-                <p className="text-sm text-muted-foreground italic mb-4 line-clamp-2">Curator's Note: "{item.curatorNote}"</p>
-                <div className="flex-grow"></div>
-                <div className="flex items-center justify-between mt-auto">
-                    <div className="flex items-center gap-2 text-sm">
-                        <Badge variant="outline">{item.style}</Badge>
-                        <div className="flex items-center gap-1.5 text-muted-foreground">
-                            <Icon name="Heart" className="text-pink-500"/>
-                            <span>{item.likes}</span>
-                        </div>
-                    </div>
-                     <div className="flex items-center gap-2">
-                        <Tooltip>
-                            <TooltipTrigger asChild><Button onClick={() => handleLike(item.id)} variant="outline" size="icon"><Icon name="Heart" /></Button></TooltipTrigger>
-                            <TooltipContent><p>Like</p></TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                 <Button 
-                                    onClick={() => handleDescribe(item)} 
-                                    disabled={!!isDescribing}
-                                    variant="outline" 
-                                    size="icon" 
-                                    className="flex-shrink-0"
-                                >
-                                    {isDescribing === item.id ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="BookOpen" />}
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent><p>Describe with AI</p></TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                            <TooltipTrigger asChild>
-                                <Button onClick={() => handleRemix(item)} disabled={!!isRemixing}>
-                                    {isRemixing === item.id ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
-                                    Remix
-                                </Button>
-                            </TooltipTrigger>
-                            <TooltipContent><p>Remix with AI</p></TooltipContent>
-                        </Tooltip>
-                    </div>
-                </div>
-            </div>
-        </Card>
-    );
-
     return (
         <TooltipProvider>
             <div className="p-4 md:p-8 animate-fade-in">
@@ -278,7 +310,25 @@ export default function InspirationGalleryPage() {
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5 }}
                         >
-                           {viewMode === 'grid' ? <GalleryCard item={item} /> : <GalleryListItem item={item} />}
+                           {viewMode === 'grid' ? (
+                               <GalleryCard 
+                                 item={item} 
+                                 isDescribing={isDescribing === item.id}
+                                 isRemixing={isRemixing === item.id}
+                                 onDescribe={handleDescribe}
+                                 onRemix={handleRemix}
+                                 onLike={handleLike}
+                                />
+                            ) : (
+                                <GalleryListItem
+                                  item={item} 
+                                  isDescribing={isDescribing === item.id}
+                                  isRemixing={isRemixing === item.id}
+                                  onDescribe={handleDescribe}
+                                  onRemix={handleRemix}
+                                  onLike={handleLike}
+                                />
+                            )}
                         </motion.div>
                     ))}
                 </div>

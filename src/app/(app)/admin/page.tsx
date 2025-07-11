@@ -42,7 +42,7 @@ const mockOrders = [
 export default function AdminPage() {
     const { isAdmin, user } = useApp();
     const { toast } = useToast();
-    const db = getFirestore(firebaseApp);
+    const db = useMemo(() => getFirestore(firebaseApp), []);
     
     const [blocklist, setBlocklist] = useState<{ id: string, word: string, category: string }[]>([]);
     const [newBlockword, setNewBlockword] = useState('');
