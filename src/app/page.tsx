@@ -11,15 +11,10 @@ export default function Home() {
   const { user } = useApp();
 
   useEffect(() => {
-    // Wait until the auth state is determined
-    if (user === undefined) return; // Still loading
-
-    if (user) {
-      router.replace('/dashboard');
-    } else {
-      router.replace('/login');
-    }
-  }, [user, router]);
+    // With the bypass, user object might be available immediately.
+    // We can just redirect to dashboard.
+    router.replace('/dashboard');
+  }, [router]);
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background">

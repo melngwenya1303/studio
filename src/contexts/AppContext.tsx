@@ -34,10 +34,19 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// --- MOCK USER FOR BYPASS ---
+const MOCK_USER: User = {
+    uid: 'mock-admin-user-01',
+    email: 'admin@surfacestory.dev',
+    name: 'Admin Bypassed'
+};
+const USE_LOGIN_BYPASS = true; // Set to false to re-enable real login
+
+
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [user, setUser] = useState<User | null>(USE_LOGIN_BYPASS ? MOCK_USER : null);
+  const [isAdmin, setIsAdmin] = useState(USE_LOGIN_BYPASS ? true : false);
   const [creations, setCreations] = useState<Creation[]>([]);
   const [remixData, setRemixData] = useState<Partial<Creation & GalleryItem> | null>(null);
   const [cart, setCart] = useState<Creation[]>([]);
@@ -103,6 +112,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }, [db]);
 
   useEffect(() => {
+    if (USE_LOGIN_BYPASS) {
+      if(user) fetchInitialCreations(user.uid);
+      if(galleryItems.length === 0) fetchInitialGalleryItems();
+      return;
+    }
+
     const auth = getAuth(firebaseApp);
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -155,7 +170,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     });
     
     return unsubscribe;
-  }, [db, fetchInitialCreations, fetchInitialGalleryItems, galleryItems.length]);
+  }, [db, fetchInitialCreations, fetchInitialGalleryItems, galleryItems.length, user]);
 
   const fetchMoreCreations = useCallback(async () => {
     const userId = user?.uid;
@@ -294,7 +309,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     fetchMoreGalleryItems,
     hasMoreGalleryItems,
     isLoadingGalleryItems,
-  }), [user, isAdmin, creations, addCreation, startRemix, remixData, clearRemixData, cart, addToCart, clearCart, fetchMoreCreations, hasMoreCreations, isLoadingCreations, galleryItems, fetchMoreGalleryItems, hasMoreGalleryItems, isLoadingGalleryItems, ]);
+  }), [user, isAdmin, creations, addCreation, startRemix, remixData, clearRemixData, cart, addToCart, clearCart, fetchMoreCreations, hasMoreCreations, isLoadingCreations, galleryItems, fetchMoreGalleryItems, hasMoreGalleryItems, isLoadingGalleryItems]);
 
   return (
     <AppContext.Provider value={contextValue}>
