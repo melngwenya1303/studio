@@ -6,8 +6,10 @@ import { useRouter } from 'next/navigation';
 import type { Creation, User, GalleryItem } from '@/lib/types';
 import { onAuthStateChanged, getAuth } from 'firebase/auth';
 import { firebaseApp } from '@/lib/firebase';
-import { getFirestore, collection, addDoc, query, where, serverTimestamp, onSnapshot, doc, getDoc, setDoc } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, where, serverTimestamp, onSnapshot, doc, getDoc, setDoc, orderBy, limit, startAfter, getDocs, DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
+
+const CREATIONS_PAGE_SIZE = 8;
 
 interface AppContextType {
   user: User | null;
@@ -20,6 +22,9 @@ interface AppContextType {
   cart: Creation[];
   addToCart: (item: Omit<Creation, 'id' | 'createdAt'>) => void;
   clearCart: () => void;
+  fetchMoreCreations: () => void;
+  hasMoreCreations: boolean;
+  isLoadingCreations: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -34,20 +39,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const db = getFirestore(firebaseApp);
   const storage = getStorage(firebaseApp);
 
-  useEffect(() => {
-    // --- LOGIN BYPASS ---
-    // This will automatically log you in as an admin for development purposes.
-    const mockAdminUser = {
-        uid: 'admin-bypass-uid',
-        email: 'admin@surfacestoryai.com',
-        name: 'Admin User',
-    };
-    setUser(mockAdminUser);
-    setIsAdmin(true);
-    // --- END LOGIN BYPASS ---
+  // Pagination state
+  const [lastVisibleCreation, setLastVisibleCreation] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [hasMoreCreations, setHasMoreCreations] = useState(true);
+  const [isLoadingCreations, setIsLoadingCreations] = useState(false);
 
-    /*
-    // Original Firebase Auth logic is commented out below. We can restore it later.
+  useEffect(() => {
     const auth = getAuth(firebaseApp);
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -55,18 +52,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         const userDocSnap = await getDoc(userDocRef);
 
         let finalIsAdmin = false;
-
         if (userDocSnap.exists()) {
           finalIsAdmin = userDocSnap.data()?.isAdmin || false;
         } else {
-          // If the user doc doesn't exist, this is their first sign-in.
-          // Create the document now.
           const isDefaultAdmin = firebaseUser.email === 'admin@surfacestoryai.com';
           const newUserPayload = {
             email: firebaseUser.email,
             isAdmin: isDefaultAdmin,
             name: firebaseUser.displayName || firebaseUser.email,
             createdAt: serverTimestamp(),
+            creationsCount: 0,
+            remixesCount: 0,
           };
           await setDoc(userDocRef, newUserPayload);
           finalIsAdmin = isDefaultAdmin;
@@ -78,27 +74,64 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setUser(null);
         setIsAdmin(false);
         setCreations([]);
+        setLastVisibleCreation(null);
+        setHasMoreCreations(true);
       }
     });
 
     return () => unsubscribe();
-    */
   }, [db]);
 
-  useEffect(() => {
-    if (user?.uid && user.uid !== 'admin-bypass-uid') { // Don't fetch for bypass user
-      const q = query(collection(db, "creations"), where("userId", "==", user.uid));
-      const unsubscribe = onSnapshot(q, (querySnapshot) => {
-        const userCreations: Creation[] = [];
-        querySnapshot.forEach((doc) => {
-          userCreations.push({ id: doc.id, ...doc.data() } as Creation);
-        });
-        userCreations.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
-        setCreations(userCreations);
-      });
-      return () => unsubscribe();
-    }
+  const fetchInitialCreations = useCallback(async () => {
+    if (!user?.uid) return;
+
+    setIsLoadingCreations(true);
+    const creationsQuery = query(
+        collection(db, "creations"), 
+        where("userId", "==", user.uid),
+        orderBy("createdAt", "desc"),
+        limit(CREATIONS_PAGE_SIZE)
+    );
+    
+    const documentSnapshots = await getDocs(creationsQuery);
+    const userCreations: Creation[] = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() } as Creation));
+    
+    setCreations(userCreations);
+    setLastVisibleCreation(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
+    setHasMoreCreations(documentSnapshots.docs.length === CREATIONS_PAGE_SIZE);
+    setIsLoadingCreations(false);
   }, [user, db]);
+
+  useEffect(() => {
+    // Reset and fetch initial creations when user changes
+    setCreations([]);
+    setLastVisibleCreation(null);
+    setHasMoreCreations(true);
+    if (user) {
+        fetchInitialCreations();
+    }
+  }, [user, fetchInitialCreations]);
+
+  const fetchMoreCreations = useCallback(async () => {
+    if (!user?.uid || !lastVisibleCreation || !hasMoreCreations) return;
+
+    setIsLoadingCreations(true);
+    const creationsQuery = query(
+        collection(db, "creations"), 
+        where("userId", "==", user.uid),
+        orderBy("createdAt", "desc"),
+        startAfter(lastVisibleCreation),
+        limit(CREATIONS_PAGE_SIZE)
+    );
+
+    const documentSnapshots = await getDocs(creationsQuery);
+    const newCreations: Creation[] = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() } as Creation));
+    
+    setCreations(prev => [...prev, ...newCreations]);
+    setLastVisibleCreation(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
+    setHasMoreCreations(documentSnapshots.docs.length === CREATIONS_PAGE_SIZE);
+    setIsLoadingCreations(false);
+  }, [user, db, lastVisibleCreation, hasMoreCreations]);
 
 
   const addCreation = useCallback(async (creationData: Omit<Creation, 'id' | 'createdAt'>) => {
@@ -107,7 +140,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const imageId = crypto.randomUUID();
     const storageRef = ref(storage, `creations/${user.uid}/${imageId}.png`);
     
-    // The uploaded image can be a data URI or a public URL. Handle both cases.
     let uploadURL = creationData.url;
     if (creationData.url.startsWith('data:')) {
       const uploadResult = await uploadString(storageRef, creationData.url, 'data_url');
@@ -123,13 +155,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const docRef = await addDoc(collection(db, "creations"), creationPayload);
     
+    // This is where you would call a Cloud Function to update the user's creationsCount
+    // For now, we fetch again to see the new creation.
+    fetchInitialCreations();
+
     return {
       ...creationData,
       id: docRef.id,
       url: uploadURL,
       createdAt: new Date(),
     };
-  }, [user, db, storage]);
+  }, [user, db, storage, fetchInitialCreations]);
   
   const startRemix = useCallback((item: Partial<Creation & GalleryItem>) => {
     setRemixData(item);
@@ -163,8 +199,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     clearRemixData,
     cart,
     addToCart,
-    clearCart
-  }), [user, isAdmin, creations, addCreation, startRemix, remixData, clearRemixData, cart, addToCart, clearCart]);
+    clearCart,
+    fetchMoreCreations,
+    hasMoreCreations,
+    isLoadingCreations
+  }), [user, isAdmin, creations, addCreation, startRemix, remixData, clearRemixData, cart, addToCart, clearCart, fetchMoreCreations, hasMoreCreations, isLoadingCreations]);
 
   return (
     <AppContext.Provider value={contextValue}>

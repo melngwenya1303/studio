@@ -24,7 +24,7 @@ type SortOrder = 'newest' | 'oldest';
 type ProductFilter = 'all' | 'Laptop' | 'Phone' | 'Tablet';
 
 export default function DashboardView() {
-    const { creations, startRemix } = useApp();
+    const { creations, startRemix, fetchMoreCreations, hasMoreCreations, isLoadingCreations } = useApp();
     const router = useRouter();
     const { toast } = useToast();
 
@@ -44,7 +44,7 @@ export default function DashboardView() {
         // Filter by search term
         if (searchTerm) {
             items = items.filter(c => 
-                c.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (c.title?.toLowerCase() || '').includes(searchTerm.toLowerCase()) ||
                 c.prompt.toLowerCase().includes(searchTerm.toLowerCase())
             );
         }
@@ -187,108 +187,117 @@ export default function DashboardView() {
                 </div>
 
                 {filteredAndSortedCreations.length > 0 ? (
-                    <div className={viewMode === 'grid' 
-                        ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
-                        : "space-y-4"
-                    }>
-                        {filteredAndSortedCreations.map((creation, i) => (
-                            <motion.div 
-                                key={creation.id} 
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ duration: 0.5, delay: i * 0.05 }}
-                                className={viewMode === 'grid' ? "group relative rounded-xl overflow-hidden shadow-lg aspect-square bg-card border" : "bg-card border rounded-xl p-4 flex items-center gap-4"}
-                                whileHover={viewMode === 'grid' ? { y: -5 } : {}}
-                            >
-                                <div className={viewMode === 'grid' ? 'relative w-full h-full' : 'relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden'}>
-                                    <Image src={creation.url} alt={creation.title || creation.prompt} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-                                    {viewMode === 'grid' && (
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button
-                                                    onClick={() => handleLike(creation.id)}
-                                                    size="icon"
-                                                    variant="ghost"
-                                                    className="absolute top-2 right-2 bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 hover:text-pink-400"
-                                                >
-                                                    <Icon name="Heart" />
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent><p>Like</p></TooltipContent>
-                                        </Tooltip>
-                                    )}
-                                </div>
-
-                                <div className={viewMode === 'grid' ? "absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end" : "flex-grow"}>
-                                    <p 
-                                        className={`${viewMode === 'grid' ? 'text-white' : 'text-card-foreground'} font-semibold truncate`}
-                                        title={creation.title}
-                                    >
-                                        {creation.title || creation.prompt}
-                                    </p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <Badge variant="outline">{creation.style}</Badge>
-                                        <Badge variant="secondary">{creation.deviceType}</Badge>
-                                    </div>
-                                    <p className="text-xs text-muted-foreground mt-2">
-                                        Created: {creation.createdAt?.seconds ? new Date(creation.createdAt.seconds * 1000).toLocaleDateString() : 'Just now'}
-                                    </p>
-                                    <motion.div 
-                                        className={`flex items-center gap-2 mt-2 ${viewMode === 'grid' ? 'opacity-0 group-hover:opacity-100' : ''} transition-opacity duration-300`}
-                                    >
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button
-                                                    onClick={() => handleRemix(creation)} 
-                                                    disabled={!!isRemixing}
-                                                    size="sm"
-                                                    variant={viewMode === 'grid' ? 'default' : 'outline'}
-                                                    className={`${viewMode === 'grid' ? 'bg-white/20 text-white backdrop-blur-md hover:bg-white/30' : ''} text-xs font-semibold rounded-full flex items-center gap-1 disabled:opacity-50`}
-                                                >
-                                                    {isRemixing === creation.id ? <Icon name="Wand2" className="w-3 h-3 animate-pulse" /> : <Icon name="Sparkles" className="w-3 h-3" />}
-                                                    Remix
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent><p>Remix with AI</p></TooltipContent>
-                                        </Tooltip>
-
-                                        <Tooltip>
-                                            <TooltipTrigger asChild>
-                                                <Button
-                                                    onClick={() => handleDescribe(creation)}
-                                                    disabled={!!isDescribing}
-                                                    size="sm"
-                                                    variant={viewMode === 'grid' ? 'default' : 'outline'}
-                                                    className={`${viewMode === 'grid' ? 'bg-white/20 text-white backdrop-blur-md hover:bg-white/30' : ''} text-xs font-semibold rounded-full flex items-center gap-1 disabled:opacity-50`}
-                                                >
-                                                    {isDescribing === creation.id ? <Icon name="Wand2" className="w-3 h-3 animate-pulse" /> : <Icon name="BookOpen" className="w-3 h-3" />}
-                                                    Describe
-                                                </Button>
-                                            </TooltipTrigger>
-                                            <TooltipContent><p>Describe with AI</p></TooltipContent>
-                                        </Tooltip>
-                                        
-                                        {viewMode === 'list' && (
+                    <>
+                        <div className={viewMode === 'grid' 
+                            ? "grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
+                            : "space-y-4"
+                        }>
+                            {filteredAndSortedCreations.map((creation, i) => (
+                                <motion.div 
+                                    key={creation.id} 
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5, delay: i * 0.05 }}
+                                    className={viewMode === 'grid' ? "group relative rounded-xl overflow-hidden shadow-lg aspect-square bg-card border" : "bg-card border rounded-xl p-4 flex items-center gap-4"}
+                                    whileHover={viewMode === 'grid' ? { y: -5 } : {}}
+                                >
+                                    <div className={viewMode === 'grid' ? 'relative w-full h-full' : 'relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden'}>
+                                        <Image src={creation.url} alt={creation.title || creation.prompt} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
+                                        {viewMode === 'grid' && (
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
                                                     <Button
                                                         onClick={() => handleLike(creation.id)}
-                                                        size="sm"
-                                                        variant="outline"
-                                                        className="text-xs font-semibold rounded-full flex items-center gap-1 hover:text-pink-500"
+                                                        size="icon"
+                                                        variant="ghost"
+                                                        className="absolute top-2 right-2 bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 hover:text-pink-400"
                                                     >
-                                                        <Icon name="Heart" className="w-3 h-3" />
-                                                        Like
+                                                        <Icon name="Heart" />
                                                     </Button>
                                                 </TooltipTrigger>
                                                 <TooltipContent><p>Like</p></TooltipContent>
                                             </Tooltip>
                                         )}
-                                    </motion.div>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
+                                    </div>
+
+                                    <div className={viewMode === 'grid' ? "absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end" : "flex-grow"}>
+                                        <p 
+                                            className={`${viewMode === 'grid' ? 'text-white' : 'text-card-foreground'} font-semibold truncate`}
+                                            title={creation.title}
+                                        >
+                                            {creation.title || creation.prompt}
+                                        </p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <Badge variant="outline">{creation.style}</Badge>
+                                            <Badge variant="secondary">{creation.deviceType}</Badge>
+                                        </div>
+                                        <p className="text-xs text-muted-foreground mt-2">
+                                            Created: {creation.createdAt?.seconds ? new Date(creation.createdAt.seconds * 1000).toLocaleDateString() : 'Just now'}
+                                        </p>
+                                        <motion.div 
+                                            className={`flex items-center gap-2 mt-2 ${viewMode === 'grid' ? 'opacity-0 group-hover:opacity-100' : ''} transition-opacity duration-300`}
+                                        >
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button
+                                                        onClick={() => handleRemix(creation)} 
+                                                        disabled={!!isRemixing}
+                                                        size="sm"
+                                                        variant={viewMode === 'grid' ? 'default' : 'outline'}
+                                                        className={`${viewMode === 'grid' ? 'bg-white/20 text-white backdrop-blur-md hover:bg-white/30' : ''} text-xs font-semibold rounded-full flex items-center gap-1 disabled:opacity-50`}
+                                                    >
+                                                        {isRemixing === creation.id ? <Icon name="Wand2" className="w-3 h-3 animate-pulse" /> : <Icon name="Sparkles" className="w-3 h-3" />}
+                                                        Remix
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent><p>Remix with AI</p></TooltipContent>
+                                            </Tooltip>
+
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button
+                                                        onClick={() => handleDescribe(creation)}
+                                                        disabled={!!isDescribing}
+                                                        size="sm"
+                                                        variant={viewMode === 'grid' ? 'default' : 'outline'}
+                                                        className={`${viewMode === 'grid' ? 'bg-white/20 text-white backdrop-blur-md hover:bg-white/30' : ''} text-xs font-semibold rounded-full flex items-center gap-1 disabled:opacity-50`}
+                                                    >
+                                                        {isDescribing === creation.id ? <Icon name="Wand2" className="w-3 h-3 animate-pulse" /> : <Icon name="BookOpen" className="w-3 h-3" />}
+                                                        Describe
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent><p>Describe with AI</p></TooltipContent>
+                                            </Tooltip>
+                                            
+                                            {viewMode === 'list' && (
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            onClick={() => handleLike(creation.id)}
+                                                            size="sm"
+                                                            variant="outline"
+                                                            className="text-xs font-semibold rounded-full flex items-center gap-1 hover:text-pink-500"
+                                                        >
+                                                            <Icon name="Heart" className="w-3 h-3" />
+                                                            Like
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent><p>Like</p></TooltipContent>
+                                                </Tooltip>
+                                            )}
+                                        </motion.div>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
+                        {hasMoreCreations && (
+                             <div className="mt-8 text-center">
+                                <Button onClick={fetchMoreCreations} disabled={isLoadingCreations}>
+                                    {isLoadingCreations ? 'Loading...' : 'Load More'}
+                                </Button>
+                            </div>
+                        )}
+                    </>
                 ) : (
                     <div className="text-center py-20 bg-card rounded-xl border border-dashed">
                         <Icon name="ImageIcon" className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
