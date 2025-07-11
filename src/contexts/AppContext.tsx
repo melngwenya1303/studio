@@ -39,7 +39,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
         const userDocRef = doc(db, 'users', firebaseUser.uid);
-        let userDocSnap = await getDoc(userDocRef);
+        const userDocSnap = await getDoc(userDocRef);
         let userData;
 
         if (!userDocSnap.exists()) {
@@ -69,7 +69,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }, [db]);
 
   useEffect(() => {
-    if (user) {
+    if (user?.uid) {
       const q = query(collection(db, "creations"), where("userId", "==", user.uid));
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const userCreations: Creation[] = [];

@@ -8,8 +8,6 @@
  * - GenerateImageInput - The input type for the generateImage function, including the prompt.
  * - GenerateImageOutput - The return type for the generateImage function, which is the image data URI.
  */
-import { config } from 'dotenv';
-config();
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
