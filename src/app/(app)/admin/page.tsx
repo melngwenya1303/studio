@@ -11,14 +11,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import Modal from '@/components/shared/modal';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+
+const BLOCKLIST_CATEGORIES = ['Copyright Infringement', 'Offensive Content', 'Hate Speech', 'General'];
 
 export default function AdminPage() {
     const { isAdmin } = useApp();
     const { toast } = useToast();
     
     // Blocklist state
-    const [blocklist, setBlocklist] = useState(['badword1', 'badword2', 'unwanted', 'prohibited']);
+    const [blocklist, setBlocklist] = useState([
+        { word: 'disney', category: 'Copyright Infringement' },
+        { word: 'marvel', category: 'Copyright Infringement' },
+        { word: 'badword1', category: 'Offensive Content' },
+        { word: 'badword2', category: 'Hate Speech' },
+        { word: 'unwanted', category: 'General' },
+    ]);
     const [newBlockword, setNewBlockword] = useState('');
+    const [newBlockwordCategory, setNewBlockwordCategory] = useState(BLOCKLIST_CATEGORIES[3]);
     const [bulkWords, setBulkWords] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [wordToDelete, setWordToDelete] = useState<string | null>(null);
@@ -37,23 +48,26 @@ export default function AdminPage() {
 
     const handleAddBlockword = (e: React.FormEvent) => {
         e.preventDefault();
-        if (!newBlockword.trim() || blocklist.includes(newBlockword.trim())) return;
-        setBlocklist(prev => [...prev, newBlockword.trim()].sort());
+        const word = newBlockword.trim();
+        if (!word || blocklist.some(item => item.word === word)) return;
+        setBlocklist(prev => [...prev, { word, category: newBlockwordCategory }].sort((a, b) => a.word.localeCompare(b.word)));
         setNewBlockword('');
     };
     
     const handleBulkAdd = (e: React.FormEvent) => {
         e.preventDefault();
         const words = bulkWords.split(',').map(w => w.trim()).filter(Boolean);
-        const newWords = words.filter(w => !blocklist.includes(w));
+        const newWords = words
+            .filter(w => !blocklist.some(item => item.word === w))
+            .map(w => ({ word: w, category: 'General' }));
         if (newWords.length > 0) {
-            setBlocklist(prev => [...prev, ...newWords].sort());
+            setBlocklist(prev => [...prev, ...newWords].sort((a, b) => a.word.localeCompare(b.word)));
         }
         setBulkWords('');
     };
 
     const handleDeleteBlockword = (word: string) => {
-        setBlocklist(prev => prev.filter(item => item !== word));
+        setBlocklist(prev => prev.filter(item => item.word !== word));
         setWordToDelete(null);
     };
 
@@ -88,9 +102,18 @@ export default function AdminPage() {
     }
 
     const filteredBlocklist = useMemo(() => {
-        return blocklist.filter(word => word.toLowerCase().includes(searchTerm.toLowerCase()));
+        return blocklist.filter(item => item.word.toLowerCase().includes(searchTerm.toLowerCase()));
     }, [blocklist, searchTerm]);
     
+    const getCategoryVariant = (category: string) => {
+        switch (category) {
+            case 'Copyright Infringement': return 'secondary';
+            case 'Offensive Content': return 'destructive';
+            case 'Hate Speech': return 'destructive';
+            default: return 'outline';
+        }
+    }
+
     if (!isAdmin) {
       return (
         <div className="p-8 text-center text-destructive">
@@ -187,6 +210,16 @@ export default function AdminPage() {
                                   placeholder="Add a single word"
                                   className="text-base"
                               />
+                               <Select value={newBlockwordCategory} onValueChange={setNewBlockwordCategory}>
+                                <SelectTrigger className="w-[240px]">
+                                    <SelectValue placeholder="Select category" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {BLOCKLIST_CATEGORIES.map(cat => (
+                                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                               </Select>
                               <Button type="submit" size="icon" aria-label="Add blockword">
                                   <Icon name="PlusCircle" />
                               </Button>
@@ -197,7 +230,7 @@ export default function AdminPage() {
                                 <Textarea 
                                     value={bulkWords}
                                     onChange={(e) => setBulkWords(e.target.value)}
-                                    placeholder="Bulk add: paste comma-separated words..."
+                                    placeholder="Bulk add: paste comma-separated words... (will be assigned 'General' category)"
                                     rows={3}
                                 />
                                 <Button type="submit" className="w-full">
@@ -213,10 +246,13 @@ export default function AdminPage() {
                             placeholder="Search blocklist..."
                           />
                           <div className="space-y-2 max-h-60 overflow-y-auto pr-2 border rounded-lg p-2">
-                              {filteredBlocklist.length > 0 ? filteredBlocklist.map(word => (
-                                  <div key={word} className="flex justify-between items-center bg-muted/50 p-2 rounded-lg">
-                                      <span className="font-mono text-sm">{word}</span>
-                                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setWordToDelete(word)} aria-label={`Delete ${word}`}>
+                              {filteredBlocklist.length > 0 ? filteredBlocklist.map(item => (
+                                  <div key={item.word} className="flex justify-between items-center bg-muted/50 p-2 rounded-lg">
+                                      <div className="flex items-center gap-2">
+                                        <span className="font-mono text-sm">{item.word}</span>
+                                        <Badge variant={getCategoryVariant(item.category)}>{item.category}</Badge>
+                                      </div>
+                                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setWordToDelete(item.word)} aria-label={`Delete ${item.word}`}>
                                           <Icon name="Trash2" className="w-4 h-4" />
                                       </Button>
                                   </div>
@@ -271,6 +307,5 @@ export default function AdminPage() {
             </div>
         </div>
     );
-}
 
     
