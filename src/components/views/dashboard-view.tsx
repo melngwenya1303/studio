@@ -23,12 +23,50 @@ type ViewMode = 'grid' | 'list';
 type SortOrder = 'newest' | 'oldest';
 type ProductFilter = 'all' | 'Laptop' | 'Phone' | 'Tablet';
 
+const ShareModalContent = ({ creation, user }: { creation: Creation, user: { uid: string } }) => {
+    const { toast } = useToast();
+    const profileUrl = `${window.location.origin}/profile/${user.uid}`;
+    const creationTitle = creation.title || 'My SurfaceStory Design';
+    const twitterText = `Check out my new design "${creationTitle}" on @SurfaceStoryAI! #AIArt #SurfaceStory`;
+    const pinterestDescription = `${creationTitle} - Created with SurfaceStory.`;
+
+    const handleCopy = () => {
+        navigator.clipboard.writeText(profileUrl);
+        toast({ title: "Link Copied!", description: "Profile URL is now on your clipboard." });
+    };
+
+    return (
+        <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">Share this creation with your friends and followers.</p>
+            <div className="space-y-2">
+                <Label htmlFor="share-link">Share Link</Label>
+                <div className="flex gap-2">
+                    <Input id="share-link" readOnly value={profileUrl} />
+                    <Button onClick={handleCopy} variant="outline" size="icon"><Icon name="Copy" /></Button>
+                </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+                 <Button asChild variant="outline">
+                    <a href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(twitterText)}&url=${encodeURIComponent(profileUrl)}`} target="_blank" rel="noopener noreferrer">
+                        <Icon name="Share2" /> Share on X
+                    </a>
+                </Button>
+                <Button asChild variant="outline">
+                    <a href={`https://pinterest.com/pin/create/button/?url=${encodeURIComponent(profileUrl)}&media=${encodeURIComponent(creation.url)}&description=${encodeURIComponent(pinterestDescription)}`} target="_blank" rel="noopener noreferrer">
+                       <Icon name="Share2" /> Share on Pinterest
+                    </a>
+                </Button>
+            </div>
+        </div>
+    )
+}
+
 export default function DashboardView() {
-    const { creations, startRemix, fetchMoreCreations, hasMoreCreations, isLoadingCreations } = useApp();
+    const { user, creations, startRemix, fetchMoreCreations, hasMoreCreations, isLoadingCreations } = useApp();
     const router = useRouter();
     const { toast } = useToast();
 
-    const [modal, setModal] = useState({ isOpen: false, title: '', children: <></> });
+    const [modal, setModal] = useState({ isOpen: false, title: '', children: <></>, size: 'md' as 'md' | 'lg' | 'xl'});
     const [isDescribing, setIsDescribing] = useState<string | null>(null);
     const [isRemixing, setIsRemixing] = useState<string | null>(null);
 
@@ -78,6 +116,7 @@ export default function DashboardView() {
                 setModal({
                     isOpen: true,
                     title: 'AI-Generated Prompts',
+                    size: 'lg',
                     children: (
                       <div className="space-y-4">
                           <p>Here are a few prompts our AI thinks could create an image like this. Click one to remix!</p>
@@ -109,6 +148,7 @@ export default function DashboardView() {
             setModal({
                 isOpen: true,
                 title: 'Intelligent Remix Ideas',
+                size: 'lg',
                 children: (
                     <div className="space-y-4">
                         <p>Not sure where to start? Try one of these AI-powered ideas to remix your creation!</p>
@@ -144,10 +184,20 @@ export default function DashboardView() {
         toast({ title: 'Liked!', description: 'You have favorited this design.' });
     }, [toast]);
 
+    const handleShare = useCallback((creation: Creation) => {
+        if (!user) return;
+        setModal({
+            isOpen: true,
+            title: `Share "${creation.title || 'My Design'}"`,
+            size: 'md',
+            children: <ShareModalContent creation={creation} user={user} />,
+        });
+    }, [user]);
+
     return (
         <TooltipProvider>
             <div className="p-4 md:p-8 animate-fade-in">
-                 <Modal isOpen={modal.isOpen} title={modal.title} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}>
+                 <Modal isOpen={modal.isOpen} title={modal.title} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} size={modal.size}>
                     {modal.children}
                 </Modal>
                 <header className="mb-8">
@@ -204,19 +254,24 @@ export default function DashboardView() {
                                     <div className={viewMode === 'grid' ? 'relative w-full h-full' : 'relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden'}>
                                         <Image src={creation.url} alt={creation.title || creation.prompt} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
                                         {viewMode === 'grid' && (
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button
-                                                        onClick={() => handleLike(creation.id)}
-                                                        size="icon"
-                                                        variant="ghost"
-                                                        className="absolute top-2 right-2 bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 hover:text-pink-400"
-                                                    >
-                                                        <Icon name="Heart" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent><p>Like</p></TooltipContent>
-                                            </Tooltip>
+                                            <div className="absolute top-2 right-2 flex flex-col gap-2">
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button onClick={() => handleLike(creation.id)} size="icon" variant="ghost" className="bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 hover:text-pink-400">
+                                                            <Icon name="Heart" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent><p>Like</p></TooltipContent>
+                                                </Tooltip>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button onClick={() => handleShare(creation)} size="icon" variant="ghost" className="bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 hover:text-white">
+                                                            <Icon name="Share2" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent><p>Share</p></TooltipContent>
+                                                </Tooltip>
+                                            </div>
                                         )}
                                     </div>
 
@@ -270,6 +325,11 @@ export default function DashboardView() {
                                             </Tooltip>
                                             
                                             {viewMode === 'list' && (
+                                                <>
+                                                 <Tooltip>
+                                                    <TooltipTrigger asChild><Button onClick={() => handleShare(creation)} size="sm" variant="outline"><Icon name="Share2" /></Button></TooltipTrigger>
+                                                    <TooltipContent><p>Share</p></TooltipContent>
+                                                </Tooltip>
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Button
@@ -284,6 +344,7 @@ export default function DashboardView() {
                                                     </TooltipTrigger>
                                                     <TooltipContent><p>Like</p></TooltipContent>
                                                 </Tooltip>
+                                                </>
                                             )}
                                         </motion.div>
                                     </div>
