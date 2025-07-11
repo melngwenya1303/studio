@@ -152,9 +152,9 @@ export default function InspirationGalleryPage() {
                     </Select>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
                     {filteredItems.map(item => (
-                        <div key={item.id} className="group relative rounded-xl overflow-hidden shadow-lg bg-card border flex flex-col">
+                        <div key={item.id} className="group relative rounded-xl overflow-hidden shadow-lg bg-card border flex flex-col break-inside-avoid">
                            <div className="relative w-full h-56">
                              <Image src={item.url} alt={item.prompt} fill className="object-cover" {...{ 'data-ai-hint': item['data-ai-hint'] }} />
                               <div className="absolute top-2 right-2 flex items-center gap-2">
