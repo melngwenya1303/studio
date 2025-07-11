@@ -18,6 +18,7 @@ const navItems = [
     { href: '/design-studio', name: 'Design Studio', icon: 'Brush' as IconName },
     { href: '/dashboard', name: 'My Designs', icon: 'LayoutGrid' as IconName },
     { href: '/inspiration-gallery', name: 'Inspiration', icon: 'Sparkles' as IconName },
+    { href: '/prompt-enhancer', name: 'Prompt Enhancer', icon: 'HelpCircle' as IconName },
     { href: '/live-share', name: 'Live Share', icon: 'Users' as IconName },
     { href: '/leaderboard', name: 'Leaderboard', icon: 'Trophy' as IconName },
 ];
