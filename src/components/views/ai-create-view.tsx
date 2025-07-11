@@ -744,7 +744,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                             fill
                                             className="object-contain"
                                             data-ai-hint={currentCanvas['data-ai-hint']}
-                                            key={currentCanvas.name}
+                                            key={currentCanvas.previewImage}
                                             priority
                                         />
                                     </motion.div>
@@ -801,7 +801,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                             )}
                         </div>
 
-                        <div className="absolute bottom-4 right-4 w-full flex justify-between items-center px-4">
+                        <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
                             {isPreviewingAr ? (
                                 <Button onClick={() => setIsPreviewingAr(false)}>
                                     <Icon name="Undo2" className="mr-2" /> Back to 2D
