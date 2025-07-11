@@ -25,13 +25,6 @@ export async function generateImage(input: GenerateImageInput): Promise<Generate
   return generateImageFlow(input);
 }
 
-const generateImagePrompt = ai.definePrompt({
-  name: 'generateImagePrompt',
-  input: {schema: GenerateImageInputSchema},
-  output: {schema: GenerateImageOutputSchema},
-  prompt: `Generate a decal image based on the following prompt: {{{prompt}}}. The output MUST be a data URI representing the generated image.`,
-});
-
 const generateImageFlow = ai.defineFlow(
   {
     name: 'generateImageFlow',
