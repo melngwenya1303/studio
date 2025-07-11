@@ -127,8 +127,8 @@ export default function InspirationGalleryPage() {
                     {modal.children}
                 </Modal>
                 <header className="mb-8">
-                    <h1 className="text-h1 font-bold font-headline">Inspiration Gallery</h1>
-                    <p className="text-muted-foreground mt-1">Discover decal designs from the community and start your own remix.</p>
+                    <h1 className="text-h1 font-headline">Inspiration Gallery</h1>
+                    <p className="text-muted-foreground mt-1 text-body">Discover decal designs from the community and start your own remix.</p>
                 </header>
 
                 <div className="mb-6 p-4 bg-card border rounded-lg flex flex-wrap items-center gap-4">
@@ -219,7 +219,7 @@ export default function InspirationGalleryPage() {
                     <div className="text-center py-20 bg-card rounded-xl border border-dashed col-span-full">
                         <Icon name="Search" className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
                         <h4 className="text-xl font-semibold mb-2">No matching designs found</h4>
-                        <p className="text-muted-foreground">Try adjusting your style filter to see more results.</p>
+                        <p className="text-muted-foreground text-body">Try adjusting your style filter to see more results.</p>
                     </div>
                 )}
             </div>

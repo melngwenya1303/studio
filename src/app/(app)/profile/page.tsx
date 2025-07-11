@@ -37,8 +37,8 @@ export default function ProfilePage() {
                             <AvatarFallback>{profileUser.name.charAt(0)}</AvatarFallback>
                         </Avatar>
                         <div className="flex-grow text-center md:text-left">
-                            <h1 className="text-h1 font-bold font-headline">{profileUser.name}</h1>
-                            <p className="text-muted-foreground mt-1">{profileUser.bio}</p>
+                            <h1 className="text-h1 font-headline">{profileUser.name}</h1>
+                            <p className="text-muted-foreground mt-1 text-body">{profileUser.bio}</p>
                             <div className="flex justify-center md:justify-start items-center gap-6 mt-4 text-sm">
                                 <div><span className="font-bold">{creations.length}</span> Creations</div>
                                 <div><span className="font-bold">{profileUser.followers}</span> Followers</div>
@@ -53,7 +53,7 @@ export default function ProfilePage() {
             </header>
 
             <div>
-                <h2 className="text-h2 font-semibold font-headline mb-4">Creations</h2>
+                <h2 className="text-h2 font-headline mb-4">Creations</h2>
                 {creations.length > 0 ? (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                         {creations.map((creation, i) => (

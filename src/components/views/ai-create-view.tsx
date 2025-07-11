@@ -290,7 +290,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                 >
                      <Card className="shadow-lg flex flex-col h-full m-4 rounded-2xl">
                         <CardHeader className="flex-row items-center justify-between">
-                            <CardTitle className="text-h3 font-medium font-headline">Creator's Palette</CardTitle>
+                            <CardTitle>Creator's Palette</CardTitle>
                             <Button variant="ghost" onClick={onBack}><Icon name="Undo2" className="mr-2" /> Back</Button>
                         </CardHeader>
                         <CardContent className="flex flex-col flex-grow">
@@ -304,7 +304,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                     <div className="space-y-6 py-6 flex-grow">
                                         {/* Step 1: Canvas */}
                                         <div className="space-y-4">
-                                            <h3 className="text-xl font-semibold font-headline">1. Select Product</h3>
+                                            <h3 className="text-h3 font-headline">1. Select Product</h3>
                                             <div className="space-y-2">
                                                 <Label htmlFor="device-type">Product Type</Label>
                                                 <Select
@@ -360,7 +360,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                         {/* Step 2: Vision */}
                                         <div className="space-y-4">
                                             <div className="flex items-center gap-2">
-                                                <h3 className="text-xl font-semibold font-headline">2. Describe Your Vision</h3>
+                                                <h3 className="text-h3 font-headline">2. Describe Your Vision</h3>
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <button className="text-muted-foreground hover:text-foreground">
@@ -429,7 +429,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
 
                                         {/* Step 3: Style */}
                                         <div className="space-y-4">
-                                            <h3 className="text-xl font-semibold font-headline">3. Choose Style</h3>
+                                            <h3 className="text-h3 font-headline">3. Choose Style</h3>
                                             <div className="space-y-2">
                                                 <Label>Selected Style: {selectedStyle.name}</Label>
                                                 <Carousel opts={{ align: "start", loop: true }} className="w-full">
@@ -546,7 +546,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                 </TabsContent>
                                 <TabsContent value="mockups">
                                     <div className="py-6 space-y-4">
-                                        <h3 className="text-xl font-semibold font-headline">Change Background</h3>
+                                        <h3 className="text-h3 font-headline">Change Background</h3>
                                         <p className="text-muted-foreground">Change the product color to see how your design looks.</p>
                                         <div className="flex flex-wrap gap-3">
                                             {[

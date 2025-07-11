@@ -28,10 +28,10 @@ export default function LeaderboardPage() {
     return (
         <div className="p-4 md:p-8 animate-fade-in">
             <header className="mb-8">
-                <h1 className="text-h1 font-bold font-headline flex items-center gap-3">
+                <h1 className="text-h1 font-headline flex items-center gap-3">
                     <Icon name="Trophy" /> Creator Leaderboard
                 </h1>
-                <p className="text-muted-foreground mt-1">See who's leading the creative charge this week.</p>
+                <p className="text-muted-foreground mt-1 text-body">See who's leading the creative charge this week.</p>
             </header>
             
             <Card>

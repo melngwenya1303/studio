@@ -143,8 +143,8 @@ export default function DashboardPage() {
                     {modal.children}
                 </Modal>
                 <header className="mb-8">
-                    <h1 className="text-h1 font-bold font-headline mb-2">Your Design Library</h1>
-                    <p className="text-muted-foreground">All your unique SurfaceStory designs, ready to be revisited or remixed.</p>
+                    <h1 className="text-h1 font-headline mb-2">Your Design Library</h1>
+                    <p className="text-muted-foreground text-body">All your unique SurfaceStory designs, ready to be revisited or remixed.</p>
                 </header>
                 
                 <div className="mb-6 p-4 bg-card border rounded-lg flex flex-wrap items-center gap-4">
@@ -285,7 +285,7 @@ export default function DashboardPage() {
                     <div className="text-center py-20 bg-card rounded-xl border border-dashed">
                         <Icon name="ImageIcon" className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
                         <h4 className="text-xl font-semibold mb-2">No designs found</h4>
-                        <p className="text-muted-foreground mb-6">
+                        <p className="text-muted-foreground mb-6 text-body">
                             {creations.length > 0 ? "Try adjusting your search or filters." : "Navigate to the 'Design Studio' to create your first masterpiece."}
                         </p>
                         {creations.length === 0 && (

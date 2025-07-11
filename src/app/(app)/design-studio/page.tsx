@@ -4,7 +4,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import Icon from '@/components/shared/icon';
-import { Button } from '@/components/ui/button';
 import AiCreateView from '@/components/views/ai-create-view';
 import UploadView from '@/components/views/upload-view';
 
@@ -31,8 +30,8 @@ export default function DesignStudioPage() {
                 >
                     <Icon name="Wand2" className="w-12 h-12 text-white" />
                 </motion.div>
-                <h1 className="text-h1 font-bold font-headline mb-2">Start Your Creation</h1>
-                <p className="text-muted-foreground max-w-md mx-auto">
+                <h1 className="text-h1 font-headline mb-2">Start Your Creation</h1>
+                <p className="text-muted-foreground max-w-md mx-auto text-body">
                     Choose your creative path. Generate a unique design with AI or upload your own artwork to see it on our products.
                 </p>
             </div>
@@ -48,7 +47,7 @@ export default function DesignStudioPage() {
                         tabIndex={0}
                     >
                         <Icon name="Sparkles" className="w-8 h-8 mb-4 text-primary" />
-                        <h2 className="text-h3 font-semibold mb-2">Create with AI</h2>
+                        <h2 className="text-h3 font-headline mb-2">Create with AI</h2>
                         <p className="text-muted-foreground text-body">
                             Describe your vision and let our AI bring it to life. Perfect for exploring new ideas.
                         </p>
@@ -65,7 +64,7 @@ export default function DesignStudioPage() {
                         tabIndex={0}
                     >
                         <Icon name="ImageIcon" className="w-8 h-8 mb-4 text-accent" />
-                        <h2 className="text-h3 font-semibold mb-2">Upload Artwork</h2>
+                        <h2 className="text-h3 font-headline mb-2">Upload Artwork</h2>
                         <p className="text-muted-foreground text-body">
                             Already have a design? Upload your image and see how it looks on our products.
                         </p>

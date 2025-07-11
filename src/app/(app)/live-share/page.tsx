@@ -43,10 +43,10 @@ export default function LiveSharePage() {
             >
                 <header className="flex items-center justify-between">
                     <div>
-                        <h1 className="text-h1 font-bold font-headline flex items-center gap-3">
+                        <h1 className="text-h1 font-headline flex items-center gap-3">
                             <Icon name="Users" /> Live Session
                         </h1>
-                        <p className="text-muted-foreground mt-1">Create together in real-time.</p>
+                        <p className="text-muted-foreground mt-1 text-body">Create together in real-time.</p>
                     </div>
                     <div className="flex items-center -space-x-2">
                         {participants.map(p => (

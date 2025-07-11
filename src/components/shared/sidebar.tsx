@@ -65,7 +65,7 @@ const SidebarContent = () => {
               transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
               <Icon name={item.icon} className={`w-5 h-5 transition-transform duration-200 ${!pathname.startsWith(item.href) && 'group-hover:scale-110'}`} />
-              <span>{item.name}</span>
+              <span className="text-button font-normal">{item.name}</span>
           </motion.div>
       </Link>
   );
