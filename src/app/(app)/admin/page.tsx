@@ -14,8 +14,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { Area, AreaChart, ResponsiveContainer } from "recharts";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 const BLOCKLIST_CATEGORIES = ['All', 'Copyright Infringement', 'Offensive Content', 'Hate Speech', 'General'];
 
@@ -28,9 +28,14 @@ const chartData = [
     { date: 'May', value: 130 },
     { date: 'Jun', value: 180 },
 ];
-const chartConfig = {
-    value: { label: "Value", color: "hsl(var(--primary))" },
-};
+
+const mockOrders = [
+  { id: 'SS-1024', customer: 'Jane Doe', date: '2023-10-26', status: 'Processing', total: '$34.98', items: 1 },
+  { id: 'SS-1023', customer: 'John Smith', date: '2023-10-25', status: 'Shipped', total: '$29.99', items: 1 },
+  { id: 'SS-1022', customer: 'ArtfulAntics', date: '2023-10-25', status: 'Shipped', total: '$59.98', items: 2 },
+  { id: 'SS-1021', customer: 'VectorVixen', date: '2023-10-24', status: 'Delivered', total: '$34.98', items: 1 },
+];
+
 
 export default function AdminPage() {
     const { isAdmin } = useApp();
@@ -130,6 +135,15 @@ export default function AdminPage() {
             case 'Copyright Infringement': return 'secondary';
             case 'Offensive Content': return 'destructive';
             case 'Hate Speech': return 'destructive';
+            default: return 'outline';
+        }
+    }
+    
+    const getStatusVariant = (status: string) => {
+        switch (status) {
+            case 'Shipped': return 'default';
+            case 'Processing': return 'secondary';
+            case 'Delivered': return 'outline';
             default: return 'outline';
         }
     }
@@ -246,12 +260,12 @@ export default function AdminPage() {
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Active Providers</CardTitle>
-                        <Icon name="KeyRound" className="text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+                        <Icon name="ShoppingCart" className="text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">{podPartners.length}</div>
-                        <p className="text-xs text-muted-foreground">Connected POD partners</p>
+                        <div className="text-2xl font-bold">{mockOrders.length}</div>
+                        <p className="text-xs text-muted-foreground">in the last 30 days</p>
                     </CardContent>
                 </Card>
                 <Card>
@@ -266,13 +280,14 @@ export default function AdminPage() {
                 </Card>
             </div>
 
-            <Tabs defaultValue="fulfillment">
-                <TabsList className="grid w-full grid-cols-3">
+            <Tabs defaultValue="orders">
+                <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="analytics"><Icon name="PieChart" /> Analytics</TabsTrigger>
+                    <TabsTrigger value="orders"><Icon name="Package" /> Orders</TabsTrigger>
                     <TabsTrigger value="content"><Icon name="Filter" /> Content Moderation</TabsTrigger>
                     <TabsTrigger value="fulfillment"><Icon name="Truck" /> Fulfillment</TabsTrigger>
                 </TabsList>
-
+                
                 <TabsContent value="analytics">
                     <Card>
                         <CardHeader>
@@ -285,6 +300,47 @@ export default function AdminPage() {
                                 <h4 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">Advanced Reporting Coming Soon</h4>
                                 <p className="text-muted-foreground">Track sales, popular designs, user cohorts, and more.</p>
                             </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="orders">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Recent Orders</CardTitle>
+                            <CardDescription>An overview of all recent orders placed on the platform.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Order ID</TableHead>
+                                        <TableHead>Customer</TableHead>
+                                        <TableHead>Date</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="text-right">Total</TableHead>
+                                        <TableHead className="text-center">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {mockOrders.map(order => (
+                                        <TableRow key={order.id}>
+                                            <TableCell className="font-medium">{order.id}</TableCell>
+                                            <TableCell>{order.customer}</TableCell>
+                                            <TableCell>{order.date}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={getStatusVariant(order.status)}>
+                                                    {order.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right">{order.total}</TableCell>
+                                            <TableCell className="text-center">
+                                                <Button variant="outline" size="sm">View Order</Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
                         </CardContent>
                     </Card>
                 </TabsContent>
