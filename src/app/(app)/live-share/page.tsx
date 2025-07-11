@@ -55,6 +55,10 @@ export default function LiveSharePage() {
                                 <AvatarFallback>{p.name.charAt(0)}</AvatarFallback>
                             </Avatar>
                         ))}
+                         <Avatar>
+                            <AvatarImage src={`https://i.pravatar.cc/40?u=${user?.uid}`} alt="You" />
+                            <AvatarFallback>Y</AvatarFallback>
+                        </Avatar>
                     </div>
                 </header>
 
