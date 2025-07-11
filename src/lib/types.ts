@@ -62,4 +62,5 @@ export type GalleryItem = {
     url: string;
     curatorNote: string;
     'data-ai-hint': string;
+    likes: number;
 };

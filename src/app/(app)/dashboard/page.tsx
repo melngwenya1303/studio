@@ -16,6 +16,7 @@ import type { Creation } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Badge } from '@/components/ui/badge';
 
 type ViewMode = 'grid' | 'list';
 type SortOrder = 'newest' | 'oldest';
@@ -183,7 +184,7 @@ export default function DashboardPage() {
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: i * 0.05 }}
-                            className={viewMode === 'grid' ? "group relative rounded-xl overflow-hidden shadow-lg aspect-square" : "group bg-card border rounded-xl p-4 flex items-center gap-4"}
+                            className={viewMode === 'grid' ? "group relative rounded-xl overflow-hidden shadow-lg aspect-square bg-card border" : "bg-card border rounded-xl p-4 flex items-center gap-4"}
                             whileHover={viewMode === 'grid' ? { y: -5 } : {}}
                         >
                             <div className={viewMode === 'grid' ? 'relative w-full h-full' : 'relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden'}>
@@ -192,13 +193,17 @@ export default function DashboardPage() {
 
                             <div className={viewMode === 'grid' ? "absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end" : "flex-grow"}>
                                 <p 
-                                    className={`${viewMode === 'grid' ? 'text-white' : 'text-card-foreground'} text-sm font-semibold truncate`}
+                                    className={`${viewMode === 'grid' ? 'text-white' : 'text-card-foreground'} font-semibold truncate`}
                                     title={creation.title}
                                 >
                                     {creation.title || creation.prompt}
                                 </p>
-                                <p className="text-xs text-muted-foreground mt-1">
-                                    {creation.deviceType} &bull; {new Date(creation.createdAt).toLocaleDateString()}
+                                <div className="flex items-center gap-2 mt-1">
+                                    <Badge variant="outline">{creation.style}</Badge>
+                                    <Badge variant="secondary">{creation.deviceType}</Badge>
+                                </div>
+                                <p className="text-xs text-muted-foreground mt-2">
+                                    Created: {new Date(creation.createdAt).toLocaleDateString()}
                                 </p>
                                 <motion.div 
                                     className={`flex items-center gap-2 mt-2 ${viewMode === 'grid' ? 'opacity-0 group-hover:opacity-100' : ''} transition-opacity duration-300`}

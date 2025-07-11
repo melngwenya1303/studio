@@ -14,6 +14,7 @@ import type { GalleryItem } from '@/lib/types';
 import Icon from '@/components/shared/icon';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
 
 type CategoryFilter = 'all' | 'trending' | 'popular' | 'recent';
 
@@ -153,23 +154,35 @@ export default function InspirationGalleryPage() {
                          <Image src={item.url} alt={item.prompt} fill className="object-cover" {...{ 'data-ai-hint': item['data-ai-hint'] }} />
                        </div>
                        <div className="p-4 flex flex-col flex-grow">
-                           <p className="text-sm font-semibold text-card-foreground mb-2 line-clamp-2" title={item.prompt}>{item.prompt}</p>
+                            <div className="flex justify-between items-start">
+                                <p className="text-sm font-semibold text-card-foreground mb-2 line-clamp-2" title={item.prompt}>{item.prompt}</p>
+                                <Badge variant="outline" className="flex-shrink-0">{item.style}</Badge>
+                            </div>
                            <p className="text-xs text-muted-foreground italic mb-4 line-clamp-3">Curator's Note: "{item.curatorNote}"</p>
-                           <div className="mt-auto flex items-center gap-2">
-                            <Button onClick={() => handleRemix(item)} disabled={!!isRemixing} className="w-full">
-                                {isRemixing === item.id ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
-                                Remix this Design
-                            </Button>
-                            <Button 
-                                onClick={() => handleDescribe(item)} 
-                                disabled={!!isDescribing}
-                                variant="outline" 
-                                size="icon" 
-                                className="flex-shrink-0"
-                                title="Describe with AI"
-                            >
-                                {isDescribing === item.id ? <Icon name="Wand2" className="w-4 h-4 animate-pulse" /> : <Icon name="BookOpen" className="w-4 h-4" />}
-                            </Button>
+                           
+                           <div className="mt-auto flex justify-between items-center">
+                                <div className="flex items-center gap-2">
+                                    <Button variant="ghost" size="icon" className="text-pink-500 hover:bg-pink-100 dark:hover:bg-pink-900/50">
+                                        <Icon name="Heart" />
+                                    </Button>
+                                    <span className="text-sm font-semibold text-muted-foreground">{item.likes}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                     <Button 
+                                        onClick={() => handleDescribe(item)} 
+                                        disabled={!!isDescribing}
+                                        variant="outline" 
+                                        size="icon" 
+                                        className="flex-shrink-0"
+                                        title="Describe with AI"
+                                    >
+                                        {isDescribing === item.id ? <Icon name="Wand2" className="w-4 h-4 animate-pulse" /> : <Icon name="BookOpen" className="w-4 h-4" />}
+                                    </Button>
+                                    <Button onClick={() => handleRemix(item)} disabled={!!isRemixing} size="sm">
+                                        {isRemixing === item.id ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
+                                        Remix
+                                    </Button>
+                                </div>
                            </div>
                        </div>
                     </div>
