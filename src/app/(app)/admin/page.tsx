@@ -16,6 +16,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Area, AreaChart, ResponsiveContainer } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const BLOCKLIST_CATEGORIES = ['All', 'Copyright Infringement', 'Offensive Content', 'Hate Speech', 'General'];
 
@@ -36,6 +38,13 @@ const mockOrders = [
   { id: 'SS-1021', customer: 'VectorVixen', date: '2023-10-24', status: 'Delivered', total: '$34.98', items: 1 },
 ];
 
+const initialUsers = [
+    { id: 'usr_1', name: 'PixelProphet', email: 'prophet@surfacestory.com', role: 'Admin', status: 'Active', creations: 124, avatar: 'https://i.pravatar.cc/40?u=prophet' },
+    { id: 'usr_2', name: 'ArtfulAntics', email: 'antics@surfacestory.com', role: 'User', status: 'Active', creations: 98, avatar: 'https://i.pravatar.cc/40?u=antics' },
+    { id: 'usr_3', name: 'VectorVixen', email: 'vixen@surfacestory.com', role: 'User', status: 'Suspended', creations: 150, avatar: 'https://i.pravatar.cc/40?u=vixen' },
+    { id: 'usr_4', name: 'DesignDroid', email: 'droid@surfacestory.com', role: 'User', status: 'Active', creations: 80, avatar: 'https://i.pravatar.cc/40?u=droid' },
+    { id: 'usr_5', name: 'StaticSpark', email: 'spark@surfacestory.com', role: 'User', status: 'Active', creations: 110, avatar: 'https://i.pravatar.cc/40?u=spark' },
+]
 
 export default function AdminPage() {
     const { isAdmin } = useApp();
@@ -52,7 +61,7 @@ export default function AdminPage() {
     const [newBlockword, setNewBlockword] = useState('');
     const [newBlockwordCategory, setNewBlockwordCategory] = useState(BLOCKLIST_CATEGORIES[4]);
     const [bulkWords, setBulkWords] = useState('');
-    const [searchTerm, setSearchTerm] = useState('');
+    const [blocklistSearchTerm, setBlocklistSearchTerm] = useState('');
     const [wordToDelete, setWordToDelete] = useState<string | null>(null);
     const [categoryFilter, setCategoryFilter] = useState('All');
     
@@ -66,6 +75,11 @@ export default function AdminPage() {
     const [partnerToDelete, setPartnerToDelete] = useState<{id: string, name: string} | null>(null);
     const [partnerToEdit, setPartnerToEdit] = useState<{id: string, name: string} | null>(null);
     const [newlyAddedPartner, setNewlyAddedPartner] = useState<{id: string, name: string, apiKey: string} | null>(null);
+
+    // User Management State
+    const [users, setUsers] = useState(initialUsers);
+    const [userSearchTerm, setUserSearchTerm] = useState('');
+    const [userAction, setUserAction] = useState<{action: 'delete' | 'suspend' | 'promote', userId: string, userName: string} | null>(null);
 
 
     const handleAddBlockword = (e: React.FormEvent) => {
@@ -123,12 +137,53 @@ export default function AdminPage() {
         toast({ title: 'Copied!', description: 'The API key has been copied to your clipboard.' });
     }
 
+    const handleConfirmUserAction = () => {
+        if (!userAction) return;
+        const { action, userId, userName } = userAction;
+
+        if (action === 'delete') {
+            setUsers(prev => prev.filter(u => u.id !== userId));
+            toast({ title: 'User Deleted', description: `${userName} has been removed from the platform.` });
+        } else if (action === 'suspend') {
+            setUsers(prev => prev.map(u => u.id === userId ? {...u, status: u.status === 'Active' ? 'Suspended' : 'Active'} : u));
+            const newStatus = users.find(u => u.id === userId)?.status === 'Active' ? 'Suspended' : 'Active';
+            toast({ title: `User ${newStatus}`, description: `${userName}'s account is now ${newStatus.toLowerCase()}.` });
+        } else if (action === 'promote') {
+            setUsers(prev => prev.map(u => u.id === userId ? {...u, role: u.role === 'Admin' ? 'User' : 'Admin'} : u));
+            const newRole = users.find(u => u.id === userId)?.role === 'Admin' ? 'User' : 'Admin';
+            toast({ title: `Role Changed`, description: `${userName} is now a ${newRole}.` });
+        }
+        setUserAction(null);
+    }
+
+    const getAlertDialogContent = () => {
+        if (!userAction) return { title: '', description: ''};
+        const { action, userName } = userAction;
+        if (action === 'delete') return { title: 'Delete User?', description: `This will permanently delete ${userName} and all their data. This action is irreversible.`};
+        if (action === 'suspend') {
+            const currentStatus = users.find(u => u.id === userAction.userId)?.status;
+            return { title: `${currentStatus === 'Active' ? 'Suspend' : 'Unsuspend'} User?`, description: `Are you sure you want to ${currentStatus === 'Active' ? 'suspend' : 'reinstate'} ${userName}?`};
+        }
+        if (action === 'promote') {
+             const currentRole = users.find(u => u.id === userAction.userId)?.role;
+            return { title: `${currentRole === 'Admin' ? 'Demote' : 'Promote'} User?`, description: `Are you sure you want to ${currentRole === 'Admin' ? 'demote' : 'promote'} ${userName} to ${currentRole === 'Admin' ? 'a User' : 'an Admin'}?`};
+        }
+        return { title: '', description: ''};
+    }
+
     const filteredBlocklist = useMemo(() => {
         return blocklist.filter(item => 
-            (item.word.toLowerCase().includes(searchTerm.toLowerCase())) &&
+            (item.word.toLowerCase().includes(blocklistSearchTerm.toLowerCase())) &&
             (categoryFilter === 'All' || item.category === categoryFilter)
         );
-    }, [blocklist, searchTerm, categoryFilter]);
+    }, [blocklist, blocklistSearchTerm, categoryFilter]);
+
+     const filteredUsers = useMemo(() => {
+        return users.filter(user =>
+            user.name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
+            user.email.toLowerCase().includes(userSearchTerm.toLowerCase())
+        );
+    }, [users, userSearchTerm]);
     
     const getCategoryVariant = (category: string) => {
         switch (category) {
@@ -147,6 +202,9 @@ export default function AdminPage() {
             default: return 'outline';
         }
     }
+
+     const getRoleVariant = (role: string) => role === 'Admin' ? 'default' : 'secondary';
+     const getUserStatusVariant = (status: string) => status === 'Active' ? 'default' : 'destructive';
 
     if (!isAdmin) {
       return (
@@ -184,6 +242,18 @@ export default function AdminPage() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+            <AlertDialog open={!!userAction} onOpenChange={() => setUserAction(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>{getAlertDialogContent().title}</AlertDialogTitle>
+                        <AlertDialogDescription>{getAlertDialogContent().description}</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction className={userAction?.action === 'delete' || userAction?.action === 'suspend' ? 'bg-destructive hover:bg-destructive/90' : ''} onClick={handleConfirmUserAction}>Confirm</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
             <Modal isOpen={!!partnerToEdit} onClose={() => setPartnerToEdit(null)} title={`Rotate API Key for ${partnerToEdit?.name}`}>
                  <form onSubmit={handleAddOrUpdatePartner} className="space-y-4 pt-4">
                      <p className="text-sm text-muted-foreground">Enter the new API key below. The old key will be immediately invalidated.</p>
@@ -199,7 +269,7 @@ export default function AdminPage() {
                     </p>
                     <div className="flex items-center gap-2">
                         <Input readOnly value={newlyAddedPartner?.apiKey} className="font-mono text-xs" />
-                        <Button onClick={handleCopyKey} size="icon" variant="outline"><Icon name="KeyRound" /></Button>
+                        <Button onClick={handleCopyKey} size="icon" variant="outline"><Icon name="Copy" /></Button>
                     </div>
                      <Button onClick={() => setNewlyAddedPartner(null)} className="w-full">I have saved my key</Button>
                 </div>
@@ -241,7 +311,7 @@ export default function AdminPage() {
                         <Icon name="Users" className="text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">+2,350</div>
+                        <div className="text-2xl font-bold">+{users.length}</div>
                         <p className="text-xs text-muted-foreground">+180.1% from last month</p>
                          <div className="h-20 -mx-4 -mb-2">
                             <ResponsiveContainer width="100%" height="100%">
@@ -271,7 +341,7 @@ export default function AdminPage() {
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                         <CardTitle className="text-sm font-medium">Blocked Terms</CardTitle>
-                        <Icon name="Trash2" className="text-muted-foreground" />
+                        <Icon name="Filter" className="text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                         <div className="text-2xl font-bold">{blocklist.length}</div>
@@ -281,10 +351,11 @@ export default function AdminPage() {
             </div>
 
             <Tabs defaultValue="orders">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="analytics"><Icon name="PieChart" /> Analytics</TabsTrigger>
                     <TabsTrigger value="orders"><Icon name="Package" /> Orders</TabsTrigger>
-                    <TabsTrigger value="content"><Icon name="Filter" /> Content Moderation</TabsTrigger>
+                    <TabsTrigger value="users"><Icon name="Users" /> Users</TabsTrigger>
+                    <TabsTrigger value="content"><Icon name="Filter" /> Content</TabsTrigger>
                     <TabsTrigger value="fulfillment"><Icon name="Truck" /> Fulfillment</TabsTrigger>
                 </TabsList>
                 
@@ -298,7 +369,7 @@ export default function AdminPage() {
                             <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed">
                                 <Icon name="BarChart3" className="w-16 h-16 mx-auto text-gray-400 mb-4" />
                                 <h4 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">Advanced Reporting Coming Soon</h4>
-                                <p className="text-muted-foreground">Track sales, popular designs, user cohorts, and more.</p>
+                                <p className="text-muted-foreground">Track sales, cloud costs, popular designs, user cohorts, and more.</p>
                             </div>
                         </CardContent>
                     </Card>
@@ -345,10 +416,77 @@ export default function AdminPage() {
                     </Card>
                 </TabsContent>
 
+                <TabsContent value="users">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>User Management</CardTitle>
+                            <CardDescription>View and manage all users on the platform.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="mb-4">
+                                <Input 
+                                    placeholder="Search by name or email..."
+                                    value={userSearchTerm}
+                                    onChange={(e) => setUserSearchTerm(e.target.value)}
+                                />
+                            </div>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>User</TableHead>
+                                        <TableHead>Creations</TableHead>
+                                        <TableHead>Role</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {filteredUsers.map(user => (
+                                        <TableRow key={user.id}>
+                                            <TableCell className="flex items-center gap-3">
+                                                <Avatar>
+                                                    <AvatarImage src={user.avatar} />
+                                                    <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <p className="font-semibold">{user.name}</p>
+                                                    <p className="text-xs text-muted-foreground">{user.email}</p>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell>{user.creations}</TableCell>
+                                            <TableCell><Badge variant={getRoleVariant(user.role)}>{user.role}</Badge></TableCell>
+                                            <TableCell><Badge variant={getUserStatusVariant(user.status)}>{user.status}</Badge></TableCell>
+                                            <TableCell className="text-right">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="sm">Actions</Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem onClick={() => setUserAction({action: 'promote', userId: user.id, userName: user.name})}>
+                                                            <Icon name={user.role === 'Admin' ? 'User' : 'ShieldCheck'} /> {user.role === 'Admin' ? 'Demote to User' : 'Promote to Admin'}
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => setUserAction({action: 'suspend', userId: user.id, userName: user.name})}>
+                                                            <Icon name="ShieldCheck" /> {user.status === 'Active' ? 'Suspend' : 'Unsuspend'}
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => setUserAction({action: 'delete', userId: user.id, userName: user.name})} className="text-destructive">
+                                                            <Icon name="Trash2" /> Delete User
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                             {filteredUsers.length === 0 && <p className="text-center text-muted-foreground py-8">No users found.</p>}
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
                 <TabsContent value="content">
                     <Card>
                         <CardHeader>
-                            <CardTitle className="flex items-center gap-2"><Icon name="Trash2" /> Prompt Filter Blocklist</CardTitle>
+                            <CardTitle className="flex items-center gap-2"><Icon name="Filter" /> Prompt Filter Blocklist</CardTitle>
                             <CardDescription>Add or remove words that should be filtered from user prompts.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
@@ -372,7 +510,7 @@ export default function AdminPage() {
                             </div>
                             <div className="space-y-2">
                                 <div className="flex gap-2">
-                                    <Input type="search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search blocklist..." />
+                                    <Input type="search" value={blocklistSearchTerm} onChange={(e) => setBlocklistSearchTerm(e.target.value)} placeholder="Search blocklist..." />
                                     <Select value={categoryFilter} onValueChange={setCategoryFilter}>
                                         <SelectTrigger className="w-[240px]"><SelectValue placeholder="Filter by category" /></SelectTrigger>
                                         <SelectContent>{BLOCKLIST_CATEGORIES.map(cat => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}</SelectContent>
