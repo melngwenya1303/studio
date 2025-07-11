@@ -29,55 +29,5 @@ export const GALLERY_SEED_DATA = [
         curatorNote: "The vibrant chaos is mesmerizing. A different time of day could completely change the mood.", 
         likes: 2109,
         tags: ['trending', 'popular', 'cyberpunk', 'city']
-    },
-    { 
-        id: 4, 
-        prompt: "A cozy, cluttered library in a cottage, with books stacked high and a cat sleeping by the fireplace.", 
-        style: "Dark Academia", 
-        url: "https://storage.googleapis.com/ci-prod-tester-srces/gallery/library.png", 
-        'data-ai-hint': "library cat", 
-        curatorNote: "The warmth and comfort are perfectly captured. Try adding another animal or a different type of room.", 
-        likes: 988,
-        tags: ['popular', 'cozy', 'animal']
-    },
-    { 
-        id: 5,
-        prompt: "An elegant art deco pattern with geometric shapes in gold and deep blue.",
-        style: "Art Deco",
-        url: "https://storage.googleapis.com/ci-prod-tester-srces/gallery/artdeco.png",
-        'data-ai-hint': "art deco pattern",
-        curatorNote: "The symmetry and bold lines make this a classic choice. Experiment with different color palettes.",
-        likes: 750,
-        tags: ['trending', 'pattern', 'geometric']
-    },
-    { 
-        id: 6,
-        prompt: "A close-up of a fierce Japanese oni mask with intricate details and vibrant colors.",
-        style: "Anime",
-        url: "https://storage.googleapis.com/ci-prod-tester-srces/gallery/oni.png",
-        'data-ai-hint': "oni mask",
-        curatorNote: "The intensity of this design is powerful. Try incorporating other elements from Japanese folklore.",
-        likes: 1800,
-        tags: ['popular', 'japanese', 'mask']
-    },
-    { 
-        id: 7,
-        prompt: "A serene watercolor landscape of cherry blossoms in front of Mount Fuji.",
-        style: "Watercolor",
-        url: "https://storage.googleapis.com/ci-prod-tester-srces/gallery/fuji.png",
-        'data-ai-hint': "mount fuji",
-        curatorNote: "A beautiful and tranquil scene. Consider adding a torii gate or changing the season.",
-        likes: 1100,
-        tags: ['popular', 'landscape', 'japanese', 'nature']
-    },
-    { 
-        id: 8,
-        prompt: "A minimalist line art drawing of a cat stretching.",
-        style: "Minimalist",
-        url: "https://storage.googleapis.com/ci-prod-tester-srces/gallery/cat.png",
-        'data-ai-hint': "cat line art",
-        curatorNote: "Simplicity at its best. This design works well on any device. What other animals could you draw in this style?",
-        likes: 950,
-        tags: ['recent', 'animal', 'minimalist']
     }
 ];
