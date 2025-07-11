@@ -69,8 +69,7 @@ export default function LiveSharePage() {
                             onChange={(e) => setPrompt(e.target.value)}
                         />
                          <div className="mt-4 text-center">
-                            <p className="text-sm text-gray-500">This feature is currently in preview.</p>
-                            <p className="text-sm text-gray-500">Real-time collaboration is coming soon!</p>
+                            <p className="text-sm text-gray-500">Real-time prompt and canvas syncing are coming soon!</p>
                         </div>
                     </CardContent>
                 </Card>
