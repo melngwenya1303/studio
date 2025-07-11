@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { getFirestore, collection, query, limit, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, limit, getDocs, orderBy } from 'firebase/firestore';
 import { firebaseApp } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -29,8 +29,8 @@ export default function LeaderboardPage() {
             setIsLoading(true);
             const db = getFirestore(firebaseApp);
             const usersRef = collection(db, 'users');
-            // Fetch users without ordering by a potentially non-existent field.
-            const q = query(usersRef, limit(10));
+            // Fetch top 10 users ordered by creationsCount
+            const q = query(usersRef, orderBy('creationsCount', 'desc'), limit(10));
             
             try {
                 const querySnapshot = await getDocs(q);
@@ -39,15 +39,11 @@ export default function LeaderboardPage() {
                     return {
                         id: doc.id,
                         name: data.name || data.email,
-                        // Add mock data for testing if counts are zero or don't exist
-                        creationsCount: data.creationsCount || Math.floor(Math.random() * 100), 
-                        remixesCount: data.remixesCount || Math.floor(Math.random() * 50),
+                        creationsCount: data.creationsCount || 0, 
+                        remixesCount: data.remixesCount || 0,
                         avatar: `https://i.pravatar.cc/40?u=${doc.id}`,
                     };
                 });
-                
-                // Sort client-side after mocking data for a reliable demonstration.
-                users.sort((a, b) => (b.creationsCount + b.remixesCount) - (a.creationsCount + a.remixesCount));
                 
                 setLeaderboardData(users);
             } catch (error) {

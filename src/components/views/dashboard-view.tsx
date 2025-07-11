@@ -12,12 +12,13 @@ import Modal from '@/components/shared/modal';
 import { useToast } from '@/hooks/use-toast';
 import { describeImage } from '@/ai/flows/describe-image';
 import { getRemixSuggestions } from '@/ai/flows/get-remix-suggestions';
-import type { Creation } from '@/lib/types';
+import type { Creation, User } from '@/lib/types';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Label } from '../ui/label';
 
 type ViewMode = 'grid' | 'list';
 type SortOrder = 'newest' | 'oldest';
@@ -94,8 +95,8 @@ export default function DashboardView() {
 
         // Sort
         items.sort((a, b) => {
-            const dateA = a.createdAt?.seconds ? new Date(a.createdAt.seconds * 1000).getTime() : 0;
-            const dateB = b.createdAt?.seconds ? new Date(b.createdAt.seconds * 1000).getTime() : 0;
+            const dateA = a.createdAt ? (a.createdAt as any).toDate().getTime() : 0;
+            const dateB = b.createdAt ? (b.createdAt as any).toDate().getTime() : 0;
             return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
         });
 
@@ -287,7 +288,7 @@ export default function DashboardView() {
                                             <Badge variant="secondary">{creation.deviceType}</Badge>
                                         </div>
                                         <p className="text-xs text-muted-foreground mt-2">
-                                            Created: {creation.createdAt?.seconds ? new Date(creation.createdAt.seconds * 1000).toLocaleDateString() : 'Just now'}
+                                            Created: {creation.createdAt ? (creation.createdAt as any).toDate().toLocaleDateString() : 'Just now'}
                                         </p>
                                         <motion.div 
                                             className={`flex items-center gap-2 mt-2 ${viewMode === 'grid' ? 'opacity-0 group-hover:opacity-100' : ''} transition-opacity duration-300`}

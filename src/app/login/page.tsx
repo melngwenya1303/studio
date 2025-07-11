@@ -13,12 +13,13 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
+import { firebaseApp } from '@/lib/firebase';
 
 export default function LoginPage() {
     const router = useRouter();
     const { user } = useApp();
     const { toast } = useToast();
-    const auth = getAuth();
+    const auth = getAuth(firebaseApp);
 
     const [email, setEmail] = useState('admin@surfacestoryai.com');
     const [password, setPassword] = useState('password');

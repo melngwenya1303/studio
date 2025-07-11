@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import type { Creation, User, GalleryItem } from '@/lib/types';
 import { onAuthStateChanged, getAuth } from 'firebase/auth';
 import { firebaseApp } from '@/lib/firebase';
-import { getFirestore, collection, addDoc, query, where, serverTimestamp, onSnapshot, doc, getDoc, setDoc, orderBy, limit, startAfter, getDocs, DocumentData, QueryDocumentSnapshot } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, where, serverTimestamp, doc, getDoc, setDoc, orderBy, limit, startAfter, getDocs, DocumentData, QueryDocumentSnapshot, updateDoc, increment } from "firebase/firestore";
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 
 const CREATIONS_PAGE_SIZE = 8;
@@ -71,7 +71,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         const userCreations: Creation[] = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() } as Creation));
         
         setCreations(userCreations);
-        setLastVisibleCreation(documentSnapshots.docs[documentSnapshots.docs.length - 1] || null);
+        const lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+        setLastVisibleCreation(lastVisible || null);
         setHasMoreCreations(documentSnapshots.docs.length === CREATIONS_PAGE_SIZE);
     } catch (error) {
         console.error("Error fetching initial creations:", error);
@@ -93,7 +94,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         const items = documentSnapshots.docs.map(doc => ({ ...doc.data() } as GalleryItem));
         
         setGalleryItems(items);
-        setLastVisibleGalleryItem(documentSnapshots.docs[documentSnapshots.docs.length - 1] || null);
+        const lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+        setLastVisibleGalleryItem(lastVisible || null);
         setHasMoreGalleryItems(documentSnapshots.docs.length === GALLERY_PAGE_SIZE);
     } catch (error) {
         console.error("Error fetching initial gallery items:", error);
@@ -116,7 +118,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           const newUserPayload = {
             email: firebaseUser.email,
             isAdmin: isDefaultAdmin,
-            name: firebaseUser.email, // Default name to email
+            name: firebaseUser.displayName || firebaseUser.email, // Default name to email
             createdAt: serverTimestamp(),
             creationsCount: 0,
             remixesCount: 0,
@@ -124,20 +126,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             following: 0,
             bio: 'A new SurfaceStory creator exploring the digital canvas.',
           };
-          await setDoc(userDocRef, newUserPayload, { merge: true });
-          // Re-fetch the document to have a consistent object
-          userDocSnap = await getDoc(userDocRef);
+          await setDoc(userDocRef, newUserPayload);
+          userDocSnap = await getDoc(userDocRef); // Re-fetch
           finalIsAdmin = isDefaultAdmin;
         } else {
            finalIsAdmin = userDocSnap.data()?.isAdmin || false;
         }
         
-        const currentUser = { uid: firebaseUser.uid, email: firebaseUser.email, name: firebaseUser.displayName };
+        const currentUser = { uid: firebaseUser.uid, email: firebaseUser.email, name: userDocSnap.data()?.name || firebaseUser.displayName };
         setUser(currentUser);
         setIsAdmin(finalIsAdmin);
 
         fetchInitialCreations(firebaseUser.uid);
-        // Only fetch gallery if it hasn't been fetched before to avoid re-fetching on every auth change
         if (galleryItems.length === 0) {
             fetchInitialGalleryItems();
         }
@@ -147,7 +147,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setCreations([]);
         setLastVisibleCreation(null);
         setHasMoreCreations(true);
-        // If logged out and gallery is empty, fetch it.
         if (galleryItems.length === 0) {
             fetchInitialGalleryItems();
         }
@@ -157,10 +156,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return unsubscribe;
   }, [db, fetchInitialCreations, fetchInitialGalleryItems, galleryItems.length]);
 
-
   const fetchMoreCreations = useCallback(async () => {
     const userId = user?.uid;
-    if (!userId || !lastVisibleCreation || !hasMoreCreations) return;
+    if (!userId || !lastVisibleCreation || !hasMoreCreations || isLoadingCreations) return;
 
     setIsLoadingCreations(true);
     const creationsQuery = query(
@@ -176,15 +174,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         const newCreations: Creation[] = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() } as Creation));
         
         setCreations(prev => [...prev, ...newCreations]);
-        setLastVisibleCreation(documentSnapshots.docs[documentSnapshots.docs.length - 1] || null);
+        const lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+        setLastVisibleCreation(lastVisible || null);
         setHasMoreCreations(documentSnapshots.docs.length === CREATIONS_PAGE_SIZE);
     } catch (error) {
         console.error("Error fetching more creations:", error);
     } finally {
         setIsLoadingCreations(false);
     }
-  }, [user, db, lastVisibleCreation, hasMoreCreations]);
-
+  }, [user, db, lastVisibleCreation, hasMoreCreations, isLoadingCreations]);
 
   const addCreation = useCallback(async (creationData: Omit<Creation, 'id' | 'createdAt'>) => {
     const userId = user?.uid;
@@ -214,19 +212,21 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const docRef = await addDoc(collection(db, "creations"), creationPayload);
     
-    // Manually add the new creation to the top of the list for immediate feedback
-    setCreations(prev => [{
-      ...creationPayload,
-      id: docRef.id,
-      createdAt: new Date(),
-    } as Creation, ...prev]);
+    // Increment user's creation count
+    const userDocRef = doc(db, 'users', userId);
+    await updateDoc(userDocRef, {
+        creationsCount: increment(1)
+    });
 
-    return {
-      ...creationData,
-      id: docRef.id,
-      url: uploadURL,
-      createdAt: new Date(),
+    const newCreation = {
+        id: docRef.id,
+        ...creationPayload,
+        createdAt: new Date(),
     } as Creation;
+
+    setCreations(prev => [newCreation, ...prev]);
+
+    return newCreation;
   }, [user, db, storage]);
   
   const startRemix = useCallback((item: Partial<Creation & GalleryItem>) => {
@@ -266,7 +266,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         const newItems: GalleryItem[] = documentSnapshots.docs.map(doc => ({ ...doc.data() } as GalleryItem));
 
         setGalleryItems(prev => [...prev, ...newItems]);
-        setLastVisibleGalleryItem(documentSnapshots.docs[documentSnapshots.docs.length - 1] || null);
+        const lastVisible = documentSnapshots.docs[documentSnapshots.docs.length - 1];
+        setLastVisibleGalleryItem(lastVisible || null);
         setHasMoreGalleryItems(documentSnapshots.docs.length === GALLERY_PAGE_SIZE);
       } catch(error) {
           console.error("Error fetching more gallery items:", error);
