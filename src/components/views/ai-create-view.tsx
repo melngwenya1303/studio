@@ -15,7 +15,6 @@ import Icon from '@/components/shared/icon';
 import Modal from '@/components/shared/modal';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import { Checkbox } from '@/components/ui/checkbox';
 import Link from 'next/link';
@@ -23,11 +22,9 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from '@/components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import { Input } from '../ui/input';
@@ -364,353 +361,276 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                     initial={{ x: -50, opacity: 0 }} 
                     animate={{ x: 0, opacity: 1 }} 
                     transition={{ duration: 0.5 }} 
-                    className="w-[400px] flex-shrink-0"
+                    className="w-[450px] flex-shrink-0 flex flex-col"
                 >
-                     <div className="flex flex-col h-full m-4">
-                        <div className="flex-row items-center justify-between mb-4">
+                     <div className="flex-grow flex flex-col p-6">
+                        <div className="flex-row items-center justify-between mb-8">
                             <h1 className="text-h1 font-headline">Creator's Palette</h1>
+                            <p className="text-muted-foreground">Follow the steps to bring your vision to life.</p>
                         </div>
-                        <div className="flex-grow flex flex-col bg-card rounded-2xl p-6 border">
-                             <Tabs defaultValue="design" className="w-full flex flex-col flex-grow">
-                                <TabsList className="grid w-full grid-cols-3">
-                                    <TabsTrigger value="design">Design</TabsTrigger>
-                                    <TabsTrigger value="layers">Layers</TabsTrigger>
-                                    <TabsTrigger value="mockups">Mockups</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="design" className="flex-grow flex flex-col">
-                                    <div className="space-y-6 py-6 flex-grow overflow-y-auto pr-2">
-                                        {/* Step 1: Canvas */}
-                                        <div className="space-y-4">
-                                            <h2 className="text-h2 font-headline">1. Select Product</h2>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="device-type">Product Type</Label>
-                                                <Select
-                                                    value={selectedDevice.name}
-                                                    onValueChange={(value) => {
-                                                        const device = DEVICES.find(d => d.name === value);
-                                                        if (device) handleDeviceSelection(device);
-                                                    }}
-                                                    disabled={isLoading}
-                                                >
-                                                    <SelectTrigger id="device-type" className="w-full">
-                                                        <SelectValue placeholder="Select a device" />
-                                                    </SelectTrigger>
-                                                    <SelectContent>
-                                                        {DEVICES.map(device => (
-                                                            <SelectItem key={device.name} value={device.name}>
-                                                                <div className="flex items-center gap-2">
-                                                                    <Icon name={device.icon as any} className="w-4 h-4" />
-                                                                    {device.name}
-                                                                </div>
-                                                            </SelectItem>
-                                                        ))}
-                                                    </SelectContent>
-                                                </Select>
-                                            </div>
-
-                                            {selectedDevice.models && selectedDevice.models.length > 0 && (
-                                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.3 }} className="space-y-2 overflow-hidden">
-                                                    <Label htmlFor="device-model">Model</Label>
-                                                    <Select
-                                                        value={selectedModel?.name}
-                                                        onValueChange={(value) => {
-                                                            const model = selectedDevice.models?.find(m => m.name === value);
-                                                            if (model) setSelectedModel(model);
-                                                        }}
-                                                        disabled={isLoading}
-                                                    >
-                                                        <SelectTrigger id="device-model" className="w-full">
-                                                            <SelectValue placeholder="Select a model" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {selectedDevice.models.map(model => (
-                                                                <SelectItem key={model.name} value={model.name}>
-                                                                    {model.name}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </motion.div>
-                                            )}
-                                        </div>
-
-                                        <Separator />
-
-                                        {/* Step 2: Vision */}
-                                        <div className="space-y-4">
-                                            <div className="flex items-center gap-2">
-                                                <h2 className="text-h2 font-headline">2. Describe Your Vision</h2>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <button className="text-muted-foreground hover:text-foreground">
-                                                          <Icon name="Info" className="w-4 h-4" />
-                                                        </button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent align="end" className="max-w-xs">
-                                                        <p className="font-bold mb-2">Prompting Tips:</p>
-                                                        <ul className="list-disc list-inside text-xs space-y-1">
-                                                          <li>Be descriptive! Mention the subject, colors, mood, and style.</li>
-                                                          <li>Example: "A majestic stag with crystal antlers in a dark, enchanted forest, photorealistic."</li>
-                                                          <li>Use the ✨ button to let our AI enhance your idea.</li>
-                                                        </ul>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </div>
-                                             <div className="space-y-2">
-                                                <Label htmlFor="prompt-input">Prompt</Label>
-                                                <div className="relative">
-                                                    <Textarea
-                                                        id="prompt-input"
-                                                        className="w-full p-4 pr-4 pb-12 rounded-lg bg-muted text-base border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
-                                                        placeholder={`A decal for my ${currentCanvas.name}...`}
-                                                        value={prompt}
-                                                        onChange={(e) => setPrompt(e.target.value)}
-                                                        rows={4}
-                                                        disabled={isLoading || isEnhancing || isListening}
-                                                    />
-                                                    <div className="absolute bottom-2 right-2 flex items-center gap-1">
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing} className={`text-cyan-600 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}>
-                                                                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleToggleListening}>
-                                                                        <Icon name="Mic" className="w-5 h-5" />
-                                                                    </motion.div>
-                                                                </Button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                              <p>Speak Your Prompt</p>
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking} className="text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
-                                                                     <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleTextToSpeech}>
-                                                                        <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
-                                                                    </motion.div>
-                                                                </Button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                              <p>Listen to Prompt</p>
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing || !prompt.trim()} className="text-primary dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50">
-                                                                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleEnhancePrompt}>
-                                                                        <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
-                                                                    </motion.div>
-                                                                </Button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                              <p>Enhance with AI ✨</p>
-                                                            </TooltipContent>
-                                                        </Tooltip>
+                        
+                        <div className="flex-grow space-y-8 overflow-y-auto pr-4">
+                            {/* Step 1: Canvas */}
+                            <div className="space-y-4">
+                                <h2 className="text-h2 font-headline">1. Select Product</h2>
+                                <div className="space-y-2">
+                                    <Label htmlFor="device-type">Product Type</Label>
+                                    <Select
+                                        value={selectedDevice.name}
+                                        onValueChange={(value) => {
+                                            const device = DEVICES.find(d => d.name === value);
+                                            if (device) handleDeviceSelection(device);
+                                        }}
+                                        disabled={isLoading}
+                                    >
+                                        <SelectTrigger id="device-type" className="w-full">
+                                            <SelectValue placeholder="Select a device" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            {DEVICES.map(device => (
+                                                <SelectItem key={device.name} value={device.name}>
+                                                    <div className="flex items-center gap-2">
+                                                        <Icon name={device.icon as any} className="w-4 h-4" />
+                                                        {device.name}
                                                     </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        
-                                        {/* AI Coach */}
-                                        <div className="space-y-3 p-3 bg-muted/50 rounded-lg">
-                                            <div className="flex items-center justify-between">
-                                              <h3 className="text-h3 font-headline flex items-center gap-2"><Icon name="Bot" className="text-primary" /> AI Coach</h3>
-                                              <Button variant="outline" size="sm" onClick={handleGetRemixSuggestions} disabled={!prompt.trim() || isGettingRemix || isLoading}>
-                                                  {isGettingRemix ? 'Getting ideas...' : 'Get Remix Ideas'}
-                                              </Button>
-                                            </div>
-                                            {remixSuggestions.length > 0 && (
-                                                <motion.div 
-                                                    initial={{opacity: 0, y: -10}} animate={{opacity: 1, y: 0}}
-                                                    className="text-sm text-muted-foreground space-y-2"
-                                                >
-                                                    <p className="text-xs">Try one of these creative directions:</p>
-                                                    <div className="flex flex-wrap gap-2">
-                                                        {remixSuggestions.map((suggestion, i) => (
-                                                            <motion.button 
-                                                                key={i}
-                                                                className="px-3 py-1 bg-background rounded-full text-xs hover:bg-primary/10 border"
-                                                                onClick={() => {
-                                                                    setPrompt(suggestion);
-                                                                    handleGenerate(suggestion);
-                                                                    setRemixSuggestions([]);
-                                                                }}
-                                                                whileHover={{scale: 1.05}} whileTap={{scale: 0.95}}
-                                                            >
-                                                                "{suggestion}"
-                                                            </motion.button>
-                                                        ))}
-                                                    </div>
-                                                </motion.div>
-                                            )}
-                                        </div>
+                                                </SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                </div>
 
-                                        <Separator />
+                                {selectedDevice.models && selectedDevice.models.length > 0 && (
+                                    <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.3 }} className="space-y-2 overflow-hidden">
+                                        <Label htmlFor="device-model">Model</Label>
+                                        <Select
+                                            value={selectedModel?.name}
+                                            onValueChange={(value) => {
+                                                const model = selectedDevice.models?.find(m => m.name === value);
+                                                if (model) setSelectedModel(model);
+                                            }}
+                                            disabled={isLoading}
+                                        >
+                                            <SelectTrigger id="device-model" className="w-full">
+                                                <SelectValue placeholder="Select a model" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {selectedDevice.models.map(model => (
+                                                    <SelectItem key={model.name} value={model.name}>
+                                                        {model.name}
+                                                    </SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </motion.div>
+                                )}
+                            </div>
 
-                                        {/* Step 3: Style */}
-                                        <div className="space-y-4 mb-4">
-                                            <h2 className="text-h2 font-headline">3. Choose Style</h2>
-                                            <div className="space-y-2">
-                                                <Label>Selected Style: {selectedStyle.name}</Label>
-                                                <Carousel opts={{ align: "start", loop: false }} className="w-full max-w-full">
-                                                    <CarouselContent className="-ml-2">
-                                                        {STYLES.map((style, index) => (
-                                                            <CarouselItem key={index} className="pl-2 basis-1/2 md:basis-1/3">
-                                                                <Tooltip>
-                                                                    <TooltipTrigger asChild>
-                                                                        <div className="p-1">
-                                                                            <motion.button 
-                                                                                onClick={() => setSelectedStyle(style)}
-                                                                                className={`w-full rounded-lg transition-all duration-200 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'ring-2 ring-primary ring-offset-background ring-offset-2' : ''}`}
-                                                                                disabled={isLoading}
-                                                                                whileHover={{ scale: 1.05 }}
-                                                                                whileTap={{ scale: 0.98 }}
-                                                                            >
-                                                                                <div className="border-0 aspect-video relative">
-                                                                                    <Image src={style.image} alt={style.name} fill className="object-cover rounded-md" {...{ 'data-ai-hint': style['data-ai-hint'] }} />
-                                                                                    <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors rounded-md" />
-                                                                                </div>
-                                                                            </motion.button>
-                                                                        </div>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                      <p>{style.name}</p>
-                                                                    </TooltipContent>
-                                                                </Tooltip>
-                                                            </CarouselItem>
-                                                        ))}
-                                                    </CarouselContent>
-                                                    <CarouselPrevious className="hidden sm:flex" />
-                                                    <CarouselNext className="hidden sm:flex"/>
-                                                </Carousel>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <div className="mt-auto pt-4 space-y-3">
-                                        <div className="flex items-center space-x-2 my-2">
-                                            <Checkbox id="terms" checked={policyAccepted} onCheckedChange={(checked) => setPolicyAccepted(Boolean(checked))} disabled={isLoading} />
-                                            <label
-                                                htmlFor="terms"
-                                                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                                            >
-                                                I agree to the{' '}
-                                                <Link href="/privacy-policy" className="underline text-primary" target="_blank">
-                                                    Content Policy
-                                                </Link>
-                                            </label>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Button asChild disabled={isLoading || !prompt.trim() || !policyAccepted}
-                                                className="flex-grow text-lg text-white transition-all duration-300 bg-gradient-to-r from-primary to-accent hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none">
-                                                <motion.button onClick={() => handleGenerate(prompt)} whileHover={{ y: -2 }} whileTap={{ y: 1 }}>
-                                                    {isLoading ? 'Designing...' : 'Generate My Vision'}
-                                                </motion.button>
-                                            </Button>
-                                             <Tooltip>
+                            {/* Step 2: Vision */}
+                            <div className="space-y-4">
+                                <div className="flex items-center gap-2">
+                                    <h2 className="text-h2 font-headline">2. Describe Your Vision</h2>
+                                    <Tooltip>
+                                        <TooltipTrigger asChild>
+                                            <button className="text-muted-foreground hover:text-foreground">
+                                              <Icon name="Info" className="w-4 h-4" />
+                                            </button>
+                                        </TooltipTrigger>
+                                        <TooltipContent align="end" className="max-w-xs">
+                                            <p className="font-bold mb-2">Prompting Tips:</p>
+                                            <ul className="list-disc list-inside text-xs space-y-1">
+                                              <li>Be descriptive! Mention the subject, colors, mood, and style.</li>
+                                              <li>Example: "A majestic stag with crystal antlers in a dark, enchanted forest, photorealistic."</li>
+                                              <li>Use the ✨ button to let our AI enhance your idea.</li>
+                                            </ul>
+                                        </TooltipContent>
+                                    </Tooltip>
+                                </div>
+                                 <div className="space-y-2">
+                                    <Label htmlFor="prompt-input">Prompt</Label>
+                                    <div className="relative">
+                                        <Textarea
+                                            id="prompt-input"
+                                            className="w-full p-4 pr-4 pb-12 rounded-lg bg-muted text-base border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+                                            placeholder={`A decal for my ${currentCanvas.name}...`}
+                                            value={prompt}
+                                            onChange={(e) => setPrompt(e.target.value)}
+                                            rows={4}
+                                            disabled={isLoading || isEnhancing || isListening}
+                                        />
+                                        <div className="absolute bottom-2 right-2 flex items-center gap-1">
+                                            <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Button asChild variant="ghost" size="icon" onClick={handleStartOver} disabled={isLoading}>
-                                                        <motion.div whileHover={{ scale: 1.1, rotate: -30 }} whileTap={{ scale: 0.9 }}>
-                                                          <Icon name="Undo2" />
+                                                    <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing} className={`text-cyan-600 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}>
+                                                        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleToggleListening}>
+                                                            <Icon name="Mic" className="w-5 h-5" />
                                                         </motion.div>
                                                     </Button>
                                                 </TooltipTrigger>
-                                                <TooltipContent><p>Start Over</p></TooltipContent>
+                                                <TooltipContent>
+                                                  <p>Speak Your Prompt</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking} className="text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
+                                                         <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleTextToSpeech}>
+                                                            <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
+                                                        </motion.div>
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                  <p>Listen to Prompt</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing || !prompt.trim()} className="text-primary dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50">
+                                                        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleEnhancePrompt}>
+                                                            <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
+                                                        </motion.div>
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                  <p>Enhance with AI ✨</p>
+                                                </TooltipContent>
                                             </Tooltip>
                                         </div>
-                                        
-                                        {generatedDecal && (
-                                            <motion.div 
-                                                initial={{ opacity: 0, y: 10 }}
-                                                animate={{ opacity: 1, y: 0 }}
-                                                className="space-y-3 pt-4 border-t"
-                                            >
-                                                <div className="flex gap-3">
-                                                    <Button variant="outline" onClick={handleSaveCreation} disabled={isLoading || isSaving} className="w-full">
-                                                        {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
-                                                        {isSaving ? 'Saving...' : 'Save Design'}
-                                                    </Button>
-                                                    <Button onClick={handlePurchase} className="w-full bg-green-600 hover:bg-green-700">
-                                                        <Icon name="ShoppingCart" /> Purchase
-                                                    </Button>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-3">
-                                                    <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
-                                                        {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
-                                                        Edit with AI ✨
-                                                    </Button>
-                                                    <Button variant="outline" onClick={handleTellStory} disabled={!story || isSpeaking} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
-                                                        <Icon name={isSpeaking ? "Volume2" : "BookOpen"} className={isSpeaking ? "animate-pulse" : ""} />
-                                                        {isSpeaking ? "Playing..." : "Tell Me the Story"}
-                                                    </Button>
-                                                </div>
-                                            </motion.div>
-                                        )}
                                     </div>
-                                </TabsContent>
-                                <TabsContent value="layers">
-                                    <div className="py-6 space-y-4">
-                                        <p className="text-muted-foreground">Manage the components of your design.</p>
-                                        <div className="space-y-2">
-                                            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                                                <div className="flex items-center gap-3">
-                                                    <Icon name="ImageIcon" />
-                                                    <span className="font-medium">Decal Image</span>
-                                                </div>
-                                                <Badge variant={generatedDecal ? 'secondary' : 'outline'}>{generatedDecal ? 'Visible' : 'Empty'}</Badge>
-                                            </div>
-                                            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
-                                                 <div className="flex items-center gap-3">
-                                                    <Icon name={selectedDevice.icon as any} />
-                                                    <span className="font-medium">Product Base</span>
-                                                </div>
-                                                <Badge variant="secondary">Visible</Badge>
-                                            </div>
-                                        </div>
+                                </div>
+                                {/* AI Coach */}
+                                <div className="space-y-3 p-3 bg-muted/50 rounded-lg">
+                                    <div className="flex items-center justify-between">
+                                      <h3 className="text-h3 font-headline flex items-center gap-2"><Icon name="Bot" className="text-primary" /> AI Coach</h3>
+                                      <Button variant="outline" size="sm" onClick={handleGetRemixSuggestions} disabled={!prompt.trim() || isGettingRemix || isLoading}>
+                                          {isGettingRemix ? 'Getting ideas...' : 'Get Remix Ideas'}
+                                      </Button>
                                     </div>
-                                </TabsContent>
-                                <TabsContent value="mockups" className="flex-grow flex flex-col">
-                                    <div className="py-6 space-y-4 flex-grow">
-                                        <h3 className="text-h3 font-headline">Change Background</h3>
-                                        <p className="text-muted-foreground">Change the product color to see how your design looks.</p>
-                                        <div className="flex flex-wrap gap-3">
-                                            {[
-                                              { name: 'Light', color: 'bg-gray-200' },
-                                              { name: 'Dark', color: 'bg-gray-800' },
-                                              { name: 'Blue', color: 'bg-blue-500' },
-                                              { name: 'Red', color: 'bg-red-500' },
-                                              { name: 'Green', color: 'bg-green-500' },
-                                            ].map(c => (
-                                                <Button key={c.name} variant="outline" className="flex items-center gap-2" onClick={() => setMockupColor(c.color)}>
-                                                    <div className={cn("w-4 h-4 rounded-full border", c.color)} />
-                                                    {c.name}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                        <Separator/>
-                                        <h3 className="text-h3 font-headline">AI Lifestyle Mockup</h3>
-                                        <p className="text-muted-foreground">Generate your product in a realistic scene.</p>
-                                        <div className="space-y-2">
-                                            <Label htmlFor="mockup-prompt">Scene Description</Label>
-                                            <Input 
-                                                id="mockup-prompt"
-                                                value={mockupPrompt}
-                                                onChange={(e) => setMockupPrompt(e.target.value)}
-                                                placeholder="e.g., on a wooden table with a coffee"
-                                                disabled={isLoading || !generatedDecal}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="mt-auto pt-4 border-t">
-                                        <Button 
-                                            onClick={() => handleGenerate(prompt)} 
-                                            className="w-full" 
-                                            disabled={isLoading || !generatedDecal || !mockupPrompt}
+                                    {remixSuggestions.length > 0 && (
+                                        <motion.div 
+                                            initial={{opacity: 0, y: -10}} animate={{opacity: 1, y: 0}}
+                                            className="text-sm text-muted-foreground space-y-2"
                                         >
-                                            <Icon name="Sparkles" /> Generate Mockup
+                                            <p className="text-xs">Try one of these creative directions:</p>
+                                            <div className="flex flex-wrap gap-2">
+                                                {remixSuggestions.map((suggestion, i) => (
+                                                    <motion.button 
+                                                        key={i}
+                                                        className="px-3 py-1 bg-background rounded-full text-xs hover:bg-primary/10 border"
+                                                        onClick={() => {
+                                                            setPrompt(suggestion);
+                                                            handleGenerate(suggestion);
+                                                            setRemixSuggestions([]);
+                                                        }}
+                                                        whileHover={{scale: 1.05}} whileTap={{scale: 0.95}}
+                                                    >
+                                                        "{suggestion}"
+                                                    </motion.button>
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </div>
+                            </div>
+                            
+                            {/* Step 3: Style */}
+                            <div className="space-y-4">
+                                <h2 className="text-h2 font-headline">3. Choose Style</h2>
+                                <div className="space-y-2">
+                                    <Label>Selected Style: {selectedStyle.name}</Label>
+                                    <Carousel opts={{ align: "start", loop: false }} className="w-full max-w-full">
+                                        <CarouselContent className="-ml-2">
+                                            {STYLES.map((style, index) => (
+                                                <CarouselItem key={index} className="pl-2 basis-1/2 md:basis-1/3">
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <div className="p-1">
+                                                                <motion.button 
+                                                                    onClick={() => setSelectedStyle(style)}
+                                                                    className={`w-full rounded-lg transition-all duration-200 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'ring-2 ring-primary ring-offset-background ring-offset-2' : ''}`}
+                                                                    disabled={isLoading}
+                                                                    whileHover={{ scale: 1.05 }}
+                                                                    whileTap={{ scale: 0.98 }}
+                                                                >
+                                                                    <div className="border-0 aspect-video relative">
+                                                                        <Image src={style.image} alt={style.name} fill className="object-cover rounded-md" {...{ 'data-ai-hint': style['data-ai-hint'] }} />
+                                                                        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors rounded-md" />
+                                                                    </div>
+                                                                </motion.button>
+                                                            </div>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                          <p>{style.name}</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </CarouselItem>
+                                            ))}
+                                        </CarouselContent>
+                                        <CarouselPrevious className="hidden sm:flex -left-4" />
+                                        <CarouselNext className="hidden sm:flex -right-4"/>
+                                    </Carousel>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div className="mt-auto pt-6 space-y-3 border-t">
+                             <div className="flex items-start space-x-2">
+                                <Checkbox id="terms" checked={policyAccepted} onCheckedChange={(checked) => setPolicyAccepted(Boolean(checked))} disabled={isLoading} className="mt-1"/>
+                                <label
+                                    htmlFor="terms"
+                                    className="text-sm text-muted-foreground leading-snug"
+                                >
+                                    I agree to the{' '}
+                                    <Link href="/privacy-policy" className="underline text-primary hover:text-primary/80" target="_blank">
+                                        Content Policy
+                                    </Link> and understand that my design may be reviewed for safety.
+                                </label>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <Button onClick={() => handleGenerate(prompt)} disabled={isLoading || !prompt.trim() || !policyAccepted}
+                                    className="flex-grow text-lg h-12 text-white transition-all duration-300 bg-gradient-to-r from-primary to-accent hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none">
+                                    <motion.span whileHover={{ y: -1 }} whileTap={{ y: 1 }}>
+                                        {isLoading ? 'Designing...' : 'Generate My Vision'}
+                                    </motion.span>
+                                </Button>
+                                 <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button asChild variant="ghost" size="icon" onClick={handleStartOver} disabled={isLoading}>
+                                            <motion.div whileHover={{ scale: 1.1, rotate: -30 }} whileTap={{ scale: 0.9 }}>
+                                              <Icon name="Undo2" />
+                                            </motion.div>
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent><p>Start Over</p></TooltipContent>
+                                </Tooltip>
+                            </div>
+                            
+                            {generatedDecal && (
+                                <motion.div 
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="space-y-3 pt-4 border-t"
+                                >
+                                    <div className="flex gap-3">
+                                        <Button variant="outline" onClick={handleSaveCreation} disabled={isLoading || isSaving} className="w-full">
+                                            {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
+                                            {isSaving ? 'Saving...' : 'Save Design'}
+                                        </Button>
+                                        <Button onClick={handlePurchase} className="w-full bg-green-600 hover:bg-green-700">
+                                            <Icon name="ShoppingCart" /> Purchase
                                         </Button>
                                     </div>
-                                </TabsContent>
-                            </Tabs>
+                                    <div className="grid grid-cols-2 gap-3">
+                                        <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
+                                            {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
+                                            Edit with AI ✨
+                                        </Button>
+                                        <Button variant="outline" onClick={handleTellStory} disabled={!story || isSpeaking} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
+                                            <Icon name={isSpeaking ? "Volume2" : "BookOpen"} className={isSpeaking ? "animate-pulse" : ""} />
+                                            {isSpeaking ? "Playing..." : "Tell Me the Story"}
+                                        </Button>
+                                    </div>
+                                </motion.div>
+                            )}
                         </div>
                     </div>
                 </motion.div>
@@ -830,7 +750,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                           <div className="text-center text-muted-foreground flex flex-col items-center justify-center gap-4">
                                               <Icon name="ImageIcon" className="w-24 h-24 text-primary/30" />
                                               <h3 className="text-lg font-semibold">AI Lifestyle Mockup</h3>
-                                              <p className="max-w-xs">Use the "Mockups" tab to generate a realistic scene for your product.</p>
+                                              <p className="max-w-xs">This feature is coming soon!</p>
                                           </div>
                                        )}
                                    </div>
