@@ -1,8 +1,8 @@
 
 'use client';
 
-import React, { useState, useRef } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useRef, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from "@/hooks/use-toast";
 import { DEVICES } from '@/lib/constants';
@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 
 type UploadViewProps = {
@@ -37,10 +38,45 @@ export default function UploadView({ onBack }: UploadViewProps) {
     const [previewMode, setPreviewMode] = useState<'2D' | '3D'>('2D');
     const [mockupColor, setMockupColor] = useState('bg-gray-200');
 
+    // AR State
+    const [isPreviewingAr, setIsPreviewingAr] = useState(false);
+    const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+
     const handleDeviceSelection = (device: Device) => {
         setSelectedDevice(device);
         setSelectedModel(device.models?.[0] || null);
     };
+
+    useEffect(() => {
+        if (isPreviewingAr) {
+            const getCameraPermission = async () => {
+              try {
+                const stream = await navigator.mediaDevices.getUserMedia({video: true});
+                setHasCameraPermission(true);
+
+                if (videoRef.current) {
+                  videoRef.current.srcObject = stream;
+                }
+              } catch (error) {
+                console.error('Error accessing camera:', error);
+                setHasCameraPermission(false);
+                toast({
+                  variant: 'destructive',
+                  title: 'Camera Access Denied',
+                  description: 'Please enable camera permissions in your browser settings to use this app.',
+                });
+              }
+            };
+            getCameraPermission();
+        } else {
+             if (videoRef.current && videoRef.current.srcObject) {
+                const stream = videoRef.current.srcObject as MediaStream;
+                stream.getTracks().forEach(track => track.stop());
+                videoRef.current.srcObject = null;
+            }
+        }
+    }, [isPreviewingAr, toast]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0];
@@ -213,7 +249,7 @@ export default function UploadView({ onBack }: UploadViewProps) {
                 </motion.div>
 
                 {/* Right Column: Canvas/Preview */}
-                <motion.div 
+                 <motion.div 
                     initial={{ scale: 0.8, opacity: 0 }} 
                     animate={{ scale: 1, opacity: 1 }} 
                     transition={{ duration: 0.7, delay: 0.2 }} 
@@ -221,10 +257,34 @@ export default function UploadView({ onBack }: UploadViewProps) {
                 >
                      <div className={cn(
                         "flex-1 flex flex-col items-center justify-center rounded-2xl min-h-0 p-4 transition-colors relative",
-                        mockupColor
+                        isPreviewingAr ? 'bg-transparent' : mockupColor
                     )}>
-                        <div className="flex-grow w-full h-full flex items-center justify-center relative">
-                            {previewMode === '2D' && (
+                        <div className="w-full h-full flex items-center justify-center">
+                            {isPreviewingAr ? (
+                                <motion.div 
+                                    key="ar-preview"
+                                    initial={{ opacity: 0 }}
+                                    animate={{ opacity: 1 }}
+                                    exit={{ opacity: 0 }}
+                                    className="w-full h-full"
+                                >
+                                    <video ref={videoRef} className="w-full h-full object-cover rounded-md" autoPlay muted playsInline />
+                                    {hasCameraPermission === false && (
+                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                            <Alert variant="destructive" className="max-w-sm">
+                                              <AlertTitle>Camera Access Required</AlertTitle>
+                                              <AlertDescription>
+                                                Please allow camera access in your browser settings to use the AR feature.
+                                              </AlertDescription>
+                                            </Alert>
+                                        </div>
+                                    )}
+                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-white p-4 bg-black/30 rounded-lg">
+                                        <p>Look at a flat surface to place your design.</p>
+                                        <p className="text-xs">(AR object rendering coming soon)</p>
+                                    </div>
+                                </motion.div>
+                            ) : previewMode === '2D' ? (
                                 <motion.div
                                     animate={{ y: [0, -8, 0] }}
                                     transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
@@ -239,11 +299,13 @@ export default function UploadView({ onBack }: UploadViewProps) {
                                         key={currentCanvas.name}
                                         priority
                                     />
+                                    <AnimatePresence>
                                     {uploadedImage && (
                                         <motion.div
                                             className="absolute"
                                             initial={{ opacity: 0, scale: 0.8 }}
                                             animate={{ opacity: 1, scale: 1 }}
+                                            exit={{opacity: 0}}
                                             transition={{ duration: 0.5 }}
                                             style={{
                                                 top: currentCanvas.decal?.top ?? '0%',
@@ -262,9 +324,9 @@ export default function UploadView({ onBack }: UploadViewProps) {
                                             />
                                         </motion.div>
                                     )}
+                                    </AnimatePresence>
                                 </motion.div>
-                            )}
-                            {previewMode === '3D' && (
+                            ) : (
                                 <div className="text-center text-muted-foreground flex flex-col items-center justify-center gap-4">
                                     <motion.div
                                         animate={{
@@ -285,17 +347,24 @@ export default function UploadView({ onBack }: UploadViewProps) {
                             )}
                         </div>
                         <div className="absolute bottom-4 right-4 w-full flex justify-between items-center px-4">
-                            <ToggleGroup type="single" value={previewMode} onValueChange={(value: '2D' | '3D') => value && setPreviewMode(value)} className="bg-background/50 rounded-lg p-1">
-                                <ToggleGroupItem value="2D" aria-label="2D Preview">
-                                <Icon name="ImageIcon" className="w-4 h-4 mr-2" /> 2D
-                                </ToggleGroupItem>
-                                <ToggleGroupItem value="3D" aria-label="3D Preview">
-                                <Icon name="Box" className="w-4 h-4 mr-2" /> 3D
-                                </ToggleGroupItem>
-                            </ToggleGroup>
-                            <Button variant="outline" disabled>
+                            {isPreviewingAr ? (
+                                 <Button onClick={() => setIsPreviewingAr(false)}>
+                                    <Icon name="Undo2" className="mr-2" /> Back to 2D
+                                </Button>
+                            ) : (
+                                <ToggleGroup type="single" value={previewMode} onValueChange={(value: '2D' | '3D') => value && setPreviewMode(value)} className="bg-background/50 rounded-lg p-1">
+                                    <ToggleGroupItem value="2D" aria-label="2D Preview">
+                                    <Icon name="ImageIcon" className="w-4 h-4 mr-2" /> 2D
+                                    </ToggleGroupItem>
+                                    <ToggleGroupItem value="3D" aria-label="3D Preview" disabled>
+                                    <Icon name="Box" className="w-4 h-4 mr-2" /> 3D
+                                    </ToggleGroupItem>
+                                </ToggleGroup>
+                            )}
+
+                            <Button variant="outline" onClick={() => setIsPreviewingAr(true)} disabled={isPreviewingAr}>
                                 <Icon name="Camera" className="w-4 h-4 mr-2" />
-                                View in AR (Coming Soon)
+                                View in AR
                             </Button>
                         </div>
                     </div>
