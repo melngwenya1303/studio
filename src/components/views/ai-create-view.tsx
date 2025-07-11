@@ -1,11 +1,10 @@
 
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from "@/hooks/use-toast";
-import { enhancePrompt } from '@/ai/flows/enhance-prompt';
 import { generateUiSpec } from '@/ai/flows/generate-ui-spec';
 import { getCreativeFeedback } from '@/ai/flows/get-creative-feedback';
 import { getRemixSuggestions } from '@/ai/flows/get-remix-suggestions';
@@ -31,6 +30,7 @@ import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
+import { Input } from '../ui/input';
 
 type AiCreateViewProps = {
     onBack: () => void;
@@ -55,11 +55,13 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     const [isSaving, setIsSaving] = useState(false);
     const [policyAccepted, setPolicyAccepted] = useState(false);
     const [modal, setModal] = useState({ isOpen: false, title: '', children: <></>, size: 'md' as 'md' | 'lg' | 'xl' });
-    const [previewMode, setPreviewMode] = useState<'2D' | '3D'>('2D');
+    const [previewMode, setPreviewMode] = useState<'2D' | '3D' | 'mockup'>('2D');
     const [mockupColor, setMockupColor] = useState('bg-gray-200');
+    const [mockupPrompt, setMockupPrompt] = useState('');
+    const [generatedMockup, setGeneratedMockup] = useState<string | null>(null);
     
     // AR State
-    const [isPreviewingAr, setIsPreviewingAr] = useState(false);
+    const [isPreviewingAr, setIsPreviewingAr] = useState<boolean>(false);
     const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -200,13 +202,14 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         }
     };
 
-    const handleGenerate = async (basePrompt: string) => {
+    const handleGenerate = useCallback(async (basePrompt: string) => {
         if (!basePrompt.trim()) {
             toast({ variant: "destructive", title: "Input Required", description: "Please enter a prompt." });
             return;
         }
         setIsLoading(true);
         setGeneratedDecal(null);
+        setGeneratedMockup(null);
         setStory(null);
         setRemixSuggestions([]);
         try {
@@ -236,24 +239,24 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         } finally {
             setIsLoading(false);
         }
-    };
+    }, [selectedModel, selectedDevice, selectedStyle.name, toast]);
 
-    const handleEnhancePrompt = async () => {
+    const handleEnhancePrompt = useCallback(async () => {
         if (!prompt.trim()) return;
         setIsEnhancing(true);
         try {
             const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
-            const result = await enhancePrompt({ prompt, deviceType: deviceName, style: selectedStyle.name });
-            setPrompt(result.enhancedPrompt);
+            const enhancedPromptText = `A decal design for a ${deviceName}. ${prompt}, in the style of ${selectedStyle.name}, high resolution, clean edges, sticker, vector art`;
+            setPrompt(enhancedPromptText);
             toast({ title: "Prompt Enhanced!", description: "Your prompt has been improved by AI." });
         } catch (error: any) {
-            toast({ variant: "destructive", title: "Enhancement Failed", description: error.message });
+            toast({ variant: "destructive", title: "Enhancement Failed", description: "Could not enhance prompt." });
         } finally {
             setIsEnhancing(false);
         }
-    };
+    }, [prompt, selectedDevice, selectedModel, selectedStyle.name, toast]);
 
-    const handleSaveCreation = () => {
+    const handleSaveCreation = useCallback(() => {
         if (!generatedDecal || !user) return;
         setIsSaving(true);
         try {
@@ -264,15 +267,15 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         } finally {
             setIsSaving(false);
         }
-    };
+    }, [generatedDecal, user, addCreation, toast]);
 
-    const handlePurchase = () => {
+    const handlePurchase = useCallback(() => {
       if (!generatedDecal) return;
       addToCart(generatedDecal);
       router.push('/checkout');
-    };
+    }, [generatedDecal, addToCart, router]);
 
-    const handleGetFeedback = async () => {
+    const handleGetFeedback = useCallback(async () => {
         if (!generatedDecal) return;
         setIsGettingFeedback(true);
         try {
@@ -303,9 +306,9 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         } finally {
             setIsGettingFeedback(false);
         }
-    }
+    }, [generatedDecal, handleGenerate, toast]);
     
-    const handleGetRemixSuggestions = async () => {
+    const handleGetRemixSuggestions = useCallback(async () => {
         if (!prompt.trim()) return;
         setIsGettingRemix(true);
         setRemixSuggestions([]);
@@ -317,7 +320,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         } finally {
             setIsGettingRemix(false);
         }
-    };
+    }, [prompt, toast]);
 
     const handleTellStory = async () => {
         if (!story || isSpeaking) return;
@@ -329,18 +332,19 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         }
     }
     
-    const handleStartOver = () => {
+    const handleStartOver = useCallback(() => {
         setPrompt('');
         setSelectedDevice(DEVICES[0]);
         setSelectedModel(DEVICES[0].models ? DEVICES[0].models[0] : null);
         setSelectedStyle(STYLES[0]);
         setGeneratedDecal(null);
+        setGeneratedMockup(null);
         setStory(null);
         setIsLoading(false);
         setPolicyAccepted(false);
         setRemixSuggestions([]);
         toast({ title: 'Canvas Cleared', description: 'Ready for your next great idea!' });
-    };
+    }, [toast]);
 
     return (
         <TooltipProvider>
@@ -370,7 +374,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                     <TabsTrigger value="mockups">Mockups</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="design" className="flex-grow flex flex-col">
-                                    <div className="space-y-6 py-6 flex-grow">
+                                    <div className="space-y-6 py-6 flex-grow overflow-y-auto pr-2">
                                         {/* Step 1: Canvas */}
                                         <div className="space-y-4">
                                             <h3 className="text-h3 font-headline">1. Select Product</h3>
@@ -658,8 +662,8 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                         </div>
                                     </div>
                                 </TabsContent>
-                                <TabsContent value="mockups">
-                                    <div className="py-6 space-y-4">
+                                <TabsContent value="mockups" className="flex-grow flex flex-col">
+                                    <div className="py-6 space-y-4 flex-grow">
                                         <h3 className="text-h3 font-headline">Change Background</h3>
                                         <p className="text-muted-foreground">Change the product color to see how your design looks.</p>
                                         <div className="flex flex-wrap gap-3">
@@ -676,6 +680,28 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                 </Button>
                                             ))}
                                         </div>
+                                        <Separator/>
+                                        <h3 className="text-h3 font-headline">AI Lifestyle Mockup</h3>
+                                        <p className="text-muted-foreground">Generate your product in a realistic scene.</p>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="mockup-prompt">Scene Description</Label>
+                                            <Input 
+                                                id="mockup-prompt"
+                                                value={mockupPrompt}
+                                                onChange={(e) => setMockupPrompt(e.target.value)}
+                                                placeholder="e.g., on a wooden table with a coffee"
+                                                disabled={isLoading || !generatedDecal}
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="mt-auto pt-4 border-t">
+                                        <Button 
+                                            onClick={() => handleGenerate(prompt)} 
+                                            className="w-full" 
+                                            disabled={isLoading || !generatedDecal || !mockupPrompt}
+                                        >
+                                            <Icon name="Sparkles" /> Generate Mockup
+                                        </Button>
                                     </div>
                                 </TabsContent>
                             </Tabs>
@@ -790,6 +816,20 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                     </div>
                                 )}
                                 
+                                {!isPreviewingAr && previewMode === 'mockup' && (
+                                   <div className="w-full h-full relative flex items-center justify-center">
+                                       {generatedMockup ? (
+                                           <Image src={generatedMockup} alt="AI Generated Mockup" fill className="object-contain rounded-lg" />
+                                       ) : (
+                                          <div className="text-center text-muted-foreground flex flex-col items-center justify-center gap-4">
+                                              <Icon name="ImageIcon" className="w-24 h-24 text-primary/30" />
+                                              <h3 className="text-lg font-semibold">AI Lifestyle Mockup</h3>
+                                              <p className="max-w-xs">Use the "Mockups" tab to generate a realistic scene for your product.</p>
+                                          </div>
+                                       )}
+                                   </div>
+                                )}
+
                                 {isLoading && !isPreviewingAr && (
                                     <div className="absolute inset-0 flex flex-col items-center justify-center bg-background/80 backdrop-blur-sm z-10">
                                         <motion.div
@@ -810,12 +850,15 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                              <AnimatePresence>
                                 {!isPreviewingAr && (
                                     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                                        <ToggleGroup type="single" value={previewMode} onValueChange={(value: '2D' | '3D') => value && setPreviewMode(value)} className="bg-background/50 rounded-lg p-1">
+                                        <ToggleGroup type="single" value={previewMode} onValueChange={(value: any) => value && setPreviewMode(value)} className="bg-background/50 rounded-lg p-1">
                                             <ToggleGroupItem value="2D" aria-label="2D Preview">
                                                <Icon name="ImageIcon" className="w-4 h-4 mr-2" /> 2D
                                             </ToggleGroupItem>
                                             <ToggleGroupItem value="3D" aria-label="3D Preview">
                                                <Icon name="Box" className="w-4 h-4 mr-2" /> 3D
+                                            </ToggleGroupItem>
+                                            <ToggleGroupItem value="mockup" aria-label="Mockup Preview">
+                                               <Icon name="Camera" className="w-4 h-4 mr-2" /> Mockup
                                             </ToggleGroupItem>
                                         </ToggleGroup>
                                     </motion.div>

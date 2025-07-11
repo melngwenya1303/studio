@@ -13,11 +13,13 @@ import {z} from 'genkit';
 
 const GenerateImageInputSchema = z.object({
   prompt: z.string().describe('The prompt to use to generate the decal image.'),
+  mockupPrompt: z.string().optional().describe('A prompt for generating a lifestyle mockup image of the product with the decal on it. e.g., "on a sunlit desk in a cozy cafe"'),
 });
 export type GenerateImageInput = z.infer<typeof GenerateImageInputSchema>;
 
 const GenerateImageOutputSchema = z.object({
   media: z.string().optional().describe('The generated image as a data URI.'),
+  mockupMedia: z.string().optional().describe('The generated lifestyle mockup image as a data URI.'),
   blocked: z.boolean().describe('Whether the prompt was blocked by the safety filter.'),
   reason: z.string().optional().describe('The reason the prompt was blocked.'),
 });
@@ -48,11 +50,39 @@ const checkForProhibitedContent = ai.defineTool(
     }
 );
 
+const generateMockupImage = ai.defineTool(
+    {
+        name: 'generateMockupImage',
+        description: 'Generates a lifestyle mockup image given a base image and a scene description.',
+        inputSchema: z.object({
+            baseImageUrl: z.string().describe('The Data URI of the base product image with the decal applied.'),
+            mockupPrompt: z.string().describe('A simple description of the lifestyle scene. e.g., "on a marble countertop next to a plant"'),
+        }),
+        outputSchema: z.string().describe('The Data URI of the generated mockup image.'),
+    },
+    async ({ baseImageUrl, mockupPrompt }) => {
+        const { media } = await ai.generate({
+            model: 'googleai/gemini-2.0-flash-preview-image-generation',
+            prompt: [
+                { media: { url: baseImageUrl } },
+                { text: `Generate a realistic lifestyle photo placing this product naturally in the following scene: ${mockupPrompt}. The product should be the main focus.`},
+            ],
+            config: {
+                responseModalities: ['TEXT', 'IMAGE'],
+            },
+        });
+        if (!media?.url) {
+            throw new Error('Mockup generation failed.');
+        }
+        return media.url;
+    }
+);
+
 
 const imageGenerationPrompt = ai.definePrompt({
     name: 'imageGenerationPrompt',
     input: {schema: GenerateImageInputSchema },
-    tools: [checkForProhibitedContent],
+    tools: [checkForProhibitedContent, generateMockupImage],
     prompt: `First, use the 'checkForProhibitedContent' tool to check if the user's prompt contains any prohibited words.
 If it is prohibited, do not generate an image and inform the user why.
 If the prompt is not prohibited, generate an image based on the following user prompt: "{{{prompt}}}"
@@ -92,8 +122,20 @@ const generateImageFlow = ai.defineFlow(
        throw new Error('The AI failed to generate an image. This can happen with unusual prompts or if the content violates safety policies. Please try again with a different idea.');
     }
     
+    // After generating the main image, check if a mockup is requested.
+    let mockupMediaUrl: string | undefined = undefined;
+    if (input.mockupPrompt && media.url) {
+        try {
+            mockupMediaUrl = await generateMockupImage({ baseImageUrl: media.url, mockupPrompt: input.mockupPrompt });
+        } catch (e) {
+            console.warn("Could not generate mockup image.", e);
+            // Non-fatal, we can proceed without the mockup.
+        }
+    }
+
     return {
         media: media.url,
+        mockupMedia: mockupMediaUrl,
         blocked: false
     };
   }
