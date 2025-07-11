@@ -2,6 +2,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
+import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { GALLERY_ITEMS, STYLES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
@@ -16,6 +17,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 
 type CategoryFilter = 'all' | 'trending' | 'popular' | 'recent';
 
@@ -36,7 +38,6 @@ export default function InspirationGalleryPage() {
         
         // This is a placeholder for real filtering logic
         if (categoryFilter !== 'all') {
-            // e.g., sort by popularity or date, for now just shuffle
             items = items.sort(() => 0.5 - Math.random());
         }
 
@@ -63,7 +64,7 @@ export default function InspirationGalleryPage() {
                               <li key={i} onClick={() => {
                                 startRemix({ ...item, prompt: p });
                                 setModal(prev => ({...prev, isOpen: false}));
-                              }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+                              }} className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
                                   <p className="font-mono text-sm">"{p}"</p>
                               </li>
                           ))}
@@ -92,14 +93,14 @@ export default function InspirationGalleryPage() {
                              <li onClick={() => {
                                 startRemix(item);
                                 setModal(prev => ({ ...prev, isOpen: false }));
-                            }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+                            }} className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
                                 <p className="font-semibold">Just take me to the original</p>
                             </li>
                             {result.suggestions.map((p, i) => (
                                 <li key={i} onClick={() => {
                                     startRemix({ ...item, prompt: p });
                                     setModal(prev => ({ ...prev, isOpen: false }));
-                                }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+                                }} className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
                                     <p className="font-mono text-sm">"{p}"</p>
                                 </li>
                             ))}
@@ -116,7 +117,6 @@ export default function InspirationGalleryPage() {
     };
 
     const handleLike = (itemId: number) => {
-        // Placeholder for like functionality
         toast({ title: 'Liked!', description: 'You liked this design.' });
     };
 
@@ -132,11 +132,11 @@ export default function InspirationGalleryPage() {
                 </header>
 
                 <div className="mb-6 p-4 bg-card border rounded-lg flex flex-wrap items-center gap-4">
-                    <ToggleGroup type="single" value={categoryFilter} onValueChange={(value: CategoryFilter) => value && setCategoryFilter(value)}>
-                        <ToggleGroupItem value="all">All</ToggleGroupItem>
-                        <ToggleGroupItem value="trending">Trending</ToggleGroupItem>
-                        <ToggleGroupItem value="popular">Popular</ToggleGroupItem>
-                        <ToggleGroupItem value="recent">Recent</ToggleGroupItem>
+                    <ToggleGroup type="single" value={categoryFilter} onValueChange={(value: CategoryFilter) => value && setCategoryFilter(value)} className="bg-muted/50 rounded-full">
+                        <ToggleGroupItem value="all" className="rounded-full px-4">All</ToggleGroupItem>
+                        <ToggleGroupItem value="trending" className="rounded-full px-4">Trending</ToggleGroupItem>
+                        <ToggleGroupItem value="popular" className="rounded-full px-4">Popular</ToggleGroupItem>
+                        <ToggleGroupItem value="recent" className="rounded-full px-4">Recent</ToggleGroupItem>
                     </ToggleGroup>
                     <div className="flex-grow"></div>
                     <Select value={styleFilter} onValueChange={setStyleFilter}>
@@ -152,38 +152,46 @@ export default function InspirationGalleryPage() {
                     </Select>
                 </div>
 
-                <div className="columns-1 sm:columns-2 lg:columns-3 gap-8 space-y-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                     {filteredItems.map(item => (
-                        <div key={item.id} className="group relative rounded-xl overflow-hidden shadow-lg bg-card border flex flex-col break-inside-avoid">
-                           <div className="relative w-full h-56">
-                             <Image src={item.url} alt={item.prompt} fill className="object-cover" {...{ 'data-ai-hint': item['data-ai-hint'] }} />
-                              <div className="absolute top-2 right-2 flex items-center gap-2">
-                                 <Tooltip>
-                                    <TooltipTrigger asChild>
-                                         <Button
-                                            onClick={() => handleLike(item.id)}
-                                            size="icon"
-                                            variant="ghost"
-                                            className="bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 hover:text-pink-400"
-                                          >
-                                           <Icon name="Heart" />
-                                         </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent><p>Like</p></TooltipContent>
-                                 </Tooltip>
-                               </div>
-                           </div>
-                           <div className="p-4 flex flex-col flex-grow">
-                                <div className="flex justify-between items-start">
-                                    <p className="text-sm font-semibold text-card-foreground mb-2 line-clamp-2" title={item.prompt}>{item.prompt}</p>
-                                    <Badge variant="outline" className="flex-shrink-0">{item.style}</Badge>
-                                </div>
-                               <p className="text-xs text-muted-foreground italic mb-4 line-clamp-3">Curator's Note: "{item.curatorNote}"</p>
-                               
-                               <div className="mt-auto flex justify-between items-center">
-                                   <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
-                                       <Icon name="Heart" className="text-pink-500"/>
-                                       <span>{item.likes}</span>
+                        <motion.div
+                            key={item.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.5 }}
+                        >
+                            <Card className="group h-full flex flex-col">
+                                <CardHeader className="p-0">
+                                   <div className="relative w-full aspect-square">
+                                     <Image src={item.url} alt={item.prompt} fill className="object-cover rounded-t-lg" {...{ 'data-ai-hint': item['data-ai-hint'] }} />
+                                      <div className="absolute top-2 right-2 flex items-center gap-2">
+                                         <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                 <Button
+                                                    onClick={() => handleLike(item.id)}
+                                                    size="icon"
+                                                    variant="ghost"
+                                                    className="bg-black/30 text-white backdrop-blur-sm rounded-full hover:bg-black/50 hover:text-pink-400"
+                                                  >
+                                                   <Icon name="Heart" />
+                                                 </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent><p>Like</p></TooltipContent>
+                                         </Tooltip>
+                                       </div>
+                                   </div>
+                                </CardHeader>
+                               <CardContent className="p-4 flex flex-col flex-grow">
+                                    <p className="text-base font-semibold text-card-foreground mb-2 line-clamp-2" title={item.prompt}>{item.prompt}</p>
+                                    <p className="text-sm text-muted-foreground italic mb-4 line-clamp-3">Curator's Note: "{item.curatorNote}"</p>
+                               </CardContent>
+                               <CardFooter className="p-4 mt-auto flex justify-between items-center">
+                                   <div className="flex items-center gap-2">
+                                        <Badge variant="outline" className="flex-shrink-0">{item.style}</Badge>
+                                        <div className="flex items-center gap-1.5 text-sm font-semibold text-muted-foreground">
+                                           <Icon name="Heart" className="text-pink-500"/>
+                                           <span>{item.likes}</span>
+                                       </div>
                                    </div>
                                     <div className="flex items-center gap-2">
                                         <Tooltip>
@@ -195,14 +203,14 @@ export default function InspirationGalleryPage() {
                                                     size="icon" 
                                                     className="flex-shrink-0"
                                                 >
-                                                    {isDescribing === item.id ? <Icon name="Wand2" className="w-4 h-4 animate-pulse" /> : <Icon name="BookOpen" className="w-4 h-4" />}
+                                                    {isDescribing === item.id ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="BookOpen" />}
                                                 </Button>
                                             </TooltipTrigger>
                                             <TooltipContent><p>Describe with AI</p></TooltipContent>
                                         </Tooltip>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <Button onClick={() => handleRemix(item)} disabled={!!isRemixing} size="sm">
+                                                <Button onClick={() => handleRemix(item)} disabled={!!isRemixing}>
                                                     {isRemixing === item.id ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
                                                     Remix
                                                 </Button>
@@ -210,9 +218,9 @@ export default function InspirationGalleryPage() {
                                             <TooltipContent><p>Remix with AI</p></TooltipContent>
                                         </Tooltip>
                                     </div>
-                               </div>
-                           </div>
-                        </div>
+                               </CardFooter>
+                            </Card>
+                        </motion.div>
                     ))}
                 </div>
                  {filteredItems.length === 0 && (
