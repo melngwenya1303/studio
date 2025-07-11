@@ -9,7 +9,7 @@ interface AppContextType {
   user: User | null;
   isAdmin: boolean;
   creations: Creation[];
-  addCreation: (creation: Omit<Creation, 'id' | 'createdAt'>) => void;
+  addCreation: (creation: Omit<Creation, 'id' | 'createdAt'>) => Creation;
   startRemix: (item: Creation | GalleryItem) => void;
   remixData: Creation | GalleryItem | null;
   clearRemixData: () => void;
