@@ -391,6 +391,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                         const device = DEVICES.find(d => d.name === value);
                                                         if (device) handleDeviceSelection(device);
                                                     }}
+                                                    disabled={isLoading}
                                                 >
                                                     <SelectTrigger id="device-type" className="w-full">
                                                         <SelectValue placeholder="Select a device" />
@@ -417,6 +418,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                             const model = selectedDevice.models?.find(m => m.name === value);
                                                             if (model) setSelectedModel(model);
                                                         }}
+                                                        disabled={isLoading}
                                                     >
                                                         <SelectTrigger id="device-model" className="w-full">
                                                             <SelectValue placeholder="Select a model" />
@@ -513,7 +515,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                         <div className="space-y-3 p-3 bg-muted/50 rounded-lg">
                                             <div className="flex items-center justify-between">
                                               <h4 className="font-semibold text-sm flex items-center gap-2"><Icon name="Bot" className="text-primary" /> AI Coach</h4>
-                                              <Button variant="outline" size="sm" onClick={handleGetRemixSuggestions} disabled={!prompt.trim() || isGettingRemix}>
+                                              <Button variant="outline" size="sm" onClick={handleGetRemixSuggestions} disabled={!prompt.trim() || isGettingRemix || isLoading}>
                                                   {isGettingRemix ? 'Getting ideas...' : 'Get Remix Ideas'}
                                               </Button>
                                             </div>
@@ -586,8 +588,8 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                     </div>
                                     
                                     <div className="mt-auto pt-4 space-y-3">
-                                        <div className="flex items-center space-x-2 my-4">
-                                            <Checkbox id="terms" checked={policyAccepted} onCheckedChange={(checked) => setPolicyAccepted(Boolean(checked))} />
+                                        <div className="flex items-center space-x-2 my-2">
+                                            <Checkbox id="terms" checked={policyAccepted} onCheckedChange={(checked) => setPolicyAccepted(Boolean(checked))} disabled={isLoading} />
                                             <label
                                                 htmlFor="terms"
                                                 className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
