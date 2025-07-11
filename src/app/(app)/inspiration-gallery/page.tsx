@@ -1,9 +1,9 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useApp } from '@/contexts/AppContext';
-import { GALLERY_ITEMS } from '@/lib/constants';
+import { GALLERY_ITEMS, STYLES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Modal from '@/components/shared/modal';
@@ -12,6 +12,10 @@ import { describeImage } from '@/ai/flows/describe-image';
 import { getRemixSuggestions } from '@/ai/flows/get-remix-suggestions';
 import type { GalleryItem } from '@/lib/types';
 import Icon from '@/components/shared/icon';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+type CategoryFilter = 'all' | 'trending' | 'popular' | 'recent';
 
 export default function InspirationGalleryPage() {
     const { startRemix } = useApp();
@@ -20,6 +24,27 @@ export default function InspirationGalleryPage() {
     const [modal, setModal] = useState({ isOpen: false, title: '', children: <></> });
     const [isDescribing, setIsDescribing] = useState<number | null>(null);
     const [isRemixing, setIsRemixing] = useState<number | null>(null);
+
+    // Filtering state
+    const [categoryFilter, setCategoryFilter] = useState<CategoryFilter>('all');
+    const [styleFilter, setStyleFilter] = useState('all');
+
+    const filteredItems = useMemo(() => {
+        let items = [...GALLERY_ITEMS];
+        
+        // This is a placeholder for real filtering logic
+        if (categoryFilter !== 'all') {
+            // e.g., sort by popularity or date, for now just shuffle
+            items = items.sort(() => 0.5 - Math.random());
+        }
+
+        if (styleFilter !== 'all') {
+            items = items.filter(item => item.style === styleFilter);
+        }
+
+        return items;
+    }, [categoryFilter, styleFilter]);
+
 
     const handleDescribe = async (item: GalleryItem) => {
         setIsDescribing(item.id);
@@ -99,8 +124,30 @@ export default function InspirationGalleryPage() {
                 <h1 className="text-h1 font-bold font-headline">Inspiration Gallery</h1>
                 <p className="text-muted-foreground mt-1">Discover decal designs from the community and start your own remix.</p>
             </header>
+
+            <div className="mb-6 p-4 bg-card border rounded-lg flex flex-wrap items-center gap-4">
+                <ToggleGroup type="single" value={categoryFilter} onValueChange={(value: CategoryFilter) => value && setCategoryFilter(value)}>
+                    <ToggleGroupItem value="all">All</ToggleGroupItem>
+                    <ToggleGroupItem value="trending">Trending</ToggleGroupItem>
+                    <ToggleGroupItem value="popular">Popular</ToggleGroupItem>
+                    <ToggleGroupItem value="recent">Recent</ToggleGroupItem>
+                </ToggleGroup>
+                <div className="flex-grow"></div>
+                <Select value={styleFilter} onValueChange={setStyleFilter}>
+                    <SelectTrigger className="w-[200px]">
+                        <SelectValue placeholder="Filter by style..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                        <SelectItem value="all">All Styles</SelectItem>
+                        {STYLES.map(style => (
+                            <SelectItem key={style.name} value={style.name}>{style.name}</SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-                {GALLERY_ITEMS.map(item => (
+                {filteredItems.map(item => (
                     <div key={item.id} className="group relative rounded-xl overflow-hidden shadow-lg bg-card border flex flex-col">
                        <div className="relative w-full h-56">
                          <Image src={item.url} alt={item.prompt} fill className="object-cover" {...{ 'data-ai-hint': item['data-ai-hint'] }} />
@@ -128,6 +175,13 @@ export default function InspirationGalleryPage() {
                     </div>
                 ))}
             </div>
+             {filteredItems.length === 0 && (
+                <div className="text-center py-20 bg-card rounded-xl border border-dashed col-span-full">
+                    <Icon name="Search" className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                    <h4 className="text-xl font-semibold mb-2">No matching designs found</h4>
+                    <p className="text-muted-foreground">Try adjusting your style filter to see more results.</p>
+                </div>
+            )}
         </div>
     );
 };
