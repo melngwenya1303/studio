@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, GoogleAuthProvider, signInWithPopup } from 'firebase/auth';
 import { useApp } from '@/contexts/AppContext';
@@ -13,6 +13,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import Icon from '@/components/shared/icon';
 import { useToast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
+import { getUserProfileByEmail } from '@/actions/userActions';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -23,12 +24,28 @@ export default function LoginPage() {
   const { user } = useApp();
   const { toast } = useToast();
   const auth = getAuth(firebaseApp);
+  const [welcomeMessage, setWelcomeMessage] = useState('Welcome Back');
 
   useEffect(() => {
     if (user) {
       router.push('/dashboard');
     }
   }, [user, router]);
+
+  const handleEmailBlur = useCallback(async () => {
+    if (isSignUp || !email) return;
+    try {
+        const userProfile = await getUserProfileByEmail(email);
+        if (userProfile) {
+            setWelcomeMessage(`Welcome back, ${userProfile.email}`);
+        } else {
+            setWelcomeMessage('Welcome Back');
+        }
+    } catch (error) {
+        // Don't show an error, just fall back to the generic message
+        setWelcomeMessage('Welcome Back');
+    }
+  }, [email, isSignUp]);
 
   const handleAuthAction = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,6 +76,11 @@ export default function LoginPage() {
        toast({ variant: 'destructive', title: "Google Sign-In Error", description: err.message });
     }
   };
+  
+  const toggleAuthMode = () => {
+      setIsSignUp(!isSignUp);
+      setWelcomeMessage('Welcome Back'); // Reset on mode toggle
+  };
 
   return (
     <div className="relative flex items-center justify-center min-h-screen bg-gray-100 dark:bg-background">
@@ -73,7 +95,7 @@ export default function LoginPage() {
         </div>
       <Card className="w-full max-w-md mx-4">
         <CardHeader className="text-center">
-          <CardTitle>{isSignUp ? 'Create an Account' : 'Welcome Back'}</CardTitle>
+          <CardTitle>{isSignUp ? 'Create an Account' : welcomeMessage}</CardTitle>
           <CardDescription>
             {isSignUp ? 'Join to start creating your unique designs.' : 'Sign in to access your creations.'}
           </CardDescription>
@@ -87,6 +109,7 @@ export default function LoginPage() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                onBlur={handleEmailBlur}
                 placeholder="you@example.com"
                 required
               />
@@ -121,7 +144,7 @@ export default function LoginPage() {
           <div className="mt-4 text-center text-sm">
             {isSignUp ? 'Already have an account?' : "Don't have an account?"}
             <button
-              onClick={() => setIsSignUp(!isSignUp)}
+              onClick={toggleAuthMode}
               className="font-medium text-primary hover:underline ml-1"
             >
               {isSignUp ? 'Sign In' : 'Sign Up'}
