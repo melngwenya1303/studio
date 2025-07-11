@@ -15,19 +15,14 @@ import Icon from '@/components/shared/icon';
 import { useToast } from '@/hooks/use-toast';
 
 export default function CheckoutPage() {
-    const { cart, clearCart } = useApp();
+    const { cart } = useApp();
     const router = useRouter();
-    const { toast } = useToast();
     const item = cart[0]; // For now, we handle a single item checkout
 
-    const handlePlaceOrder = () => {
-        // Mock order placement
-        toast({
-            title: "Order Placed! 🎉",
-            description: "Thank you for your purchase. Your unique creation is on its way!",
-        });
-        clearCart();
-        router.push('/dashboard');
+    const handleProceedToCheckout = () => {
+        // In a real app, you would create the product on Shopify's backend here
+        // and get a checkout URL. For now, we redirect to a simulation page.
+        router.push('/shopify-redirect');
     };
 
     if (!item) {
@@ -50,7 +45,7 @@ export default function CheckoutPage() {
     return (
         <div className="p-4 md:p-8 animate-fade-in max-w-6xl mx-auto">
             <header className="mb-8">
-                <h1 className="text-h1 font-headline flex items-center gap-3"><Icon name="ShoppingCart" /> Secure Checkout</h1>
+                <h1 className="text-h1 font-headline flex items-center gap-3"><Icon name="ShoppingCart" /> Review Your Order</h1>
             </header>
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 {/* Order Summary */}
@@ -115,54 +110,33 @@ export default function CheckoutPage() {
                         <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="md:col-span-2 space-y-2">
                                 <Label htmlFor="name">Full Name</Label>
-                                <Input id="name" placeholder="Jane Doe" />
+                                <Input id="name" placeholder="Jane Doe" defaultValue="Jane Doe" />
                             </div>
                             <div className="md:col-span-2 space-y-2">
                                 <Label htmlFor="address">Address</Label>
-                                <Input id="address" placeholder="123 Creator Lane" />
+                                <Input id="address" placeholder="123 Creator Lane" defaultValue="123 Creator Lane" />
                             </div>
                              <div className="space-y-2">
                                 <Label htmlFor="city">City</Label>
-                                <Input id="city" placeholder="Artville" />
+                                <Input id="city" placeholder="Artville" defaultValue="Artville" />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="state">State / Province</Label>
-                                <Input id="state" placeholder="CA" />
+                                <Input id="state" placeholder="CA" defaultValue="CA" />
                             </div>
                              <div className="space-y-2">
                                 <Label htmlFor="zip">ZIP / Postal Code</Label>
-                                <Input id="zip" placeholder="90210" />
+                                <Input id="zip" placeholder="90210" defaultValue="90210" />
                             </div>
                              <div className="space-y-2">
                                 <Label htmlFor="country">Country</Label>
-                                <Input id="country" placeholder="United States" />
+                                <Input id="country" placeholder="United States" defaultValue="United States" />
                             </div>
                         </CardContent>
                     </Card>
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Payment Information</CardTitle>
-                            <CardDescription>All transactions are secure and encrypted.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="card-number">Card Number</Label>
-                                <Input id="card-number" placeholder="•••• •••• •••• 1234" />
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                               <div className="space-y-2">
-                                    <Label htmlFor="expiry">Expiry Date</Label>
-                                    <Input id="expiry" placeholder="MM / YY" />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="cvc">CVC</Label>
-                                    <Input id="cvc" placeholder="123" />
-                                </div>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    <Button onClick={handlePlaceOrder} size="lg" className="w-full text-lg">
-                        <Icon name="ShieldCheck" /> Place Order
+                    
+                    <Button onClick={handleProceedToCheckout} size="lg" className="w-full text-lg">
+                        <Icon name="ShieldCheck" /> Proceed to Secure Checkout
                     </Button>
                 </motion.div>
             </div>
