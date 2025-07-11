@@ -55,19 +55,54 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [hasMoreGalleryItems, setHasMoreGalleryItems] = useState(true);
   const [isLoadingGalleryItems, setIsLoadingGalleryItems] = useState(false);
 
+  const fetchInitialCreations = useCallback(async (userId: string) => {
+    if (!userId) return;
+
+    setIsLoadingCreations(true);
+    const creationsQuery = query(
+        collection(db, "creations"), 
+        where("userId", "==", userId),
+        orderBy("createdAt", "desc"),
+        limit(CREATIONS_PAGE_SIZE)
+    );
+    
+    try {
+        const documentSnapshots = await getDocs(creationsQuery);
+        const userCreations: Creation[] = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() } as Creation));
+        
+        setCreations(userCreations);
+        setLastVisibleCreation(documentSnapshots.docs[documentSnapshots.docs.length - 1] || null);
+        setHasMoreCreations(documentSnapshots.docs.length === CREATIONS_PAGE_SIZE);
+    } catch (error) {
+        console.error("Error fetching initial creations:", error);
+    } finally {
+        setIsLoadingCreations(false);
+    }
+  }, [db]);
+
+  const fetchInitialGalleryItems = useCallback(async () => {
+    setIsLoadingGalleryItems(true);
+    const galleryQuery = query(
+        collection(db, "gallery"),
+        orderBy("likes", "desc"),
+        limit(GALLERY_PAGE_SIZE)
+    );
+    
+    try {
+        const documentSnapshots = await getDocs(galleryQuery);
+        const items = documentSnapshots.docs.map(doc => ({ ...doc.data() } as GalleryItem));
+        
+        setGalleryItems(items);
+        setLastVisibleGalleryItem(documentSnapshots.docs[documentSnapshots.docs.length - 1] || null);
+        setHasMoreGalleryItems(documentSnapshots.docs.length === GALLERY_PAGE_SIZE);
+    } catch (error) {
+        console.error("Error fetching initial gallery items:", error);
+    } finally {
+        setIsLoadingGalleryItems(false);
+    }
+  }, [db]);
 
   useEffect(() => {
-    // Bypass login for development
-    const adminUser = {
-        uid: 'admin-bypass-uid',
-        email: 'admin@surfacestoryai.com',
-        name: 'Admin User',
-    };
-    setUser(adminUser);
-    setIsAdmin(true);
-
-    // The original auth logic is commented out to enforce the bypass
-    /*
     const auth = getAuth(firebaseApp);
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -78,6 +113,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         if (userDocSnap.exists()) {
           finalIsAdmin = userDocSnap.data()?.isAdmin || false;
         } else {
+          // This logic now runs only once when a new user signs up
           const isDefaultAdmin = firebaseUser.email === 'admin@surfacestoryai.com';
           const newUserPayload = {
             email: firebaseUser.email,
@@ -91,71 +127,56 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           finalIsAdmin = isDefaultAdmin;
         }
         
-        setUser({ uid: firebaseUser.uid, email: firebaseUser.email, name: firebaseUser.displayName });
+        const currentUser = { uid: firebaseUser.uid, email: firebaseUser.email, name: firebaseUser.displayName };
+        setUser(currentUser);
         setIsAdmin(finalIsAdmin);
+
+        // Fetch data *after* user is confirmed
+        fetchInitialCreations(firebaseUser.uid);
+        fetchInitialGalleryItems();
       } else {
+        // Handle user sign-out
         setUser(null);
         setIsAdmin(false);
         setCreations([]);
         setLastVisibleCreation(null);
         setHasMoreCreations(true);
+        // We can keep gallery items for signed-out users if we want
+        if (galleryItems.length === 0) {
+            fetchInitialGalleryItems();
+        }
       }
     });
 
-    return () => unsubscribe();
-    */
-  }, [db]);
+    // Bypassing login for development
+    const setupBypass = async () => {
+        const adminUid = 'admin-bypass-uid';
+        const adminEmail = 'admin@surfacestoryai.com';
+        const adminUser = {
+            uid: adminUid,
+            email: adminEmail,
+            name: 'Admin User',
+        };
+        setUser(adminUser);
+        setIsAdmin(true);
 
-  const fetchInitialCreations = useCallback(async () => {
-    // Use the bypassed admin user's UID for fetching data if no other user is set.
-    const userId = user?.uid;
-    if (!userId) return;
-
-
-    setIsLoadingCreations(true);
-    const creationsQuery = query(
-        collection(db, "creations"), 
-        where("userId", "==", userId),
-        orderBy("createdAt", "desc"),
-        limit(CREATIONS_PAGE_SIZE)
-    );
+        // Fetch data for the bypassed user
+        await fetchInitialCreations(adminUid);
+        await fetchInitialGalleryItems();
+    };
     
-    const documentSnapshots = await getDocs(creationsQuery);
-    const userCreations: Creation[] = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() } as Creation));
-    
-    setCreations(userCreations);
-    setLastVisibleCreation(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
-    setHasMoreCreations(documentSnapshots.docs.length === CREATIONS_PAGE_SIZE);
-    setIsLoadingCreations(false);
-  }, [user, db]);
+    // Comment out the line below to use real Firebase Auth
+    setupBypass();
 
-  // Gallery Fetching Logic
-  const fetchInitialGalleryItems = useCallback(async () => {
-    setIsLoadingGalleryItems(true);
-    const galleryQuery = query(
-        collection(db, "gallery"),
-        orderBy("likes", "desc"),
-        limit(GALLERY_PAGE_SIZE)
-    );
-    const documentSnapshots = await getDocs(galleryQuery);
-    const items = documentSnapshots.docs.map(doc => ({ ...doc.data() } as GalleryItem));
-    
-    setGalleryItems(items);
-    setLastVisibleGalleryItem(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
-    setHasMoreGalleryItems(documentSnapshots.docs.length === GALLERY_PAGE_SIZE);
-    setIsLoadingGalleryItems(false);
-  }, [db]);
 
-  useEffect(() => {
-    // Reset and fetch initial creations when user changes
-    setCreations([]);
-    setLastVisibleCreation(null);
-    setHasMoreCreations(true);
-    if (user) {
-        fetchInitialCreations();
-        fetchInitialGalleryItems();
-    }
-  }, [user, fetchInitialCreations, fetchInitialGalleryItems]);
+    return () => {
+        // Disabling the real auth listener cleanup if bypass is active
+        if (typeof unsubscribe === 'function') {
+            unsubscribe();
+        }
+    };
+  }, [db, fetchInitialCreations, fetchInitialGalleryItems]);
+
 
   const fetchMoreCreations = useCallback(async () => {
     const userId = user?.uid;
@@ -170,13 +191,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         limit(CREATIONS_PAGE_SIZE)
     );
 
-    const documentSnapshots = await getDocs(creationsQuery);
-    const newCreations: Creation[] = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() } as Creation));
-    
-    setCreations(prev => [...prev, ...newCreations]);
-    setLastVisibleCreation(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
-    setHasMoreCreations(documentSnapshots.docs.length === CREATIONS_PAGE_SIZE);
-    setIsLoadingCreations(false);
+    try {
+        const documentSnapshots = await getDocs(creationsQuery);
+        const newCreations: Creation[] = documentSnapshots.docs.map(doc => ({ id: doc.id, ...doc.data() } as Creation));
+        
+        setCreations(prev => [...prev, ...newCreations]);
+        setLastVisibleCreation(documentSnapshots.docs[documentSnapshots.docs.length - 1] || null);
+        setHasMoreCreations(documentSnapshots.docs.length === CREATIONS_PAGE_SIZE);
+    } catch (error) {
+        console.error("Error fetching more creations:", error);
+    } finally {
+        setIsLoadingCreations(false);
+    }
   }, [user, db, lastVisibleCreation, hasMoreCreations]);
 
 
@@ -188,9 +214,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const storageRef = ref(storage, `creations/${userId}/${imageId}.png`);
     
     let uploadURL = creationData.url;
+    // Only upload to storage if it's a data URI
     if (creationData.url.startsWith('data:')) {
-      const uploadResult = await uploadString(storageRef, creationData.url, 'data_url');
-      uploadURL = await getDownloadURL(uploadResult.ref);
+      try {
+        const uploadResult = await uploadString(storageRef, creationData.url, 'data_url');
+        uploadURL = await getDownloadURL(uploadResult.ref);
+      } catch (error) {
+        console.error("Error uploading image to storage:", error);
+        throw new Error("Could not save image to cloud storage.");
+      }
     }
     
     const creationPayload = {
@@ -202,7 +234,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     const docRef = await addDoc(collection(db, "creations"), creationPayload);
     
-    fetchInitialCreations();
+    // Manually add the new creation to the top of the list for immediate feedback
+    setCreations(prev => [{
+      ...creationPayload,
+      id: docRef.id,
+      createdAt: new Date(),
+    }, ...prev]);
 
     return {
       ...creationData,
@@ -210,7 +247,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       url: uploadURL,
       createdAt: new Date(),
     };
-  }, [user, db, storage, fetchInitialCreations]);
+  }, [user, db, storage]);
   
   const startRemix = useCallback((item: Partial<Creation & GalleryItem>) => {
     setRemixData(item);
@@ -244,13 +281,18 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           limit(GALLERY_PAGE_SIZE)
       );
 
-      const documentSnapshots = await getDocs(galleryQuery);
-      const newItems: GalleryItem[] = documentSnapshots.docs.map(doc => ({ ...doc.data() } as GalleryItem));
+      try {
+        const documentSnapshots = await getDocs(galleryQuery);
+        const newItems: GalleryItem[] = documentSnapshots.docs.map(doc => ({ ...doc.data() } as GalleryItem));
 
-      setGalleryItems(prev => [...prev, ...newItems]);
-      setLastVisibleGalleryItem(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
-      setHasMoreGalleryItems(documentSnapshots.docs.length === GALLERY_PAGE_SIZE);
-      setIsLoadingGalleryItems(false);
+        setGalleryItems(prev => [...prev, ...newItems]);
+        setLastVisibleGalleryItem(documentSnapshots.docs[documentSnapshots.docs.length - 1] || null);
+        setHasMoreGalleryItems(documentSnapshots.docs.length === GALLERY_PAGE_SIZE);
+      } catch(error) {
+          console.error("Error fetching more gallery items:", error);
+      } finally {
+        setIsLoadingGalleryItems(false);
+      }
   }, [db, lastVisibleGalleryItem, hasMoreGalleryItems]);
 
 
@@ -272,7 +314,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     fetchMoreGalleryItems,
     hasMoreGalleryItems,
     isLoadingGalleryItems,
-  }), [user, isAdmin, creations, addCreation, startRemix, remixData, clearRemixData, cart, addToCart, clearCart, fetchMoreCreations, hasMoreCreations, isLoadingCreations, galleryItems, fetchMoreGalleryItems, hasMoreGalleryItems, isLoadingGalleryItems]);
+  }), [user, isAdmin, creations, addCreation, startRemix, remixData, clearRemixData, cart, addToCart, clearCart, fetchMoreCreations, hasMoreCreations, isLoadingCreations, galleryItems, fetchMoreGalleryItems, hasMoreGalleryItems, isLoadingGalleryItems, ]);
 
   return (
     <AppContext.Provider value={contextValue}>
