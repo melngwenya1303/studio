@@ -359,7 +359,24 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
 
                                         {/* Step 2: Vision */}
                                         <div className="space-y-4">
-                                            <h3 className="text-xl font-semibold font-headline">2. Describe Your Vision</h3>
+                                            <div className="flex items-center gap-2">
+                                                <h3 className="text-xl font-semibold font-headline">2. Describe Your Vision</h3>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <button className="text-muted-foreground hover:text-foreground">
+                                                          <Icon name="Info" className="w-4 h-4" />
+                                                        </button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent align="end" className="max-w-xs">
+                                                        <p className="font-bold mb-2">Prompting Tips:</p>
+                                                        <ul className="list-disc list-inside text-xs space-y-1">
+                                                          <li>Be descriptive! Mention the subject, colors, mood, and style.</li>
+                                                          <li>Example: "A majestic stag with crystal antlers in a dark, enchanted forest, photorealistic."</li>
+                                                          <li>Use the ✨ button to let our AI enhance your idea.</li>
+                                                        </ul>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </div>
                                              <div className="space-y-2">
                                                 <Label htmlFor="prompt-input">Prompt</Label>
                                                 <div className="relative">
