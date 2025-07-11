@@ -262,7 +262,7 @@ export default function DesignStudioPage() {
     
     return (
         <TooltipProvider>
-            <div className="p-4 md:p-8 grid grid-cols-1 lg:grid-cols-4 gap-8 h-full">
+            <div className="flex h-full">
                 <Modal isOpen={modal.isOpen} title={modal.title} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))} size={modal.size}>
                     {modal.children}
                 </Modal>
@@ -273,9 +273,9 @@ export default function DesignStudioPage() {
                     initial={{ x: -50, opacity: 0 }} 
                     animate={{ x: 0, opacity: 1 }} 
                     transition={{ duration: 0.5 }} 
-                    className="lg:col-span-1 flex flex-col"
+                    className="w-[400px] flex-shrink-0"
                 >
-                     <Card className="shadow-lg flex flex-col h-full">
+                     <Card className="shadow-lg flex flex-col h-full m-4 rounded-2xl">
                         <CardHeader>
                             <CardTitle className="text-h3 font-medium font-headline">Creator's Palette</CardTitle>
                         </CardHeader>
@@ -404,7 +404,7 @@ export default function DesignStudioPage() {
                                                 <Carousel opts={{ align: "start", loop: true }} className="w-full">
                                                     <CarouselContent className="-ml-2">
                                                         {STYLES.map((style, index) => (
-                                                            <CarouselItem key={index} className="pl-2 basis-1/2 md:basis-1/3 lg:basis-1/2">
+                                                            <CarouselItem key={index} className="pl-2 basis-1/2 md:basis-1/3">
                                                                 <Tooltip>
                                                                     <TooltipTrigger asChild>
                                                                         <div className="p-1">
@@ -535,7 +535,7 @@ export default function DesignStudioPage() {
                     animate={{ scale: 1, opacity: 1 }} 
                     transition={{ duration: 0.7, delay: 0.2 }} 
                     className={cn(
-                        "lg:col-span-3 flex flex-col items-center justify-center rounded-2xl min-h-[50vh] lg:min-h-0 p-8 transition-colors",
+                        "flex-1 flex flex-col items-center justify-center rounded-2xl min-h-0 p-8 transition-colors m-4",
                         mockupColor
                     )}
                 >
@@ -638,5 +638,3 @@ export default function DesignStudioPage() {
         </TooltipProvider>
     );
 }
-
-    
