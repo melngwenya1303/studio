@@ -8,7 +8,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { getFirestore, collection, query, orderBy, limit, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, limit, getDocs } from 'firebase/firestore';
 import { firebaseApp } from '@/lib/firebase';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -29,7 +29,7 @@ export default function LeaderboardPage() {
             setIsLoading(true);
             const db = getFirestore(firebaseApp);
             const usersRef = collection(db, 'users');
-            // Fetch users, but don't order by creationsCount in the query yet as it may not exist for all users
+            // Fetch users without ordering by a potentially non-existent field.
             const q = query(usersRef, limit(10));
             
             try {
@@ -45,8 +45,10 @@ export default function LeaderboardPage() {
                         avatar: `https://i.pravatar.cc/40?u=${doc.id}`,
                     };
                 });
-                // Sort client-side for reliable demonstration with mock data
+                
+                // Sort client-side after mocking data for a reliable demonstration.
                 users.sort((a, b) => (b.creationsCount + b.remixesCount) - (a.creationsCount + a.remixesCount));
+                
                 setLeaderboardData(users);
             } catch (error) {
                 console.error("Error fetching leaderboard:", error);
