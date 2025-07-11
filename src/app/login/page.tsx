@@ -13,7 +13,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Separator } from '@/components/ui/separator';
-import { motion } from 'framer-motion';
 
 export default function LoginPage() {
     const router = useRouter();
@@ -91,15 +90,15 @@ export default function LoginPage() {
 
     return (
         <div className="flex h-screen w-full items-center justify-center bg-gray-100 dark:bg-background p-4">
-             <Card className="w-full max-w-sm">
-                <CardHeader className="text-center">
-                     <motion.div
-                        className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4"
-                        whileHover={{ scale: 1.1, rotate: 10 }}
-                    >
-                        <Icon name="Wand2" className="w-8 h-8 text-white" />
-                    </motion.div>
-                    <CardTitle>Welcome to SurfaceStory</CardTitle>
+             <Card className="w-full max-w-md">
+                <CardHeader>
+                     <div className="flex items-center space-x-3 mb-4">
+                        <div className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center shadow-lg">
+                            <Icon name="Wand2" className="w-6 h-6 text-white" />
+                        </div>
+                        <h1 className="text-2xl font-bold font-headline text-foreground">SurfaceStory</h1>
+                    </div>
+                    <CardTitle>Welcome Back</CardTitle>
                     <CardDescription>Sign in or create an account to begin.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
