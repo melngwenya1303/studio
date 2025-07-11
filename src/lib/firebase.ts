@@ -2,14 +2,14 @@
 import { initializeApp, getApps, getApp } from "firebase/app";
 
 // Your web app's Firebase configuration
-// IMPORTANT: Replace with your actual Firebase project config
 const firebaseConfig = {
-  apiKey: "REPLACE_WITH_YOUR_API_KEY",
-  authDomain: "REPLACE_WITH_YOUR_AUTH_DOMAIN",
-  projectId: "REPLACE_WITH_YOUR_PROJECT_ID",
-  storageBucket: "REPLACE_WITH_YOUR_STORAGE_BUCKET",
-  messagingSenderId: "REPLACE_WITH_YOUR_MESSAGING_SENDER_ID",
-  appId: "REPLACE_WITH_YOUR_APP_ID"
+  apiKey: "AIzaSyBPp07PuQ7-Y4ZHecsWJNPjQaZ7wmHUsTQ",
+  authDomain: "context-intelligence.firebaseapp.com",
+  projectId: "context-intelligence",
+  storageBucket: "context-intelligence.appspot.com",
+  messagingSenderId: "702465558183",
+  appId: "1:702465558183:web:76df1ac90c9e7d82ea3d82",
+  measurementId: "G-8Z4LX7NNV7"
 };
 
 // Initialize Firebase
