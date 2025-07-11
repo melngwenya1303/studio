@@ -6,7 +6,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyBPp07PuQ7-Y4ZHecsWJNPjQaZ7wmHUsTQ",
   authDomain: "context-intelligence.firebaseapp.com",
   projectId: "context-intelligence",
-  storageBucket: "context-intelligence.appspot.com",
+  storageBucket: "context-intelligence.firebasestorage.app",
   messagingSenderId: "702465558183",
   appId: "1:702465558183:web:76df1ac90c9e7d82ea3d82",
   measurementId: "G-8Z4LX7NNV7"
