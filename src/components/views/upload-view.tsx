@@ -255,116 +255,123 @@ export default function UploadView({ onBack }: UploadViewProps) {
                     transition={{ duration: 0.7, delay: 0.2 }} 
                     className="flex-1 flex flex-col p-4"
                 >
-                     <div className={cn(
+                    <div className={cn(
                         "flex-1 flex flex-col items-center justify-center rounded-2xl min-h-0 p-4 transition-colors relative",
-                        isPreviewingAr ? 'bg-transparent' : mockupColor
+                        isPreviewingAr ? 'bg-transparent' : 'bg-card' 
                     )}>
-                        <div className="w-full h-full flex items-center justify-center">
-                            {isPreviewingAr ? (
-                                <motion.div 
-                                    key="ar-preview"
-                                    initial={{ opacity: 0 }}
-                                    animate={{ opacity: 1 }}
-                                    exit={{ opacity: 0 }}
-                                    className="w-full h-full"
-                                >
-                                    <video ref={videoRef} className="w-full h-full object-cover rounded-md" autoPlay muted playsInline />
-                                    {hasCameraPermission === false && (
-                                        <div className="absolute inset-0 flex items-center justify-center bg-black/50">
-                                            <Alert variant="destructive" className="max-w-sm">
-                                              <AlertTitle>Camera Access Required</AlertTitle>
-                                              <AlertDescription>
-                                                Please allow camera access in your browser settings to use the AR feature.
-                                              </AlertDescription>
-                                            </Alert>
+                        <AnimatePresence mode="wait">
+                            <motion.div
+                                key={previewMode}
+                                initial={{ opacity: 0, scale: 0.95 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                exit={{ opacity: 0, scale: 0.95 }}
+                                transition={{ duration: 0.3 }}
+                                className="w-full h-full flex flex-col items-center justify-center"
+                            >
+                                {isPreviewingAr ? (
+                                    <div className="w-full h-full relative">
+                                        <video ref={videoRef} className="w-full h-full object-cover rounded-md" autoPlay muted playsInline />
+                                        {hasCameraPermission === false && (
+                                            <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                                                <Alert variant="destructive" className="max-w-sm">
+                                                  <AlertTitle>Camera Access Required</AlertTitle>
+                                                  <AlertDescription>
+                                                    Please allow camera access in your browser settings to use the AR feature.
+                                                  </AlertDescription>
+                                                </Alert>
+                                            </div>
+                                        )}
+                                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-white p-4 bg-black/30 rounded-lg">
+                                            <p>Look at a flat surface to place your design.</p>
+                                            <p className="text-xs">(AR object rendering coming soon)</p>
                                         </div>
-                                    )}
-                                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center text-white p-4 bg-black/30 rounded-lg">
-                                        <p>Look at a flat surface to place your design.</p>
-                                        <p className="text-xs">(AR object rendering coming soon)</p>
                                     </div>
-                                </motion.div>
-                            ) : previewMode === '2D' ? (
-                                <motion.div
-                                    animate={{ y: [0, -8, 0] }}
-                                    transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                                    className="relative w-full h-full"
-                                >
-                                    <Image
-                                        src={currentCanvas.previewImage}
-                                        alt={`${currentCanvas.name} preview`}
-                                        fill
-                                        className="object-contain"
-                                        data-ai-hint={currentCanvas['data-ai-hint']}
-                                        key={currentCanvas.previewImage}
-                                        priority
-                                    />
-                                    <AnimatePresence>
-                                    {uploadedImage && (
-                                        <motion.div
-                                            className="absolute"
-                                            initial={{ opacity: 0, scale: 0.8 }}
-                                            animate={{ opacity: 1, scale: 1 }}
-                                            exit={{opacity: 0}}
-                                            transition={{ duration: 0.5 }}
-                                            style={{
-                                                top: currentCanvas.decal?.top ?? '0%',
-                                                left: currentCanvas.decal?.left ?? '0%',
-                                                width: currentCanvas.decal?.width ?? '100%',
-                                                height: currentCanvas.decal?.height ?? '100%',
-                                                transform: currentCanvas.decal?.transform,
-                                                transformOrigin: currentCanvas.decal?.transformOrigin,
-                                            }}
+                                ) : previewMode === '2D' ? (
+                                    <div
+                                        className="relative w-full h-full"
+                                    >
+                                        <motion.div 
+                                            className={cn("w-full h-full rounded-2xl transition-colors", mockupColor)}
+                                            animate={{ y: [0, -8, 0] }}
+                                            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                                         >
                                             <Image
-                                                src={uploadedImage}
-                                                alt="Uploaded Decal"
+                                                src={currentCanvas.previewImage}
+                                                alt={`${currentCanvas.name} preview`}
                                                 fill
                                                 className="object-contain"
+                                                data-ai-hint={currentCanvas['data-ai-hint']}
+                                                key={currentCanvas.previewImage}
+                                                priority
                                             />
                                         </motion.div>
-                                    )}
-                                    </AnimatePresence>
-                                </motion.div>
-                            ) : (
-                                <div className="text-center text-muted-foreground flex flex-col items-center justify-center gap-4">
-                                    <motion.div
-                                        animate={{
-                                            y: [0, -10, 0],
-                                            rotate: [0, 5, -5, 0],
-                                        }}
-                                        transition={{
-                                            duration: 4,
-                                            repeat: Infinity,
-                                            ease: 'easeInOut',
-                                        }}
-                                    >
-                                        <Icon name="Box" className="w-24 h-24 text-primary/30" />
-                                    </motion.div>
-                                    <h3 className="text-lg font-semibold">Interactive 3D Preview</h3>
-                                    <p className="max-w-xs">This feature is coming soon!</p>
-                                </div>
-                            )}
-                        </div>
-                        <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
-                            {isPreviewingAr ? (
-                                 <Button onClick={() => setIsPreviewingAr(false)}>
-                                    <Icon name="Undo2" className="mr-2" /> Back to 2D
-                                </Button>
-                            ) : (
-                                <ToggleGroup type="single" value={previewMode} onValueChange={(value: '2D' | '3D') => value && setPreviewMode(value)} className="bg-background/50 rounded-lg p-1">
-                                    <ToggleGroupItem value="2D" aria-label="2D Preview">
-                                    <Icon name="ImageIcon" className="w-4 h-4 mr-2" /> 2D
-                                    </ToggleGroupItem>
-                                    <ToggleGroupItem value="3D" aria-label="3D Preview" disabled>
-                                    <Icon name="Box" className="w-4 h-4 mr-2" /> 3D
-                                    </ToggleGroupItem>
-                                </ToggleGroup>
-                            )}
+                                        <AnimatePresence>
+                                        {uploadedImage && (
+                                            <motion.div
+                                                className="absolute"
+                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                exit={{opacity: 0}}
+                                                transition={{ duration: 0.5 }}
+                                                style={{
+                                                    top: currentCanvas.decal?.top ?? '0%',
+                                                    left: currentCanvas.decal?.left ?? '0%',
+                                                    width: currentCanvas.decal?.width ?? '100%',
+                                                    height: currentCanvas.decal?.height ?? '100%',
+                                                    transform: currentCanvas.decal?.transform,
+                                                    transformOrigin: currentCanvas.decal?.transformOrigin,
+                                                }}
+                                            >
+                                                <Image
+                                                    src={uploadedImage}
+                                                    alt="Uploaded Decal"
+                                                    fill
+                                                    className="object-contain"
+                                                />
+                                            </motion.div>
+                                        )}
+                                        </AnimatePresence>
+                                    </div>
+                                ) : (
+                                    <div className="text-center text-muted-foreground flex flex-col items-center justify-center gap-4">
+                                        <motion.div
+                                            animate={{
+                                                y: [0, -10, 0],
+                                                rotate: [0, 5, -5, 0],
+                                            }}
+                                            transition={{
+                                                duration: 4,
+                                                repeat: Infinity,
+                                                ease: 'easeInOut',
+                                            }}
+                                        >
+                                            <Icon name="Box" className="w-24 h-24 text-primary/30" />
+                                        </motion.div>
+                                        <h3 className="text-lg font-semibold">Interactive 3D Preview</h3>
+                                        <p className="max-w-xs">This feature is coming soon!</p>
+                                    </div>
+                                )}
+                            </motion.div>
+                        </AnimatePresence>
 
-                            <Button variant="outline" onClick={() => setIsPreviewingAr(true)} disabled={isPreviewingAr}>
-                                <Icon name="Camera" className="w-4 h-4 mr-2" />
-                                View in AR
+                        <div className="absolute bottom-4 left-4 right-4 flex justify-between items-center">
+                            <AnimatePresence>
+                                {!isPreviewingAr && (
+                                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+                                        <ToggleGroup type="single" value={previewMode} onValueChange={(value: '2D' | '3D') => value && setPreviewMode(value)} className="bg-background/50 rounded-lg p-1">
+                                            <ToggleGroupItem value="2D" aria-label="2D Preview">
+                                            <Icon name="ImageIcon" className="w-4 h-4 mr-2" /> 2D
+                                            </ToggleGroupItem>
+                                            <ToggleGroupItem value="3D" aria-label="3D Preview">
+                                            <Icon name="Box" className="w-4 h-4 mr-2" /> 3D
+                                            </ToggleGroupItem>
+                                        </ToggleGroup>
+                                    </motion.div>
+                                )}
+                            </AnimatePresence>
+
+                            <Button variant="outline" onClick={() => setIsPreviewingAr(!isPreviewingAr)}>
+                                {isPreviewingAr ? <><Icon name="Undo2" className="w-4 h-4 mr-2" /> Back to Editor</> : <><Icon name="Camera" className="w-4 h-4 mr-2" /> View in AR</>}
                             </Button>
                         </div>
                     </div>
@@ -373,3 +380,5 @@ export default function UploadView({ onBack }: UploadViewProps) {
         </TooltipProvider>
     );
 }
+
+    
