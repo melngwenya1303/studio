@@ -9,18 +9,17 @@ import { DEVICES } from '@/lib/constants';
 import type { Device, DeviceModel, Creation } from '@/lib/types';
 import Icon from '@/components/shared/icon';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Image from 'next/image';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipProvider } from '@/components/ui/tooltip';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
-import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
+import { describeImage } from '@/ai/flows/describe-image';
 
 
 type UploadViewProps = {
@@ -28,7 +27,7 @@ type UploadViewProps = {
 };
 
 export default function UploadView({ onBack }: UploadViewProps) {
-    const { user, addCreation, addToCart } = useApp();
+    const { user, addCreation, addToCart, startRemix } = useApp();
     const { toast } = useToast();
     const router = useRouter();
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -39,6 +38,10 @@ export default function UploadView({ onBack }: UploadViewProps) {
     const [isSaving, setIsSaving] = useState(false);
     const [previewMode, setPreviewMode] = useState<'2D' | '3D'>('2D');
     const [mockupColor, setMockupColor] = useState('bg-gray-200');
+
+    // AI Deconstruction State
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analyzedPrompts, setAnalyzedPrompts] = useState<string[]>([]);
 
     // AR State
     const [isPreviewingAr, setIsPreviewingAr] = useState(false);
@@ -90,9 +93,33 @@ export default function UploadView({ onBack }: UploadViewProps) {
             const reader = new FileReader();
             reader.onloadend = () => {
                 setUploadedImage(reader.result as string);
+                setAnalyzedPrompts([]); // Clear old prompts on new image
             };
             reader.readAsDataURL(file);
         }
+    };
+    
+    const handleAnalyzeImage = async () => {
+        if (!uploadedImage) return;
+        setIsAnalyzing(true);
+        setAnalyzedPrompts([]);
+        try {
+            const result = await describeImage({ imageDataUri: uploadedImage });
+            setAnalyzedPrompts(result.prompts);
+            toast({ title: "Analysis Complete", description: "The AI has generated some prompt ideas for you." });
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Analysis Failed', description: error.message });
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
+    const handleRemixWithPrompt = (prompt: string) => {
+        if (!uploadedImage) return;
+        startRemix({
+            prompt: prompt,
+            url: uploadedImage, // Pass the image URL to start the remix
+        });
     };
 
     const handleSaveCreation = useCallback(async () => {
@@ -114,7 +141,8 @@ export default function UploadView({ onBack }: UploadViewProps) {
             };
             const savedCreation = await addCreation(newCreation);
             toast({ title: 'Success!', description: `'${savedCreation.title}' has been saved to My Designs.` });
-        } catch (error: any) {
+        } catch (error: any)
+{
             toast({ variant: 'destructive', title: 'Save Error', description: error.message });
         } finally {
             setIsSaving(false);
@@ -157,7 +185,7 @@ export default function UploadView({ onBack }: UploadViewProps) {
                                 <TabsTrigger value="mockups"><Icon name="ImageIcon" /> Mockups</TabsTrigger>
                             </TabsList>
                             <TabsContent value="design" className="flex-grow flex flex-col">
-                                <div className="space-y-6 py-6 flex-grow">
+                                <div className="space-y-6 py-6 flex-grow overflow-y-auto pr-2">
                                     <div className="space-y-4">
                                         <h3 className="text-h2 font-headline">1. Upload Your Image</h3>
                                         <div className="space-y-2">
@@ -173,6 +201,29 @@ export default function UploadView({ onBack }: UploadViewProps) {
                                         <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
                                     </div>
                                     
+                                    {uploadedImage && (
+                                        <motion.div initial={{opacity: 0}} animate={{opacity: 1}} className="space-y-4">
+                                            <Separator />
+                                            <h3 className="text-h2 font-headline">AI Deconstruction</h3>
+                                            <p className="text-muted-foreground text-sm">Don't know the prompt for your image? Let our AI analyze it and suggest some ideas to remix.</p>
+                                            <Button onClick={handleAnalyzeImage} disabled={isAnalyzing} className="w-full">
+                                                {isAnalyzing ? <><Icon name="Wand2" className="animate-pulse" /> Analyzing...</> : <><Icon name="Sparkles" /> Analyze with AI</>}
+                                            </Button>
+                                            {analyzedPrompts.length > 0 && (
+                                                <div className="space-y-2">
+                                                    <h4 className="font-semibold">Suggested Prompts:</h4>
+                                                    <ul className="space-y-2">
+                                                        {analyzedPrompts.map((prompt, i) => (
+                                                            <li key={i} onClick={() => handleRemixWithPrompt(prompt)} className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-primary/10 transition-colors text-sm">
+                                                                "{prompt}"
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </motion.div>
+                                    )}
+
                                     <Separator />
 
                                     <div className="space-y-4">
