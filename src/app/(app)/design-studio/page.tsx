@@ -28,6 +28,8 @@ import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/comp
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from '@/components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
 
 export default function DesignStudioPage() {
     const { user, addCreation, remixData, clearRemixData } = useApp();
@@ -46,6 +48,7 @@ export default function DesignStudioPage() {
     const [policyAccepted, setPolicyAccepted] = useState(false);
     const [modal, setModal] = useState({ isOpen: false, title: '', children: <></>, size: 'md' as 'md' | 'lg' | 'xl' });
     const [previewMode, setPreviewMode] = useState<'2D' | '3D'>('2D');
+    const [mockupColor, setMockupColor] = useState('bg-gray-200');
     
     // Accessibility States
     const [isListening, setIsListening] = useState(false);
@@ -280,8 +283,8 @@ export default function DesignStudioPage() {
                              <Tabs defaultValue="design" className="w-full flex flex-col flex-grow">
                                 <TabsList className="grid w-full grid-cols-3">
                                     <TabsTrigger value="design">Design</TabsTrigger>
-                                    <TabsTrigger value="layers" disabled>Layers</TabsTrigger>
-                                    <TabsTrigger value="mockups" disabled>Mockups</TabsTrigger>
+                                    <TabsTrigger value="layers">Layers</TabsTrigger>
+                                    <TabsTrigger value="mockups">Mockups</TabsTrigger>
                                 </TabsList>
                                 <TabsContent value="design" className="flex-grow flex flex-col">
                                     <div className="space-y-6 py-6 flex-grow">
@@ -481,13 +484,43 @@ export default function DesignStudioPage() {
                                     </div>
                                 </TabsContent>
                                 <TabsContent value="layers">
-                                    <div className="py-6">
-                                        <p className="text-muted-foreground">Layer management is coming soon!</p>
+                                    <div className="py-6 space-y-4">
+                                        <p className="text-muted-foreground">Manage the components of your design.</p>
+                                        <div className="space-y-2">
+                                            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                                <div className="flex items-center gap-3">
+                                                    <Icon name="ImageIcon" />
+                                                    <span className="font-medium">Decal Image</span>
+                                                </div>
+                                                <Badge variant={generatedDecal ? 'secondary' : 'outline'}>{generatedDecal ? 'Visible' : 'Empty'}</Badge>
+                                            </div>
+                                            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                                 <div className="flex items-center gap-3">
+                                                    <Icon name={selectedDevice.icon as any} />
+                                                    <span className="font-medium">Product Base</span>
+                                                </div>
+                                                <Badge variant="secondary">Visible</Badge>
+                                            </div>
+                                        </div>
                                     </div>
                                 </TabsContent>
                                 <TabsContent value="mockups">
-                                    <div className="py-6">
-                                        <p className="text-muted-foreground">Mockup selection is coming soon!</p>
+                                    <div className="py-6 space-y-4">
+                                        <p className="text-muted-foreground">Change the product color to see how your design looks.</p>
+                                        <div className="flex flex-wrap gap-3">
+                                            {[
+                                              { name: 'Light', color: 'bg-gray-200' },
+                                              { name: 'Dark', color: 'bg-gray-800' },
+                                              { name: 'Blue', color: 'bg-blue-500' },
+                                              { name: 'Red', color: 'bg-red-500' },
+                                              { name: 'Green', color: 'bg-green-500' },
+                                            ].map(c => (
+                                                <Button key={c.name} variant="outline" className="flex items-center gap-2" onClick={() => setMockupColor(c.color)}>
+                                                    <div className={cn("w-4 h-4 rounded-full border", c.color)} />
+                                                    {c.name}
+                                                </Button>
+                                            ))}
+                                        </div>
                                     </div>
                                 </TabsContent>
                             </Tabs>
@@ -501,7 +534,10 @@ export default function DesignStudioPage() {
                     initial={{ scale: 0.8, opacity: 0 }} 
                     animate={{ scale: 1, opacity: 1 }} 
                     transition={{ duration: 0.7, delay: 0.2 }} 
-                    className="lg:col-span-3 flex flex-col items-center justify-center bg-gray-100 dark:bg-black/20 rounded-2xl min-h-[50vh] lg:min-h-0 p-8"
+                    className={cn(
+                        "lg:col-span-3 flex flex-col items-center justify-center rounded-2xl min-h-[50vh] lg:min-h-0 p-8 transition-colors",
+                        mockupColor
+                    )}
                 >
                     <div className="flex-grow w-full h-full flex items-center justify-center relative">
                         {isLoading ? (
