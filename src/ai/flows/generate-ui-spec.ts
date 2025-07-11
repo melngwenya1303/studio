@@ -12,6 +12,7 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 import {generateStory} from './generate-story';
+import {generateImage} from './generate-image';
 
 // Input and Output Schemas
 const GenerateUiSpecInputSchema = z.object({
@@ -24,6 +25,8 @@ const GenerateUiSpecOutputSchema = z.object({
   story: z.string().describe('A 2-4 sentence story or lore about the design.'),
   imageUrl: z.string().describe('The data URI of the generated decal image.'),
   storyAudio: z.string().describe('A data URI for the narrated story audio.'),
+  blocked: z.boolean().describe('Whether the prompt was blocked by the safety filter.'),
+  blockedReason: z.string().optional().describe('The reason the prompt was blocked.'),
 });
 export type GenerateUiSpecOutput = z.infer<typeof GenerateUiSpecOutputSchema>;
 
@@ -52,22 +55,29 @@ const generateUiSpecFlow = ai.defineFlow(
     outputSchema: GenerateUiSpecOutputSchema,
   },
   async input => {
-    // Execute text and image generation in parallel
-    const [titleResult, storyResult, imageResult] = await Promise.all([
+    // Run image generation first to check for blocked content
+    const imageResult = await generateImage(input);
+    
+    if (imageResult.blocked || !imageResult.media) {
+      return {
+        title: 'Blocked',
+        story: '',
+        imageUrl: '',
+        storyAudio: '',
+        blocked: true,
+        blockedReason: imageResult.reason || 'The AI failed to generate an image. This can happen with unusual prompts or if the content violates safety policies. Please try again with a different idea.',
+      };
+    }
+    
+    // If not blocked, proceed with title and story generation in parallel
+    const [titleResult, storyResult] = await Promise.all([
       titlePrompt(input),
       generateStory(input), // This now returns { story, audio }
-      ai.generate({
-        model: 'googleai/gemini-2.0-flash-preview-image-generation',
-        prompt: input.prompt,
-        config: {
-          responseModalities: ['TEXT', 'IMAGE'],
-        },
-      }),
     ]);
 
     const title = titleResult.output?.title;
     const { story, audio: storyAudio } = storyResult;
-    const imageUrl = imageResult.media?.url;
+    const imageUrl = imageResult.media;
 
     // Validate results
     if (!title) {
@@ -76,12 +86,7 @@ const generateUiSpecFlow = ai.defineFlow(
      if (!story || !storyAudio) {
       throw new Error('The AI failed to generate a story or narration.');
     }
-    if (!imageUrl) {
-      throw new Error(
-        'The AI failed to generate an image. This can happen with unusual prompts or if the content violates safety policies. Please try again with a different idea.'
-      );
-    }
 
-    return {title, story, imageUrl, storyAudio};
+    return {title, story, imageUrl, storyAudio, blocked: false };
   }
 );

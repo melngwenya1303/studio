@@ -14,7 +14,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Area, AreaChart, ResponsiveContainer } from "recharts";
+import { Area, AreaChart, ResponsiveContainer, Bar, BarChart, XAxis, YAxis, Tooltip } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -30,6 +30,15 @@ const chartData = [
     { date: 'May', value: 130 },
     { date: 'Jun', value: 180 },
 ];
+
+const salesData = [
+    { name: 'Jan', sales: 4000 },
+    { name: 'Feb', sales: 3000 },
+    { name: 'Mar', sales: 5000 },
+    { name: 'Apr', sales: 4500 },
+    { name: 'May', sales: 6000 },
+    { name: 'Jun', sales: 7500 },
+]
 
 const mockOrders = [
   { id: 'SS-1024', customer: 'Jane Doe', date: '2023-10-26', status: 'Processing', total: '$34.98', items: 1 },
@@ -280,77 +289,7 @@ export default function AdminPage() {
                 <p className="text-muted-foreground mt-1 text-body">Manage platform safety, integrations, and operations.</p>
             </header>
 
-            {/* Analytics Overview */}
-            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Creations</CardTitle>
-                        <Icon name="Brush" className="text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">12,453</div>
-                        <p className="text-xs text-muted-foreground">+20.1% from last month</p>
-                        <div className="h-20 -mx-4 -mb-2">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
-                                    <defs>
-                                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                                        </linearGradient>
-                                    </defs>
-                                    <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorValue)" />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Active Users</CardTitle>
-                        <Icon name="Users" className="text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">+{users.length}</div>
-                        <p className="text-xs text-muted-foreground">+180.1% from last month</p>
-                         <div className="h-20 -mx-4 -mb-2">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <AreaChart data={chartData.slice().reverse()} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
-                                    <defs>
-                                        <linearGradient id="colorValue2" x1="0" y1="0" x2="0" y2="1">
-                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
-                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
-                                        </linearGradient>
-                                    </defs>
-                                    <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorValue2)" />
-                                </AreaChart>
-                            </ResponsiveContainer>
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
-                        <Icon name="ShoppingCart" className="text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{mockOrders.length}</div>
-                        <p className="text-xs text-muted-foreground">in the last 30 days</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Blocked Terms</CardTitle>
-                        <Icon name="Filter" className="text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{blocklist.length}</div>
-                        <p className="text-xs text-muted-foreground">Terms in prompt filter</p>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <Tabs defaultValue="orders">
+            <Tabs defaultValue="analytics" className="w-full">
                 <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="analytics"><Icon name="PieChart" /> Analytics</TabsTrigger>
                     <TabsTrigger value="orders"><Icon name="Package" /> Orders</TabsTrigger>
@@ -359,23 +298,74 @@ export default function AdminPage() {
                     <TabsTrigger value="fulfillment"><Icon name="Truck" /> Fulfillment</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="analytics">
+                <TabsContent value="analytics" className="mt-4">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-4">
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Total Creations</CardTitle>
+                                <Icon name="Brush" className="text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">12,453</div>
+                                <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+                            </CardContent>
+                        </Card>
+                         <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+                                <Icon name="Users" className="text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">+{users.length}</div>
+                                <p className="text-xs text-muted-foreground">+180.1% from last month</p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Total Orders</CardTitle>
+                                <Icon name="ShoppingCart" className="text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{mockOrders.length}</div>
+                                <p className="text-xs text-muted-foreground">in the last 30 days</p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Blocked Terms</CardTitle>
+                                <Icon name="Filter" className="text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{blocklist.length}</div>
+                                <p className="text-xs text-muted-foreground">Terms in prompt filter</p>
+                            </CardContent>
+                        </Card>
+                    </div>
                     <Card>
                         <CardHeader>
-                            <CardTitle>Detailed Analytics</CardTitle>
-                            <CardDescription>Comprehensive reporting on platform performance.</CardDescription>
+                            <CardTitle>Sales Overview</CardTitle>
+                            <CardDescription>Monthly sales performance.</CardDescription>
                         </CardHeader>
-                        <CardContent>
-                            <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed">
-                                <Icon name="BarChart3" className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                                <h4 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">Advanced Reporting Coming Soon</h4>
-                                <p className="text-muted-foreground">Track sales, cloud costs, popular designs, user cohorts, and more.</p>
-                            </div>
+                        <CardContent className="h-[300px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={salesData}>
+                                    <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                                    <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
+                                    <Tooltip
+                                      contentStyle={{
+                                        backgroundColor: "hsl(var(--background))",
+                                        border: "1px solid hsl(var(--border))",
+                                        borderRadius: "var(--radius)"
+                                      }}
+                                    />
+                                    <Bar dataKey="sales" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
                         </CardContent>
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="orders">
+                <TabsContent value="orders" className="mt-4">
                     <Card>
                         <CardHeader>
                             <CardTitle>Recent Orders</CardTitle>
@@ -416,7 +406,7 @@ export default function AdminPage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="users">
+                <TabsContent value="users" className="mt-4">
                     <Card>
                         <CardHeader>
                             <CardTitle>User Management</CardTitle>
@@ -483,7 +473,7 @@ export default function AdminPage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="content">
+                <TabsContent value="content" className="mt-4">
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><Icon name="Filter" /> Prompt Filter Blocklist</CardTitle>
@@ -534,7 +524,7 @@ export default function AdminPage() {
                     </Card>
                 </TabsContent>
 
-                <TabsContent value="fulfillment">
+                <TabsContent value="fulfillment" className="mt-4">
                     <Card>
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2"><Icon name="KeyRound" /> POD Partner Integrations</CardTitle>

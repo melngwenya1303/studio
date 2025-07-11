@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from "@/hooks/use-toast";
 import { enhancePrompt } from '@/ai/flows/enhance-prompt';
-import { generateImage } from '@/ai/flows/generate-image';
 import { generateUiSpec } from '@/ai/flows/generate-ui-spec';
 import { getCreativeFeedback } from '@/ai/flows/get-creative-feedback';
 import { getRemixSuggestions } from '@/ai/flows/get-remix-suggestions';
@@ -212,31 +211,25 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         setRemixSuggestions([]);
         try {
             const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
+            const fullPromptWithStyle = `A decal design for a ${deviceName}. ${basePrompt}, in the style of ${selectedStyle.name}, high resolution, clean edges, sticker, vector art`;
             
-            const imageResult = await generateImage({ prompt: basePrompt });
+            const result = await generateUiSpec({ prompt: fullPromptWithStyle });
 
-            if (imageResult.blocked) {
-                toast({ variant: "destructive", title: "Prompt Blocked", description: imageResult.reason, duration: 5000 });
+            if (result.blocked) {
+                toast({ variant: "destructive", title: "Prompt Blocked", description: result.blockedReason, duration: 5000 });
                 setIsLoading(false);
                 return;
             }
-
-            if (!imageResult.media) {
-                throw new Error("The AI failed to generate an image for an unknown reason.");
-            }
-            
-            const fullPromptWithStyle = `A decal design for a ${deviceName}. ${basePrompt}, in the style of ${selectedStyle.name}, high resolution, clean edges, sticker, vector art`;
-            const textResult = await generateUiSpec({ prompt: fullPromptWithStyle });
             
             const newDecal = { 
-                url: imageResult.media!, 
+                url: result.imageUrl, 
                 prompt: basePrompt, 
                 style: selectedStyle.name, 
                 deviceType: deviceName,
-                title: textResult.title 
+                title: result.title 
             };
             setGeneratedDecal(newDecal);
-            setStory({ text: textResult.story, audio: textResult.storyAudio });
+            setStory({ text: result.story, audio: result.storyAudio });
 
         } catch (error: any) {
             toast({ variant: "destructive", title: "Generation Error", description: error.message, duration: 5000 });
