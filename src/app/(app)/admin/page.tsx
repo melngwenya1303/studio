@@ -13,8 +13,24 @@ import Modal from '@/components/shared/modal';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 
-const BLOCKLIST_CATEGORIES = ['Copyright Infringement', 'Offensive Content', 'Hate Speech', 'General'];
+const BLOCKLIST_CATEGORIES = ['All', 'Copyright Infringement', 'Offensive Content', 'Hate Speech', 'General'];
+
+// Mock data for charts
+const chartData = [
+    { date: 'Jan', value: 86 },
+    { date: 'Feb', value: 120 },
+    { date: 'Mar', value: 95 },
+    { date: 'Apr', value: 150 },
+    { date: 'May', value: 130 },
+    { date: 'Jun', value: 180 },
+];
+const chartConfig = {
+    value: { label: "Value", color: "hsl(var(--primary))" },
+};
 
 export default function AdminPage() {
     const { isAdmin } = useApp();
@@ -29,10 +45,11 @@ export default function AdminPage() {
         { word: 'unwanted', category: 'General' },
     ]);
     const [newBlockword, setNewBlockword] = useState('');
-    const [newBlockwordCategory, setNewBlockwordCategory] = useState(BLOCKLIST_CATEGORIES[3]);
+    const [newBlockwordCategory, setNewBlockwordCategory] = useState(BLOCKLIST_CATEGORIES[4]);
     const [bulkWords, setBulkWords] = useState('');
     const [searchTerm, setSearchTerm] = useState('');
     const [wordToDelete, setWordToDelete] = useState<string | null>(null);
+    const [categoryFilter, setCategoryFilter] = useState('All');
     
     // POD Partner State
     const [podPartners, setPodPartners] = useState([
@@ -102,8 +119,11 @@ export default function AdminPage() {
     }
 
     const filteredBlocklist = useMemo(() => {
-        return blocklist.filter(item => item.word.toLowerCase().includes(searchTerm.toLowerCase()));
-    }, [blocklist, searchTerm]);
+        return blocklist.filter(item => 
+            (item.word.toLowerCase().includes(searchTerm.toLowerCase())) &&
+            (categoryFilter === 'All' || item.category === categoryFilter)
+        );
+    }, [blocklist, searchTerm, categoryFilter]);
     
     const getCategoryVariant = (category: string) => {
         switch (category) {
@@ -125,14 +145,12 @@ export default function AdminPage() {
 
     return (
         <div className="p-4 md:p-8 animate-fade-in">
-            {/* Blocklist deletion confirmation */}
+            {/* Modal Dialogs */}
             <AlertDialog open={!!wordToDelete} onOpenChange={() => setWordToDelete(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This action cannot be undone. This will permanently remove "{wordToDelete}" from the blocklist.
-                        </AlertDialogDescription>
+                        <AlertDialogDescription>This action cannot be undone. This will permanently remove "{wordToDelete}" from the blocklist.</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel onClick={() => setWordToDelete(null)}>Cancel</AlertDialogCancel>
@@ -140,15 +158,11 @@ export default function AdminPage() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-            
-            {/* POD Partner deletion confirmation */}
             <AlertDialog open={!!partnerToDelete} onOpenChange={() => setPartnerToDelete(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
                         <AlertDialogTitle className="flex items-center gap-2"><Icon name="Trash2" /> Delete Integration?</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            This will permanently delete the {partnerToDelete?.name} integration and immediately stop all related operations. This action cannot be undone.
-                        </AlertDialogDescription>
+                        <AlertDialogDescription>This will permanently delete the {partnerToDelete?.name} integration and immediately stop all related operations. This action cannot be undone.</AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
                         <AlertDialogCancel>Cancel</AlertDialogCancel>
@@ -156,25 +170,13 @@ export default function AdminPage() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
-
-             {/* Partner edit modal */}
             <Modal isOpen={!!partnerToEdit} onClose={() => setPartnerToEdit(null)} title={`Rotate API Key for ${partnerToEdit?.name}`}>
                  <form onSubmit={handleAddOrUpdatePartner} className="space-y-4 pt-4">
                      <p className="text-sm text-muted-foreground">Enter the new API key below. The old key will be immediately invalidated.</p>
-                    <Input
-                        type="password"
-                        value={newPartnerApiKey}
-                        onChange={(e) => setNewPartnerApiKey(e.target.value)}
-                        placeholder="Enter new API Key"
-                        className="text-base"
-                    />
-                    <Button type="submit" className="w-full">
-                        <Icon name="KeyRound" /> Update Key
-                    </Button>
+                    <Input type="password" value={newPartnerApiKey} onChange={(e) => setNewPartnerApiKey(e.target.value)} placeholder="Enter new API Key" className="text-base" />
+                    <Button type="submit" className="w-full"><Icon name="KeyRound" /> Update Key</Button>
                 </form>
             </Modal>
-            
-            {/* Newly Added Partner Info Modal */}
             <Modal isOpen={!!newlyAddedPartner} onClose={() => setNewlyAddedPartner(null)} title={`Integration Added: ${newlyAddedPartner?.name}`}>
                 <div className="space-y-4 pt-2">
                     <p className="p-3 text-sm bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200 rounded-lg border border-yellow-200 dark:border-yellow-800/60">
@@ -194,118 +196,181 @@ export default function AdminPage() {
                 <p className="text-muted-foreground mt-1">Manage platform safety, integrations, and operations.</p>
             </header>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Analytics Overview */}
+            <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 mb-8">
                 <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Icon name="Trash2" /> Prompt Filter Blocklist</CardTitle>
-                        <CardDescription>Add or remove words that should be filtered from user prompts.</CardDescription>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total Creations</CardTitle>
+                        <Icon name="Brush" className="text-muted-foreground" />
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div>
-                          <form onSubmit={handleAddBlockword} className="flex gap-2">
-                              <Input 
-                                  type="text"
-                                  value={newBlockword}
-                                  onChange={(e) => setNewBlockword(e.target.value)}
-                                  placeholder="Add a single word"
-                                  className="text-base"
-                              />
-                               <Select value={newBlockwordCategory} onValueChange={setNewBlockwordCategory}>
-                                <SelectTrigger className="w-[240px]">
-                                    <SelectValue placeholder="Select category" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {BLOCKLIST_CATEGORIES.map(cat => (
-                                        <SelectItem key={cat} value={cat}>{cat}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                               </Select>
-                              <Button type="submit" size="icon" aria-label="Add blockword">
-                                  <Icon name="PlusCircle" />
-                              </Button>
-                          </form>
-                        </div>
-                        <div>
-                            <form onSubmit={handleBulkAdd} className="space-y-2">
-                                <Textarea 
-                                    value={bulkWords}
-                                    onChange={(e) => setBulkWords(e.target.value)}
-                                    placeholder="Bulk add: paste comma-separated words... (will be assigned 'General' category)"
-                                    rows={3}
-                                />
-                                <Button type="submit" className="w-full">
-                                  <Icon name="PlusCircle" /> Add Bulk Words
-                                </Button>
-                            </form>
-                        </div>
-                        <div className="space-y-2">
-                          <Input 
-                            type="search"
-                            value={searchTerm}
-                            onChange={(e) => setSearchTerm(e.target.value)}
-                            placeholder="Search blocklist..."
-                          />
-                          <div className="space-y-2 max-h-60 overflow-y-auto pr-2 border rounded-lg p-2">
-                              {filteredBlocklist.length > 0 ? filteredBlocklist.map(item => (
-                                  <div key={item.word} className="flex justify-between items-center bg-muted/50 p-2 rounded-lg">
-                                      <div className="flex items-center gap-2">
-                                        <span className="font-mono text-sm">{item.word}</span>
-                                        <Badge variant={getCategoryVariant(item.category)}>{item.category}</Badge>
-                                      </div>
-                                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setWordToDelete(item.word)} aria-label={`Delete ${item.word}`}>
-                                          <Icon name="Trash2" className="w-4 h-4" />
-                                      </Button>
-                                  </div>
-                              )) : <p className="text-sm text-muted-foreground text-center py-4">No matching words found.</p>}
-                          </div>
+                    <CardContent>
+                        <div className="text-2xl font-bold">12,453</div>
+                        <p className="text-xs text-muted-foreground">+20.1% from last month</p>
+                        <div className="h-20 -mx-4 -mb-2">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={chartData} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorValue)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
                         </div>
                     </CardContent>
                 </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Icon name="KeyRound" /> POD Partner APIs</CardTitle>
-                        <CardDescription>Manage API keys for your Print-on-Demand partners.</CardDescription>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Active Users</CardTitle>
+                        <Icon name="Users" className="text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={handleAddOrUpdatePartner} className="space-y-3 mb-4 p-4 border rounded-lg">
-                             <Input 
-                                type="text"
-                                value={newPartnerName}
-                                onChange={(e) => setNewPartnerName(e.target.value)}
-                                placeholder="Partner Name (e.g., Printify)"
-                                className="text-base"
-                            />
-                            <Input 
-                                type="password"
-                                value={newPartnerApiKey}
-                                onChange={(e) => setNewPartnerApiKey(e.target.value)}
-                                placeholder="Partner API Key"
-                                className="text-base"
-                            />
-                            <Button type="submit" className="w-full">
-                                <Icon name="PlusCircle" /> Add New Partner
-                            </Button>
-                        </form>
-                        <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
-                            {podPartners.length > 0 ? podPartners.map(partner => (
-                                 <div key={partner.id} className="flex justify-between items-center bg-muted/50 p-3 rounded-lg">
-                                    <p className="font-semibold">{partner.name}</p>
-                                    <div className="flex items-center gap-2">
-                                        <Button variant="outline" size="sm" onClick={() => { setPartnerToEdit(partner); setNewPartnerApiKey('')}}>
-                                            <Icon name="RefreshCcw" /> Rotate Key
-                                        </Button>
-                                        <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setPartnerToDelete(partner)}>
-                                            <Icon name="Trash2" /> Delete
-                                        </Button>
-                                    </div>
-                                </div>
-                            )) : <p className="text-sm text-muted-foreground text-center py-4">No POD partners configured.</p>}
+                        <div className="text-2xl font-bold">+2,350</div>
+                        <p className="text-xs text-muted-foreground">+180.1% from last month</p>
+                         <div className="h-20 -mx-4 -mb-2">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <AreaChart data={chartData.slice().reverse()} margin={{ top: 5, right: 10, left: 10, bottom: 0 }}>
+                                    <defs>
+                                        <linearGradient id="colorValue2" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.8}/>
+                                            <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <Area type="monotone" dataKey="value" stroke="hsl(var(--primary))" fillOpacity={1} fill="url(#colorValue2)" />
+                                </AreaChart>
+                            </ResponsiveContainer>
                         </div>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Active Providers</CardTitle>
+                        <Icon name="KeyRound" className="text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{podPartners.length}</div>
+                        <p className="text-xs text-muted-foreground">Connected POD partners</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Blocked Terms</CardTitle>
+                        <Icon name="Trash2" className="text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">{blocklist.length}</div>
+                        <p className="text-xs text-muted-foreground">Terms in prompt filter</p>
                     </CardContent>
                 </Card>
             </div>
+
+            <Tabs defaultValue="analytics">
+                <TabsList className="grid w-full grid-cols-3">
+                    <TabsTrigger value="analytics"><Icon name="PieChart" /> Analytics</TabsTrigger>
+                    <TabsTrigger value="content"><Icon name="Filter" /> Content Moderation</TabsTrigger>
+                    <TabsTrigger value="fulfillment"><Icon name="Truck" /> Fulfillment</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="analytics">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Detailed Analytics</CardTitle>
+                            <CardDescription>Comprehensive reporting on platform performance.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed">
+                                <Icon name="BarChart3" className="w-16 h-16 mx-auto text-gray-400 mb-4" />
+                                <h4 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">Advanced Reporting Coming Soon</h4>
+                                <p className="text-muted-foreground">Track sales, popular designs, user cohorts, and more.</p>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="content">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Icon name="Trash2" /> Prompt Filter Blocklist</CardTitle>
+                            <CardDescription>Add or remove words that should be filtered from user prompts.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div>
+                              <form onSubmit={handleAddBlockword} className="flex gap-2">
+                                  <Input type="text" value={newBlockword} onChange={(e) => setNewBlockword(e.target.value)} placeholder="Add a single word" className="text-base" />
+                                   <Select value={newBlockwordCategory} onValueChange={setNewBlockwordCategory}>
+                                    <SelectTrigger className="w-[240px]"><SelectValue placeholder="Select category" /></SelectTrigger>
+                                    <SelectContent>
+                                        {BLOCKLIST_CATEGORIES.slice(1).map(cat => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}
+                                    </SelectContent>
+                                   </Select>
+                                  <Button type="submit" size="icon" aria-label="Add blockword"><Icon name="PlusCircle" /></Button>
+                              </form>
+                            </div>
+                            <div>
+                                <form onSubmit={handleBulkAdd} className="space-y-2">
+                                    <Textarea value={bulkWords} onChange={(e) => setBulkWords(e.target.value)} placeholder="Bulk add: paste comma-separated words... (will be assigned 'General' category)" rows={3} />
+                                    <Button type="submit" className="w-full"><Icon name="PlusCircle" /> Add Bulk Words</Button>
+                                </form>
+                            </div>
+                            <div className="space-y-2">
+                                <div className="flex gap-2">
+                                    <Input type="search" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Search blocklist..." />
+                                    <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                                        <SelectTrigger className="w-[240px]"><SelectValue placeholder="Filter by category" /></SelectTrigger>
+                                        <SelectContent>{BLOCKLIST_CATEGORIES.map(cat => (<SelectItem key={cat} value={cat}>{cat}</SelectItem>))}</SelectContent>
+                                   </Select>
+                                </div>
+                              <div className="space-y-2 max-h-60 overflow-y-auto pr-2 border rounded-lg p-2">
+                                  {filteredBlocklist.length > 0 ? filteredBlocklist.map(item => (
+                                      <div key={item.word} className="flex justify-between items-center bg-muted/50 p-2 rounded-lg">
+                                          <div className="flex items-center gap-2">
+                                            <span className="font-mono text-sm">{item.word}</span>
+                                            <Badge variant={getCategoryVariant(item.category)}>{item.category}</Badge>
+                                          </div>
+                                          <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive" onClick={() => setWordToDelete(item.word)} aria-label={`Delete ${item.word}`}>
+                                              <Icon name="Trash2" className="w-4 h-4" />
+                                          </Button>
+                                      </div>
+                                  )) : <p className="text-sm text-muted-foreground text-center py-4">No matching words found.</p>}
+                              </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="fulfillment">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Icon name="KeyRound" /> POD Partner APIs</CardTitle>
+                            <CardDescription>Manage API keys for your Print-on-Demand partners.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <form onSubmit={handleAddOrUpdatePartner} className="space-y-3 mb-4 p-4 border rounded-lg">
+                                 <Input type="text" value={newPartnerName} onChange={(e) => setNewPartnerName(e.target.value)} placeholder="Partner Name (e.g., Printify)" className="text-base"/>
+                                <Input type="password" value={newPartnerApiKey} onChange={(e) => setNewPartnerApiKey(e.target.value)} placeholder="Partner API Key" className="text-base" />
+                                <Button type="submit" className="w-full"><Icon name="PlusCircle" /> Add New Partner</Button>
+                            </form>
+                            <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                                {podPartners.length > 0 ? podPartners.map(partner => (
+                                     <div key={partner.id} className="flex justify-between items-center bg-muted/50 p-3 rounded-lg">
+                                        <p className="font-semibold">{partner.name}</p>
+                                        <div className="flex items-center gap-2">
+                                            <Button variant="outline" size="sm" onClick={() => { setPartnerToEdit(partner); setNewPartnerApiKey('')}}>
+                                                <Icon name="RefreshCcw" /> Rotate Key
+                                            </Button>
+                                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setPartnerToDelete(partner)}>
+                                                <Icon name="Trash2" /> Delete
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )) : <p className="text-sm text-muted-foreground text-center py-4">No POD partners configured.</p>}
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+            </Tabs>
         </div>
     );
-
-    
+}
