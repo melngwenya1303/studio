@@ -29,7 +29,6 @@ export default function LeaderboardPage() {
             setIsLoading(true);
             const db = getFirestore(firebaseApp);
             const usersRef = collection(db, 'users');
-            // Fetch top 10 users ordered by creationsCount
             const q = query(usersRef, orderBy('creationsCount', 'desc'), limit(10));
             
             try {
@@ -66,20 +65,14 @@ export default function LeaderboardPage() {
     const LeaderboardSkeleton = () => (
         <Card>
             <CardContent className="p-0">
-                <div className="space-y-4">
+                <div className="space-y-4 p-4">
                     {[...Array(5)].map((_, i) => (
-                         <div key={i} className="flex items-center p-4 border-b last:border-b-0 dark:border-border/50">
-                            <div className="flex items-center gap-4 w-1/3">
-                                <Skeleton className="h-8 w-8" />
-                                <Skeleton className="h-10 w-10 rounded-full" />
-                                <Skeleton className="h-6 w-24" />
-                            </div>
-                            <div className="w-1/3 flex items-center justify-center gap-6">
-                                <Skeleton className="h-8 w-16" />
-                                <Skeleton className="h-8 w-16" />
-                            </div>
-                            <div className="w-1/3 flex justify-end">
-                                <Skeleton className="h-8 w-20" />
+                         <div key={i} className="flex items-center space-x-4">
+                            <Skeleton className="h-8 w-8" />
+                            <Skeleton className="h-10 w-10 rounded-full" />
+                            <div className="space-y-2 flex-grow">
+                                <Skeleton className="h-4 w-3/5" />
+                                <Skeleton className="h-4 w-4/5" />
                             </div>
                         </div>
                     ))}
@@ -100,16 +93,16 @@ export default function LeaderboardPage() {
             {isLoading ? <LeaderboardSkeleton /> : (
                 <Card>
                     <CardContent className="p-0">
-                        <div className="space-y-4">
+                        <div className="divide-y divide-border">
                             {leaderboardData.map((user, index) => (
                                 <motion.div
                                     key={user.id}
-                                    className="flex items-center p-4 border-b last:border-b-0 dark:border-border/50 hover:bg-muted/50 transition-colors"
+                                    className="flex items-center p-4 hover:bg-muted/50 transition-colors"
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: index * 0.1 }}
+                                    transition={{ duration: 0.5, delay: index * 0.05 }}
                                 >
-                                    <div className="flex items-center gap-4 w-1/3">
+                                    <div className="flex items-center gap-4 flex-1">
                                         <span className={`text-2xl font-bold w-8 text-center ${getRankColor(index + 1)}`}>{index + 1}</span>
                                         <Avatar>
                                             <AvatarImage src={user.avatar} />
@@ -117,7 +110,7 @@ export default function LeaderboardPage() {
                                         </Avatar>
                                         <span className="font-semibold">{user.name}</span>
                                     </div>
-                                    <div className="w-1/3 flex items-center justify-center gap-6 text-sm">
+                                    <div className="flex-1 flex items-center justify-center gap-6 text-sm">
                                         <div className="text-center">
                                             <p className="font-bold text-lg">{user.creationsCount}</p>
                                             <p className="text-muted-foreground text-xs">Creations</p>
@@ -127,7 +120,7 @@ export default function LeaderboardPage() {
                                             <p className="text-muted-foreground text-xs">Remixes</p>
                                         </div>
                                     </div>
-                                    <div className="w-1/3 flex justify-end">
+                                    <div className="flex-1 flex justify-end">
                                         <Link href={`/profile/${user.id}`} passHref>
                                             <Button variant="outline" size="sm">View Profile</Button>
                                         </Link>

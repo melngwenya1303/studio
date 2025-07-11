@@ -122,8 +122,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             createdAt: serverTimestamp(),
             creationsCount: 0,
             remixesCount: 0,
-            followers: 0,
-            following: 0,
+            followers: Math.floor(Math.random() * 100),
+            following: Math.floor(Math.random() * 100),
             bio: 'A new SurfaceStory creator exploring the digital canvas.',
           };
           await setDoc(userDocRef, newUserPayload);
@@ -147,6 +147,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setCreations([]);
         setLastVisibleCreation(null);
         setHasMoreCreations(true);
+        // Don't clear gallery on logout, so guests can see it.
         if (galleryItems.length === 0) {
             fetchInitialGalleryItems();
         }
