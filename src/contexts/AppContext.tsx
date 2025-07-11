@@ -6,12 +6,13 @@ import { useRouter } from 'next/navigation';
 import type { Creation, User, GalleryItem } from '@/lib/types';
 import { onAuthStateChanged, getAuth } from 'firebase/auth';
 import { firebaseApp } from '@/lib/firebase';
+import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot } from "firebase/firestore";
 
 interface AppContextType {
   user: User | null;
   isAdmin: boolean;
   creations: Creation[];
-  addCreation: (creation: Omit<Creation, 'id' | 'createdAt'>) => Creation;
+  addCreation: (creation: Omit<Creation, 'id' | 'createdAt'>) => Promise<Creation>;
   startRemix: (item: Partial<Creation & GalleryItem>) => void;
   remixData: Partial<Creation & GalleryItem> | null;
   clearRemixData: () => void;
@@ -29,33 +30,58 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [creations, setCreations] = useState<Creation[]>([]);
   const [remixData, setRemixData] = useState<Partial<Creation & GalleryItem> | null>(null);
   const [cart, setCart] = useState<Creation[]>([]);
+  const db = getFirestore(firebaseApp);
 
   useEffect(() => {
     const auth = getAuth(firebaseApp);
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
         setUser({ uid: firebaseUser.uid, isAnonymous: firebaseUser.isAnonymous, email: firebaseUser.email });
-        // In a real app, you'd check for admin role from a custom claim or Firestore
         setIsAdmin(firebaseUser.email === 'admin@surfacestory.com'); 
       } else {
         setUser(null);
         setIsAdmin(false);
+        setCreations([]); // Clear creations on logout
       }
     });
 
     return () => unsubscribe();
   }, []);
 
+  useEffect(() => {
+    if (user) {
+      const q = query(collection(db, "creations"), where("userId", "==", user.uid));
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        const userCreations: Creation[] = [];
+        querySnapshot.forEach((doc) => {
+          userCreations.push({ id: doc.id, ...doc.data() } as Creation);
+        });
+        // Sort by creation date, newest first
+        userCreations.sort((a, b) => (b.createdAt?.toMillis() || 0) - (a.createdAt?.toMillis() || 0));
+        setCreations(userCreations);
+      });
+      return () => unsubscribe();
+    }
+  }, [user, db]);
 
-  const addCreation = useCallback((creationData: Omit<Creation, 'id' | 'createdAt'>) => {
-    const newCreation: Creation = {
+
+  const addCreation = useCallback(async (creationData: Omit<Creation, 'id' | 'createdAt'>) => {
+    if (!user) throw new Error("You must be logged in to save a creation.");
+    
+    const creationPayload = {
       ...creationData,
-      id: crypto.randomUUID(),
-      createdAt: new Date(),
+      userId: user.uid,
+      createdAt: serverTimestamp(),
     };
-    setCreations(prev => [newCreation, ...prev]);
-    return newCreation;
-  }, []);
+
+    const docRef = await addDoc(collection(db, "creations"), creationPayload);
+    
+    return {
+      ...creationData,
+      id: docRef.id,
+      createdAt: new Date(), // Return a client-side date for immediate UI update
+    };
+  }, [user, db]);
   
   const startRemix = useCallback((item: Partial<Creation & GalleryItem>) => {
     setRemixData(item);

@@ -95,8 +95,13 @@ export default function UploadView({ onBack }: UploadViewProps) {
         }
     };
 
-    const handleSaveCreation = () => {
-        if (!uploadedImage || !user) return;
+    const handleSaveCreation = async () => {
+        if (!uploadedImage) return;
+        if (!user) {
+            toast({ variant: "destructive", title: "Login Required", description: "Please sign in to save your creations." });
+            router.push('/login');
+            return;
+        }
         setIsSaving(true);
         try {
             const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
@@ -108,7 +113,7 @@ export default function UploadView({ onBack }: UploadViewProps) {
                 style: 'Custom',
                 deviceType: deviceName,
             };
-            const savedCreation = addCreation(newCreation);
+            const savedCreation = await addCreation(newCreation);
             toast({ title: 'Success!', description: `'${savedCreation.title}' has been saved to My Designs.` });
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Save Error', description: error.message });
