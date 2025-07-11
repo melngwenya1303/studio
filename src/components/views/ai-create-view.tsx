@@ -550,7 +550,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                             <h3 className="text-h3 font-headline">3. Choose Style</h3>
                                             <div className="space-y-2">
                                                 <Label>Selected Style: {selectedStyle.name}</Label>
-                                                <Carousel opts={{ align: "start", loop: true }} className="w-full">
+                                                <Carousel opts={{ align: "start", loop: false }} className="w-full max-w-full">
                                                     <CarouselContent className="-ml-2">
                                                         {STYLES.map((style, index) => (
                                                             <CarouselItem key={index} className="pl-2 basis-1/2 md:basis-1/3">
@@ -578,15 +578,15 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                             </CarouselItem>
                                                         ))}
                                                     </CarouselContent>
-                                                    <CarouselPrevious className="hidden sm:flex" />
-                                                    <CarouselNext className="hidden sm:flex"/>
+                                                    <CarouselPrevious className="hidden sm:flex -left-4" />
+                                                    <CarouselNext className="hidden sm:flex -right-4"/>
                                                 </Carousel>
                                             </div>
                                         </div>
                                     </div>
                                     
                                     <div className="mt-auto pt-4 space-y-3">
-                                        <div className="flex items-center space-x-2 mb-3">
+                                        <div className="flex items-center space-x-2 my-4">
                                             <Checkbox id="terms" checked={policyAccepted} onCheckedChange={(checked) => setPolicyAccepted(Boolean(checked))} />
                                             <label
                                                 htmlFor="terms"
