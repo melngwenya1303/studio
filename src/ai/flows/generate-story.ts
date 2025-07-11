@@ -45,6 +45,9 @@ const generateStoryFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output?.story) {
+        throw new Error('The AI failed to generate a story for this prompt.');
+    }
+    return output;
   }
 );

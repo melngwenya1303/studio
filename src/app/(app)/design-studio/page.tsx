@@ -132,9 +132,8 @@ export default function DesignStudioPage() {
                 audioRef.current.play();
                 audioRef.current.onended = () => setIsSpeaking(false);
             }
-        } catch (error) {
-            console.error(error);
-            toast({ variant: "destructive", title: "Audio Error", description: "Could not generate audio for the prompt." });
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Audio Error", description: error.message });
             setIsSpeaking(false);
         }
     };
@@ -152,9 +151,8 @@ export default function DesignStudioPage() {
             const result = await generateImage({ prompt: fullPrompt });
             const newDecal = { url: result.media, prompt: basePrompt, style: selectedStyle.name, deviceType: deviceName };
             setGeneratedDecal(newDecal);
-        } catch (error) {
-            console.error(error);
-            toast({ variant: "destructive", title: "Generation Error", description: "Could not generate decal. Please try again." });
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Generation Error", description: error.message });
         } finally {
             setIsLoading(false);
         }
@@ -168,8 +166,8 @@ export default function DesignStudioPage() {
             const result = await enhancePrompt({ prompt, deviceType: deviceName, style: selectedStyle.name });
             setPrompt(result.enhancedPrompt);
             toast({ title: "Prompt Enhanced!", description: "Your prompt has been improved by AI." });
-        } catch (error) {
-            toast({ variant: "destructive", title: "Enhancement Failed", description: "The AI could not enhance the prompt." });
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Enhancement Failed", description: error.message });
         } finally {
             setIsEnhancing(false);
         }
@@ -183,8 +181,8 @@ export default function DesignStudioPage() {
             const title = result.title;
             addCreation({ ...generatedDecal, title });
             toast({ title: 'Success!', description: 'Your design has been saved to My Designs.' });
-        } catch (error) {
-            toast({ variant: "destructive", title: "Save Error", description: "Could not save your design." });
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Save Error", description: error.message });
         } finally {
             setIsSaving(false);
         }
@@ -235,8 +233,8 @@ export default function DesignStudioPage() {
                     </div>
                 ),
             });
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not get AI feedback at this time.' });
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Feedback Error', description: error.message });
         } finally {
             setIsGettingFeedback(false);
         }
@@ -253,8 +251,8 @@ export default function DesignStudioPage() {
                 size: 'lg',
                 children: <p className="leading-relaxed">{result.story}</p>
             });
-        } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not generate a story at this time.' });
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Story Error', description: error.message });
         } finally {
             setIsTellingStory(false);
         }

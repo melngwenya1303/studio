@@ -40,6 +40,9 @@ const generateTitleFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return output!;
+    if (!output?.title) {
+        throw new Error('The AI failed to generate a title for this prompt.');
+    }
+    return output;
   }
 );

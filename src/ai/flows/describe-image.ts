@@ -48,7 +48,7 @@ const describeImageFlow = ai.defineFlow(
   async input => {
     const {output} = await prompt(input);
     if (!output) {
-      throw new Error('The AI failed to generate any prompts.');
+      throw new Error('The AI failed to generate any prompts. It may have been unable to understand the image.');
     }
     return output;
   }

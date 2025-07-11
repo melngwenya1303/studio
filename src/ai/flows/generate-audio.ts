@@ -78,7 +78,7 @@ const generateAudioFlow = ai.defineFlow(
     });
 
     if (!media?.url) {
-      throw new Error('No audio was generated.');
+      throw new Error('The AI failed to generate audio for the provided text.');
     }
 
     const audioBuffer = Buffer.from(media.url.substring(media.url.indexOf(',') + 1), 'base64');

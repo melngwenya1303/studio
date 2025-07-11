@@ -42,6 +42,9 @@ const enhancePromptFlow = ai.defineFlow(
   },
   async input => {
     const {output} = await prompt(input);
-    return {enhancedPrompt: output!.enhancedPrompt};
+    if (!output?.enhancedPrompt) {
+        throw new Error('The AI could not enhance the prompt. Try rephrasing your idea.');
+    }
+    return {enhancedPrompt: output.enhancedPrompt};
   }
 );

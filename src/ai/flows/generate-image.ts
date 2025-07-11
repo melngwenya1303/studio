@@ -49,7 +49,7 @@ const generateImageFlow = ai.defineFlow(
     });
 
     if (!media?.url) {
-      throw new Error('No image was generated.');
+       throw new Error('The AI failed to generate an image. This can happen with unusual prompts or if the content violates safety policies. Please try again with a different idea.');
     }
     return {media: media.url};
   }

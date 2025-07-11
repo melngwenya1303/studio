@@ -47,7 +47,7 @@ const getRemixSuggestionsFlow = ai.defineFlow(
   async input => {
     const {output} = await prompt(input);
     if (!output) {
-      throw new Error('The AI failed to generate any suggestions.');
+      throw new Error('The AI failed to generate any suggestions. Please try a different prompt.');
     }
     return output;
   }

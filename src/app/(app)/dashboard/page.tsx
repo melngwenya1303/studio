@@ -86,9 +86,8 @@ export default function DashboardPage() {
                   </div>
                 ),
             });
-        } catch (error) {
-            console.error('Describe error:', error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not generate descriptions for this image.' });
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Error Describing Image', description: error.message });
         } finally {
             setIsDescribing(null);
         }
@@ -123,9 +122,8 @@ export default function DashboardPage() {
                     </div>
                 ),
             });
-        } catch (error) {
-            console.error('Remix suggestions error:', error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not get remix ideas. Starting with original prompt.' });
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Error Getting Suggestions', description: error.message });
             startRemix(creation);
         } finally {
             setIsRemixing(null);
