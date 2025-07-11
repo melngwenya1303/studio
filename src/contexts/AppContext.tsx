@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo, useEffect } from 'react';
@@ -45,7 +44,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         if (!userDoc.exists()) {
           await setDoc(userDocRef, { 
             email: firebaseUser.email,
-            isAdmin: firebaseUser.email === 'admin@surfacestory.com', // Default admin
+            isAdmin: firebaseUser.email === 'admin@surfacestoryai.com', // Default admin
           });
           userDoc = await getDoc(userDocRef); // Re-fetch the document
         }
