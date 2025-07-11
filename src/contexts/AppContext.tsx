@@ -44,12 +44,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const db = getFirestore(firebaseApp);
   const storage = getStorage(firebaseApp);
 
-  // Pagination state for creations
   const [lastVisibleCreation, setLastVisibleCreation] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [hasMoreCreations, setHasMoreCreations] = useState(true);
   const [isLoadingCreations, setIsLoadingCreations] = useState(false);
 
-  // Pagination state for gallery
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [lastVisibleGalleryItem, setLastVisibleGalleryItem] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [hasMoreGalleryItems, setHasMoreGalleryItems] = useState(true);
@@ -113,35 +111,37 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
         if (!userDocSnap.exists()) {
           const isDefaultAdmin = firebaseUser.email === 'admin@surfacestoryai.com';
-          const newUserPayload = {
-            email: firebaseUser.email,
-            isAdmin: isDefaultAdmin,
-            name: firebaseUser.displayName || firebaseUser.email,
-            createdAt: serverTimestamp(),
-            creationsCount: 0,
-            remixesCount: 0,
-            followers: Math.floor(Math.random() * 100),
-            following: Math.floor(Math.random() * 100),
-            bio: 'A new SurfaceStory creator exploring the digital canvas.',
-          };
-          await setDoc(userDocRef, newUserPayload);
+          await setDoc(userDocRef, { 
+              email: firebaseUser.email, 
+              isAdmin: isDefaultAdmin,
+              name: firebaseUser.displayName || firebaseUser.email,
+              createdAt: serverTimestamp(),
+              creationsCount: 0,
+              remixesCount: 0,
+              followers: 0,
+              following: 0,
+              bio: 'A new SurfaceStory creator.',
+          });
           userDocSnap = await getDoc(userDocRef);
         }
         
         const userData = userDocSnap.data();
         const finalIsAdmin = userData?.isAdmin || false;
+        
         const currentUser = { 
             uid: firebaseUser.uid, 
             email: firebaseUser.email, 
             name: userData?.name || firebaseUser.displayName 
         };
+        
         setUser(currentUser);
         setIsAdmin(finalIsAdmin);
-
         fetchInitialCreations(firebaseUser.uid);
+        
         if (galleryItems.length === 0) {
-            fetchInitialGalleryItems();
+          fetchInitialGalleryItems();
         }
+
       } else {
         setUser(null);
         setIsAdmin(false);

@@ -11,8 +11,9 @@ export default function Home() {
   const { user } = useApp();
 
   useEffect(() => {
-    // This will redirect to login if not authenticated,
-    // or to dashboard if authentication is successful.
+    // Wait until the auth state is determined
+    if (user === undefined) return; // Still loading
+
     if (user) {
       router.replace('/dashboard');
     } else {
