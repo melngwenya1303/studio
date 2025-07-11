@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
@@ -16,7 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bar, BarChart, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { Bar, BarChart, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -24,13 +23,24 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 const BLOCKLIST_CATEGORIES = ['All', 'Copyright Infringement', 'Offensive Content', 'Hate Speech', 'General'];
 
 const salesData = [
-    { name: 'Jan', sales: 4000 },
-    { name: 'Feb', sales: 3000 },
-    { name: 'Mar', sales: 5000 },
-    { name: 'Apr', sales: 4500 },
-    { name: 'May', sales: 6000 },
-    { name: 'Jun', sales: 7500 },
+    { name: 'Jan', sales: 4000, signups: 240 },
+    { name: 'Feb', sales: 3000, signups: 139 },
+    { name: 'Mar', sales: 5000, signups: 980 },
+    { name: 'Apr', sales: 4500, signups: 390 },
+    { name: 'May', sales: 6000, signups: 480 },
+    { name: 'Jun', sales: 7500, signups: 800 },
 ]
+
+const chartConfig = {
+  sales: {
+    label: "Sales",
+    color: "hsl(var(--primary))",
+  },
+  signups: {
+    label: "Signups",
+    color: "hsl(var(--accent))",
+  },
+}
 
 const mockOrders = [
   { id: 'SS-1024', customer: 'Jane Doe', date: '2023-10-26', status: 'Processing', total: '$34.98', items: 1 },
@@ -384,22 +394,26 @@ export default function AdminView() {
                     </div>
                     <Card>
                         <CardHeader>
-                            <CardTitle>Sales Overview</CardTitle>
-                            <CardDescription>Monthly sales performance for the last 6 months.</CardDescription>
+                            <CardTitle>Sales &amp; Growth Overview</CardTitle>
+                            <CardDescription>Monthly performance for the last 6 months.</CardDescription>
                         </CardHeader>
                         <CardContent className="h-[300px]">
                             <ResponsiveContainer width="100%" height="100%">
                                 <BarChart data={salesData}>
+                                    <CartesianGrid vertical={false} />
                                     <XAxis dataKey="name" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
                                     <YAxis stroke="#888888" fontSize={12} tickLine={false} axisLine={false} tickFormatter={(value) => `$${value}`} />
                                     <Tooltip
+                                      cursor={{ fill: 'hsla(var(--muted))' }}
                                       contentStyle={{
                                         backgroundColor: "hsl(var(--background))",
                                         border: "1px solid hsl(var(--border))",
                                         borderRadius: "var(--radius)"
                                       }}
                                     />
+                                    <Legend />
                                     <Bar dataKey="sales" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                                    <Bar dataKey="signups" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
                                 </BarChart>
                             </ResponsiveContainer>
                         </CardContent>

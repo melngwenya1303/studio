@@ -1,4 +1,3 @@
-// src/ai/flows/generate-title.ts
 'use server';
 /**
  * @fileOverview A flow that generates a title for a given prompt using Genkit.

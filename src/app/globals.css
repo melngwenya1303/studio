@@ -10,7 +10,7 @@
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 265 82% 52%;
+    --primary: 262 84% 58%;
     --primary-foreground: 0 0% 98%;
     --secondary: 240 5% 96%;
     --secondary-foreground: 240 6% 10%;
@@ -22,30 +22,30 @@
     --destructive-foreground: 0 0% 98%;
     --border: 240 6% 90%;
     --input: 240 6% 90%;
-    --ring: 265 82% 52%;
+    --ring: 262 84% 58%;
     --radius: 0.75rem;
   }
 
-  .dark {
-    --background: 240 5% 8%; /* Not pure black, as recommended */
-    --foreground: 0 0% 98%; /* White at 87% opacity */
-    --card: 240 5% 12%;
-    --card-foreground: 0 0% 98%;
-    --popover: 240 5% 12%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 265 75% 65%; /* Desaturated variant for dark mode */
-    --primary-foreground: 240 10% 3.9%;
+ .dark {
+    --background: 240 5% 8%; /* #121414 - Dark Gray, not pure black */
+    --foreground: 0 0% 90%; /* Off-white for body text */
+    --card: 240 5% 11%; /* Slightly lighter gray for elevated surfaces */
+    --card-foreground: 0 0% 95%; /* Higher contrast for card titles */
+    --popover: 240 5% 7%;
+    --popover-foreground: 0 0% 95%;
+    --primary: 262 88% 68%; /* A vibrant, accessible purple */
+    --primary-foreground: 0 0% 98%;
     --secondary: 240 4% 16%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 4% 16%;
-    --muted-foreground: 0 0% 64%; /* White at 60% opacity */
-    --accent: 275 80% 70%; /* Desaturated variant for dark mode */
+    --muted-foreground: 0 0% 64%;
+    --accent: 275 80% 70%;
     --accent-foreground: 240 10% 3.9%;
-    --destructive: 0 63% 31%;
+    --destructive: 0 72% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 240 4% 16%;
-    --input: 240 4% 16%;
-    --ring: 265 75% 65%;
+    --border: 240 4% 18%;
+    --input: 240 4% 18%;
+    --ring: 262 88% 68%;
   }
 }
 

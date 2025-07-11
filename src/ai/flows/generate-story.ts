@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview A flow that generates a short story from a prompt and narrates it.
