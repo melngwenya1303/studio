@@ -116,6 +116,11 @@ export default function InspirationGalleryPage() {
         }
     };
 
+    const handleLike = (itemId: number) => {
+        // Placeholder for like functionality
+        toast({ title: 'Liked!', description: 'You liked this design.' });
+    };
+
     return (
         <div className="p-4 md:p-8 animate-fade-in">
             <Modal isOpen={modal.isOpen} title={modal.title} onClose={() => setModal(prev => ({ ...prev, isOpen: false }))}>
@@ -152,6 +157,16 @@ export default function InspirationGalleryPage() {
                     <div key={item.id} className="group relative rounded-xl overflow-hidden shadow-lg bg-card border flex flex-col">
                        <div className="relative w-full h-56">
                          <Image src={item.url} alt={item.prompt} fill className="object-cover" {...{ 'data-ai-hint': item['data-ai-hint'] }} />
+                          <div className="absolute top-2 right-2 flex items-center gap-2">
+                             <Button
+                                onClick={() => handleLike(item.id)}
+                                size="icon"
+                                variant="ghost"
+                                className="bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 hover:text-pink-400"
+                              >
+                               <Icon name="Heart" />
+                             </Button>
+                           </div>
                        </div>
                        <div className="p-4 flex flex-col flex-grow">
                             <div className="flex justify-between items-start">
@@ -161,12 +176,10 @@ export default function InspirationGalleryPage() {
                            <p className="text-xs text-muted-foreground italic mb-4 line-clamp-3">Curator's Note: "{item.curatorNote}"</p>
                            
                            <div className="mt-auto flex justify-between items-center">
-                                <div className="flex items-center gap-2">
-                                    <Button variant="ghost" size="icon" className="text-pink-500 hover:bg-pink-100 dark:hover:bg-pink-900/50">
-                                        <Icon name="Heart" />
-                                    </Button>
-                                    <span className="text-sm font-semibold text-muted-foreground">{item.likes}</span>
-                                </div>
+                               <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                                   <Icon name="Heart" className="text-pink-500"/>
+                                   <span>{item.likes}</span>
+                               </div>
                                 <div className="flex items-center gap-2">
                                      <Button 
                                         onClick={() => handleDescribe(item)} 
