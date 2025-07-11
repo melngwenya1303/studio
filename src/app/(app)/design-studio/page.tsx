@@ -348,17 +348,17 @@ export default function DesignStudioPage() {
                                             <h3 className="text-xl font-semibold font-headline">2. Describe Your Vision</h3>
                                              <div className="space-y-2">
                                                 <Label htmlFor="prompt-input">Prompt</Label>
-                                                <div className="relative">
+                                                <div>
                                                     <Textarea
                                                         id="prompt-input"
-                                                        className="w-full p-4 pr-24 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-base text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+                                                        className="w-full p-4 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-base text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
                                                         placeholder={`A decal for my ${currentCanvas.name}...`}
                                                         value={prompt}
                                                         onChange={(e) => setPrompt(e.target.value)}
                                                         rows={4}
                                                         disabled={isLoading || isEnhancing || isListening}
                                                     />
-                                                    <div className="absolute top-3 right-3 flex items-center gap-1">
+                                                    <div className="flex justify-end items-center gap-1 mt-2">
                                                         <Tooltip>
                                                             <TooltipTrigger asChild>
                                                                 <Button variant="ghost" size="icon" onClick={handleToggleListening} disabled={isLoading || isEnhancing} className={`text-cyan-600 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}>
@@ -628,3 +628,5 @@ export default function DesignStudioPage() {
         </TooltipProvider>
     );
 }
+
+    
