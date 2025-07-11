@@ -1,9 +1,11 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Creation, User, GalleryItem } from '@/lib/types';
+import { onAuthStateChanged, getAuth } from 'firebase/auth';
+import { firebaseApp } from '@/lib/firebase';
 
 interface AppContextType {
   user: User | null;
@@ -22,11 +24,28 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>({ uid: 'dev-user-01', isAnonymous: false });
-  const [isAdmin, setIsAdmin] = useState(true);
+  const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false); // Default to false for real auth
   const [creations, setCreations] = useState<Creation[]>([]);
   const [remixData, setRemixData] = useState<Partial<Creation & GalleryItem> | null>(null);
   const [cart, setCart] = useState<Creation[]>([]);
+
+  useEffect(() => {
+    const auth = getAuth(firebaseApp);
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      if (firebaseUser) {
+        setUser({ uid: firebaseUser.uid, isAnonymous: firebaseUser.isAnonymous });
+        // In a real app, you'd check for admin role from a custom claim or Firestore
+        setIsAdmin(firebaseUser.email === 'admin@surfacestory.com'); 
+      } else {
+        setUser(null);
+        setIsAdmin(false);
+      }
+    });
+
+    return () => unsubscribe();
+  }, []);
+
 
   const addCreation = useCallback((creationData: Omit<Creation, 'id' | 'createdAt'>) => {
     const newCreation: Creation = {

@@ -4,7 +4,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import Icon, { IconName } from '@/components/shared/icon';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Badge } from '@/components/ui/badge';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { getAuth, signOut } from 'firebase/auth';
 
 
 const navItems = [
@@ -57,6 +58,11 @@ const SidebarContent = () => {
   const allBottomNavItems = [...bottomNavItems];
 
   const cartItem = { href: '/checkout', name: 'Cart', icon: 'ShoppingCart' as IconName, count: cart.length };
+
+  const handleSignOut = () => {
+    const auth = getAuth();
+    signOut(auth);
+  };
 
 
   const NavLink: React.FC<{ item: { href: string; name: string; icon: IconName, count?: number } }> = ({ item }) => (
@@ -117,23 +123,29 @@ const SidebarContent = () => {
           ))}
         </ul>
       </nav>
-      {user && (
-        <motion.div 
-          className="mt-4 flex items-center space-x-3 p-2 rounded-lg"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.8 }}
-        >
-          <Avatar className="w-10 h-10">
-             <AvatarImage src={`https://i.pravatar.cc/40?u=${user.uid}`} alt="User Avatar" />
-             <AvatarFallback>U</AvatarFallback>
-          </Avatar>
-          <div>
-            <p className="font-semibold text-foreground text-sm">Creative User {isAdmin && <span className="text-xs text-primary">(Admin)</span>}</p>
-            <p className="text-muted-foreground text-xs truncate">{user.uid}</p>
-          </div>
-        </motion.div>
-      )}
+      <motion.div 
+        className="mt-4 flex items-center space-x-3 p-2 rounded-lg"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.5, delay: 0.8 }}
+      >
+        {user ? (
+          <>
+            <Avatar className="w-10 h-10">
+               <AvatarImage src={`https://i.pravatar.cc/40?u=${user.uid}`} alt="User Avatar" />
+               <AvatarFallback>U</AvatarFallback>
+            </Avatar>
+            <div className="flex-grow">
+              <p className="font-semibold text-foreground text-sm">Creative User {isAdmin && <span className="text-xs text-primary">(Admin)</span>}</p>
+              <button onClick={handleSignOut} className="text-xs text-muted-foreground hover:text-primary">Sign Out</button>
+            </div>
+          </>
+        ) : (
+           <Button asChild className="w-full">
+            <Link href="/login">Sign In</Link>
+           </Button>
+        )}
+      </motion.div>
     </>
   )
 }

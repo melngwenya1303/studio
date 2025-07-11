@@ -30,7 +30,7 @@ export default function ProfilePage() {
                 <Icon name="UserCircle" className="w-24 h-24 text-muted-foreground mb-6" />
                 <h1 className="text-h1 font-headline">Please Log In</h1>
                 <p className="text-muted-foreground mt-2 mb-6">You need to be logged in to view your profile.</p>
-                <Button onClick={() => router.push('/design-studio')}>Back to Home</Button>
+                <Button onClick={() => router.push('/login')}>Sign In</Button>
             </div>
         );
     }
