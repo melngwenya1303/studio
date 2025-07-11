@@ -10,8 +10,8 @@ interface AppContextType {
   isAdmin: boolean;
   creations: Creation[];
   addCreation: (creation: Omit<Creation, 'id' | 'createdAt'>) => Creation;
-  startRemix: (item: Creation | GalleryItem) => void;
-  remixData: Creation | GalleryItem | null;
+  startRemix: (item: Partial<Creation & GalleryItem>) => void;
+  remixData: Partial<Creation & GalleryItem> | null;
   clearRemixData: () => void;
   cart: Creation[];
   addToCart: (item: Omit<Creation, 'id' | 'createdAt'>) => void;
@@ -25,7 +25,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>({ uid: 'dev-user-01', isAnonymous: false });
   const [isAdmin, setIsAdmin] = useState(true);
   const [creations, setCreations] = useState<Creation[]>([]);
-  const [remixData, setRemixData] = useState<Creation | GalleryItem | null>(null);
+  const [remixData, setRemixData] = useState<Partial<Creation & GalleryItem> | null>(null);
   const [cart, setCart] = useState<Creation[]>([]);
 
   const addCreation = (creationData: Omit<Creation, 'id' | 'createdAt'>) => {
@@ -38,7 +38,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return newCreation;
   };
   
-  const startRemix = useCallback((item: Creation | GalleryItem) => {
+  const startRemix = useCallback((item: Partial<Creation & GalleryItem>) => {
     setRemixData(item);
     router.push('/design-studio');
   }, [router]);
@@ -55,7 +55,6 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
     // For now, the cart only holds one item for a simple checkout
     setCart([newCartItem]);
-    router.push('/checkout');
   };
 
   const clearCart = () => {

@@ -43,15 +43,9 @@ export default function PromptEnhancerPage() {
 
     const handleStartDesigning = () => {
         if (!enhancedPrompt) return;
-        // We use the startRemix function to pass the prompt to the design studio
+        // We use the startRemix function to pass just the prompt to the design studio
         startRemix({
             prompt: enhancedPrompt,
-            style: 'Photorealistic', // Default style
-            // These are placeholders for the remix functionality
-            id: 'temp',
-            url: '',
-            title: '',
-            deviceType: 'Laptop'
         });
     };
 
