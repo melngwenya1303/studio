@@ -547,7 +547,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                         <Separator />
 
                                         {/* Step 3: Style */}
-                                        <div className="space-y-4">
+                                        <div className="space-y-4 mb-4">
                                             <h2 className="text-h2 font-headline">3. Choose Style</h2>
                                             <div className="space-y-2">
                                                 <Label>Selected Style: {selectedStyle.name}</Label>
@@ -579,8 +579,8 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                             </CarouselItem>
                                                         ))}
                                                     </CarouselContent>
-                                                    <CarouselPrevious className="hidden sm:flex -left-4" />
-                                                    <CarouselNext className="hidden sm:flex -right-4"/>
+                                                    <CarouselPrevious className="hidden sm:flex" />
+                                                    <CarouselNext className="hidden sm:flex"/>
                                                 </Carousel>
                                             </div>
                                         </div>
