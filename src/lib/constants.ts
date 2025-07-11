@@ -165,12 +165,12 @@ export const DEVICES: Device[] = [
 ];
 
 export const STYLES: Style[] = [
-    { name: 'Photorealistic', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'photorealistic woman' },
-    { name: 'Anime', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'anime character' },
-    { name: 'Cyberpunk', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'cyberpunk city' },
-    { name: 'Dark Academia', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'dark library' },
-    { name: 'Cottagecore', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'cozy cottage' },
-    { name: 'Fantasy Art', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'fantasy landscape' },
+    { name: 'Photorealistic', image: '/styles/photorealistic.png', 'data-ai-hint': 'photorealistic woman' },
+    { name: 'Anime', image: '/styles/anime.png', 'data-ai-hint': 'anime character' },
+    { name: 'Cyberpunk', image: '/styles/cyberpunk.png', 'data-ai-hint': 'cyberpunk city' },
+    { name: 'Dark Academia', image: '/styles/dark-academia.png', 'data-ai-hint': 'dark library' },
+    { name: 'Cottagecore', image: '/styles/cottagecore.png', 'data-ai-hint': 'cozy cottage' },
+    { name: 'Fantasy Art', image: '/styles/fantasy.png', 'data-ai-hint': 'fantasy landscape' },
 ];
 
 export const GALLERY_ITEMS: GalleryItem[] = [
