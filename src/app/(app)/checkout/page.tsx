@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 import { useApp } from '@/contexts/AppContext';
 import { useRouter } from 'next/navigation';
@@ -13,16 +13,49 @@ import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import Icon from '@/components/shared/icon';
 import { useToast } from '@/hooks/use-toast';
+import { fulfillOrder } from '@/ai/flows/fulfill-order';
+import { Alert, AlertTitle, AlertDescription } from '@/components/ui/alert';
 
 export default function CheckoutPage() {
-    const { cart } = useApp();
+    const { user, cart } = useApp();
     const router = useRouter();
+    const { toast } = useToast();
+    const [isLoading, setIsLoading] = useState(false);
     const item = cart[0]; // For now, we handle a single item checkout
 
-    const handleProceedToCheckout = () => {
-        // In a real app, you would create the product on Shopify's backend here
-        // and get a checkout URL. For now, we redirect to a simulation page.
-        router.push('/shopify-redirect');
+    const handleProceedToCheckout = async () => {
+        if (!item || !user) {
+            toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in and have an item in your cart.'});
+            return;
+        }
+
+        setIsLoading(true);
+
+        try {
+            // In a real app, this data would come from the form
+            const orderInput = {
+                orderId: `SS-${Date.now()}`,
+                customerName: user.email || 'Valued Customer',
+                shippingAddress: '123 Creator Lane, Artville, CA 90210',
+                imageUrl: item.url, // This should be a public URL or data URI
+                productType: `${item.deviceType} Decal`,
+                podPartner: 'Printify', // This could be selected based on product/region
+            };
+
+            const result = await fulfillOrder(orderInput);
+
+            if (result.success) {
+                toast({ title: 'Order Submitted!', description: `Your order is being processed. Confirmation: ${result.confirmationNumber}` });
+                router.push('/shopify-redirect');
+            } else {
+                toast({ variant: 'destructive', title: 'Order Failed', description: result.message });
+            }
+
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Checkout Error', description: error.message || 'An unexpected error occurred.' });
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     if (!item) {
@@ -102,6 +135,15 @@ export default function CheckoutPage() {
                     transition={{ duration: 0.5 }}
                     className="lg:col-span-2 space-y-8"
                 >
+                     {!user && (
+                        <Alert variant="destructive">
+                            <Icon name="Ban" />
+                            <AlertTitle>You're not signed in!</AlertTitle>
+                            <AlertDescription>
+                                Please sign in or create an account to proceed with your order.
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     <Card>
                         <CardHeader>
                             <CardTitle>Shipping Address</CardTitle>
@@ -135,8 +177,8 @@ export default function CheckoutPage() {
                         </CardContent>
                     </Card>
                     
-                    <Button onClick={handleProceedToCheckout} size="lg" className="w-full text-lg">
-                        <Icon name="ShieldCheck" /> Proceed to Secure Checkout
+                    <Button onClick={handleProceedToCheckout} size="lg" className="w-full text-lg" disabled={!user || isLoading}>
+                        {isLoading ? <><Icon name="Wand2" className="animate-pulse" /> Processing...</> : <><Icon name="ShieldCheck" /> Proceed to Secure Checkout</>}
                     </Button>
                 </motion.div>
             </div>
