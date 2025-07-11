@@ -4,44 +4,44 @@
 
 @layer base {
   :root {
-    --background: 228 94% 98%;
+    --background: 0 0% 100%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 265 82% 52%; /* Adjusted Indigo for 4.5:1 contrast */
+    --primary: 265 82% 52%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 240 5.9% 10%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 240 3.8% 46.1%;
-    --accent: 275 94% 60%; /* Adjusted Violet for 4.5:1 contrast */
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 6% 10%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 275 94% 60%;
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 84.2% 60.2%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
     --ring: 265 82% 52%;
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: 240 10% 3.9%; /* Darker background */
+    --background: 240 5% 8%;
     --foreground: 0 0% 98%;
-    --card: 240 5% 12%; /* Slightly lighter card */
+    --card: 240 5% 12%;
     --card-foreground: 0 0% 98%;
     --popover: 240 5% 12%;
     --popover-foreground: 0 0% 98%;
-    --primary: 265 75% 65%; /* Lighter Indigo for dark mode contrast */
+    --primary: 265 75% 65%;
     --primary-foreground: 240 10% 3.9%;
     --secondary: 240 4% 16%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 4% 16%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 275 80% 70%; /* Lighter Violet for dark mode contrast */
+    --muted-foreground: 0 0% 64%;
+    --accent: 275 80% 70%;
     --accent-foreground: 240 10% 3.9%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;
     --border: 240 4% 16%;
     --input: 240 4% 16%;

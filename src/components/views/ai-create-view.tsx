@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from "@/hooks/use-toast";
 import { enhancePrompt } from '@/ai/flows/enhance-prompt';
@@ -207,7 +207,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         children: (
           <div>
             <p className="mb-4">Our system is now preparing your masterpiece for printing and shipping!</p>
-            <ul className="list-disc list-inside space-y-2 text-sm bg-gray-100 dark:bg-gray-700/50 p-4 rounded-lg">
+            <ul className="list-disc list-inside space-y-2 text-sm bg-muted p-4 rounded-lg">
               <li>Optimizing resolution for your {currentCanvas.name}...</li>
               <li>Calibrating colors for our premium vinyl...</li>
               <li>Perfectly scaling the design to your device's dimensions...</li>
@@ -236,7 +236,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                   setPrompt(p);
                                   handleGenerate(p);
                                   setModal(prev => ({...prev, isOpen: false}));
-                                }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+                                }} className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
                                     <p className="font-mono text-sm">"{p}"</p>
                                 </li>
                             ))}
@@ -382,7 +382,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                 <div className="relative">
                                                     <Textarea
                                                         id="prompt-input"
-                                                        className="w-full p-4 pr-4 pb-12 rounded-lg bg-gray-50 dark:bg-gray-800/80 text-base text-gray-800 dark:text-white border-gray-300 dark:border-gray-700 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+                                                        className="w-full p-4 pr-4 pb-12 rounded-lg bg-muted text-base border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
                                                         placeholder={`A decal for my ${currentCanvas.name}...`}
                                                         value={prompt}
                                                         onChange={(e) => setPrompt(e.target.value)}
@@ -392,8 +392,10 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                     <div className="absolute bottom-2 right-2 flex items-center gap-1">
                                                         <Tooltip>
                                                             <TooltipTrigger asChild>
-                                                                <Button variant="ghost" size="icon" onClick={handleToggleListening} disabled={isLoading || isEnhancing} className={`text-cyan-600 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}>
-                                                                    <Icon name="Mic" className="w-5 h-5" />
+                                                                <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing} className={`text-cyan-600 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}>
+                                                                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleToggleListening}>
+                                                                        <Icon name="Mic" className="w-5 h-5" />
+                                                                    </motion.div>
                                                                 </Button>
                                                             </TooltipTrigger>
                                                             <TooltipContent>
@@ -402,8 +404,10 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                         </Tooltip>
                                                         <Tooltip>
                                                             <TooltipTrigger asChild>
-                                                                <Button variant="ghost" size="icon" onClick={handleTextToSpeech} disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking} className="text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
-                                                                    <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
+                                                                <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking} className="text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
+                                                                     <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleTextToSpeech}>
+                                                                        <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
+                                                                    </motion.div>
                                                                 </Button>
                                                             </TooltipTrigger>
                                                             <TooltipContent>
@@ -412,8 +416,10 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                         </Tooltip>
                                                         <Tooltip>
                                                             <TooltipTrigger asChild>
-                                                                <Button variant="ghost" size="icon" onClick={handleEnhancePrompt} disabled={isLoading || isEnhancing || !prompt.trim()} className="text-primary dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50">
-                                                                    <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
+                                                                <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing || !prompt.trim()} className="text-primary dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50">
+                                                                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleEnhancePrompt}>
+                                                                        <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
+                                                                    </motion.div>
                                                                 </Button>
                                                             </TooltipTrigger>
                                                             <TooltipContent>
@@ -481,15 +487,18 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                             </label>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <motion.button onClick={() => handleGenerate(prompt)} disabled={isLoading || !prompt.trim() || !policyAccepted}
-                                                className="flex-grow py-3 px-6 rounded-xl font-semibold text-lg text-white transition-all duration-300 bg-gradient-to-r from-primary to-accent hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none"
-                                                whileHover={{ y: -2 }} whileTap={{ y: 1 }}>
-                                                {isLoading ? 'Designing...' : 'Create My Design'}
-                                            </motion.button>
+                                            <Button asChild disabled={isLoading || !prompt.trim() || !policyAccepted}
+                                                className="flex-grow text-lg text-white transition-all duration-300 bg-gradient-to-r from-primary to-accent hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none">
+                                                <motion.button onClick={() => handleGenerate(prompt)} whileHover={{ y: -2 }} whileTap={{ y: 1 }}>
+                                                    {isLoading ? 'Designing...' : 'Create My Design'}
+                                                </motion.button>
+                                            </Button>
                                              <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Button variant="ghost" size="icon" onClick={handleStartOver} disabled={isLoading}>
-                                                        <Icon name="Undo2" />
+                                                    <Button asChild variant="ghost" size="icon" onClick={handleStartOver} disabled={isLoading}>
+                                                        <motion.div whileHover={{ scale: 1.1, rotate: -30 }} whileTap={{ scale: 0.9 }}>
+                                                          <Icon name="Undo2" />
+                                                        </motion.div>
                                                     </Button>
                                                 </TooltipTrigger>
                                                 <TooltipContent><p>Start Over</p></TooltipContent>
@@ -527,14 +536,14 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                     <div className="py-6 space-y-4">
                                         <p className="text-muted-foreground">Manage the components of your design.</p>
                                         <div className="space-y-2">
-                                            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
                                                 <div className="flex items-center gap-3">
                                                     <Icon name="ImageIcon" />
                                                     <span className="font-medium">Decal Image</span>
                                                 </div>
                                                 <Badge variant={generatedDecal ? 'secondary' : 'outline'}>{generatedDecal ? 'Visible' : 'Empty'}</Badge>
                                             </div>
-                                            <div className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
+                                            <div className="flex items-center justify-between p-3 bg-muted rounded-lg">
                                                  <div className="flex items-center gap-3">
                                                     <Icon name={selectedDevice.icon as any} />
                                                     <span className="font-medium">Product Base</span>
@@ -581,8 +590,15 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                         "flex-1 flex flex-col items-center justify-center rounded-2xl min-h-0 p-4 transition-colors relative",
                         mockupColor
                     )}>
+                        <AnimatePresence>
                         {isLoading ? (
-                            <div className="flex flex-col items-center justify-center text-primary text-center">
+                            <motion.div 
+                                key="loader"
+                                initial={{ opacity: 0 }}
+                                animate={{ opacity: 1 }}
+                                exit={{ opacity: 0 }}
+                                className="flex flex-col items-center justify-center text-primary text-center"
+                            >
                                 <motion.div
                                     animate={{ rotate: [0, 360], scale: [1, 1.1, 1]}}
                                     transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
@@ -591,11 +607,12 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                 </motion.div>
                                 <p className="mt-4 font-semibold text-lg">AI is creating magic...</p>
                                 <p className="text-sm text-muted-foreground">This can take up to 30 seconds.</p>
-                            </div>
+                            </motion.div>
                         ) : (
-                            <>
+                            <div className="w-full h-full flex items-center justify-center">
                                 {previewMode === '2D' && (
                                     <motion.div
+                                        key="preview-2d"
                                         className="relative w-full h-full"
                                         initial={{ opacity: 0, scale: 0.95 }}
                                         animate={{ opacity: 1, scale: 1 }}
@@ -622,7 +639,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                 className="absolute"
                                                 initial={{ opacity: 0, scale: 0.8 }}
                                                 animate={{ opacity: 1, scale: 1 }}
-                                                transition={{ duration: 0.5 }}
+                                                transition={{ duration: 0.5, delay: 0.2 }}
                                                 style={{
                                                   top: currentCanvas.decal?.top ?? '0%',
                                                   left: currentCanvas.decal?.left ?? '0%',
@@ -643,7 +660,12 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                     </motion.div>
                                 )}
                                 {previewMode === '3D' && (
-                                     <div className="text-center text-muted-foreground flex flex-col items-center justify-center gap-4">
+                                     <motion.div 
+                                        key="preview-3d"
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        className="text-center text-muted-foreground flex flex-col items-center justify-center gap-4"
+                                    >
                                         <motion.div
                                             animate={{
                                                 y: [0, -10, 0],
@@ -659,10 +681,11 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                         </motion.div>
                                         <h3 className="text-lg font-semibold">Interactive 3D Preview</h3>
                                         <p className="max-w-xs">This feature is coming soon! You'll be able to rotate, pan, and zoom to see your design from every angle.</p>
-                                    </div>
+                                    </motion.div>
                                 )}
-                            </>
+                            </div>
                         )}
+                        </AnimatePresence>
                         <div className="absolute bottom-4 right-4 w-full flex justify-between items-center px-4">
                             <ToggleGroup type="single" value={previewMode} onValueChange={(value: '2D' | '3D') => value && setPreviewMode(value)} className="bg-background/50 rounded-lg p-1">
                                 <ToggleGroupItem value="2D" aria-label="2D Preview">
