@@ -11,10 +11,12 @@ export default function Home() {
   const { user } = useApp();
 
   useEffect(() => {
-    // With the bypass, user object might be available immediately.
-    // We can just redirect to dashboard.
-    router.replace('/dashboard');
-  }, [router]);
+    if (user) {
+      router.replace('/dashboard');
+    } else {
+      router.replace('/login');
+    }
+  }, [user, router]);
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background">
