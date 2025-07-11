@@ -10,3 +10,4 @@ import '@/ai/flows/generate-story.ts';
 import '@/ai/flows/get-remix-suggestions.ts';
 import '@/ai/flows/generate-audio.ts';
 import '@/ai/flows/generate-ui-spec.ts';
+import '@/ai/flows/fulfill-order.ts';
