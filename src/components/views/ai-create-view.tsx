@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from "@/hooks/use-toast";
 import { generateUiSpec } from '@/ai/flows/generate-ui-spec';
+import { generateImage } from '@/ai/flows/generate-image';
 import { getCreativeFeedback } from '@/ai/flows/get-creative-feedback';
 import { getRemixSuggestions } from '@/ai/flows/get-remix-suggestions';
 import { generateAudio } from '@/ai/flows/generate-audio';
@@ -55,6 +56,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     const [previewMode, setPreviewMode] = useState<'2D' | '3D' | 'mockup'>('2D');
     const [mockupColor, setMockupColor] = useState('bg-gray-200');
     const [mockupPrompt, setMockupPrompt] = useState('');
+    const [isGeneratingMockup, setIsGeneratingMockup] = useState(false);
     const [generatedMockup, setGeneratedMockup] = useState<string | null>(null);
     
     // AR State
@@ -237,6 +239,28 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
             setIsLoading(false);
         }
     }, [selectedModel, selectedDevice, selectedStyle.name, toast]);
+    
+    const handleGenerateMockup = useCallback(async () => {
+      if (!generatedDecal?.url || !mockupPrompt.trim()) {
+        toast({ variant: "destructive", title: "Input Required", description: "Please describe a scene for the mockup." });
+        return;
+      }
+      setIsGeneratingMockup(true);
+      try {
+        const result = await generateImage({
+          prompt: mockupPrompt,
+          baseImageUrl: generatedDecal.url
+        });
+        if (result.media) {
+          setGeneratedMockup(result.media);
+        }
+      } catch (error: any) {
+        toast({ variant: "destructive", title: "Mockup Generation Failed", description: error.message, duration: 5000 });
+      } finally {
+        setIsGeneratingMockup(false);
+      }
+    }, [generatedDecal, mockupPrompt, toast]);
+
 
     const handleEnhancePrompt = useCallback(async () => {
         if (!prompt.trim()) return;
@@ -740,14 +764,30 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                 )}
                                 
                                 {!isPreviewingAr && previewMode === 'mockup' && (
-                                   <div className="w-full h-full relative flex items-center justify-center">
-                                       {generatedMockup ? (
+                                   <div className="w-full h-full relative flex items-center justify-center flex-col gap-4">
+                                       {isGeneratingMockup ? (
+                                           <div className="flex flex-col items-center justify-center gap-4 text-muted-foreground">
+                                               <Icon name="Wand2" className="w-16 h-16 text-primary animate-pulse" />
+                                               <p className="font-semibold">Generating lifestyle mockup...</p>
+                                           </div>
+                                       ) : generatedMockup ? (
                                            <Image src={generatedMockup} alt="AI Generated Mockup" fill className="object-contain rounded-lg" />
                                        ) : (
                                           <div className="text-center text-muted-foreground flex flex-col items-center justify-center gap-4">
-                                              <Icon name="ImageIcon" className="w-24 h-24 text-primary/30" />
-                                              <h3 className="text-lg font-semibold">AI Lifestyle Mockup</h3>
-                                              <p className="max-w-xs">This feature is coming soon!</p>
+                                              <Icon name="Camera" className="w-24 h-24 text-primary/30" />
+                                              <h3 className="text-lg font-semibold">Generate AI Lifestyle Mockup</h3>
+                                              <p className="max-w-xs">Describe a scene to place your product in. e.g., "on a sunlit desk in a cozy cafe"</p>
+                                               <div className="w-full max-w-md flex items-center gap-2">
+                                                    <Input 
+                                                        value={mockupPrompt} 
+                                                        onChange={e => setMockupPrompt(e.target.value)}
+                                                        placeholder="Describe a scene..."
+                                                        disabled={!generatedDecal || isGeneratingMockup}
+                                                    />
+                                                    <Button onClick={handleGenerateMockup} disabled={!generatedDecal || !mockupPrompt.trim() || isGeneratingMockup}>
+                                                        Generate
+                                                    </Button>
+                                               </div>
                                           </div>
                                        )}
                                    </div>
@@ -780,7 +820,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                             <ToggleGroupItem value="3D" aria-label="3D Preview">
                                                <Icon name="Box" className="w-4 h-4 mr-2" /> 3D
                                             </ToggleGroupItem>
-                                            <ToggleGroupItem value="mockup" aria-label="Mockup Preview">
+                                            <ToggleGroupItem value="mockup" aria-label="Mockup Preview" disabled={!generatedDecal}>
                                                <Icon name="Camera" className="w-4 h-4 mr-2" /> Mockup
                                             </ToggleGroupItem>
                                         </ToggleGroup>

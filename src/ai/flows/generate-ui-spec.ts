@@ -56,7 +56,7 @@ const generateUiSpecFlow = ai.defineFlow(
   },
   async input => {
     // Run image generation first to check for blocked content
-    const imageResult = await generateImage(input);
+    const imageResult = await generateImage({ prompt: input.prompt });
     
     if (imageResult.blocked || !imageResult.media) {
       return {
