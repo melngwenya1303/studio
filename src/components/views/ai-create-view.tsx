@@ -212,17 +212,21 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         setRemixSuggestions([]);
         try {
             const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
-            const fullPrompt = `A decal design for a ${deviceName}. ${basePrompt}, in the style of ${selectedStyle.name}, high resolution, clean edges, sticker, vector art`;
             
             const imageResult = await generateImage({ prompt: basePrompt });
 
             if (imageResult.blocked) {
-                toast({ variant: "destructive", title: "Prompt Blocked", description: imageResult.reason });
+                toast({ variant: "destructive", title: "Prompt Blocked", description: imageResult.reason, duration: 5000 });
                 setIsLoading(false);
                 return;
             }
 
-            const textResult = await generateUiSpec({ prompt: fullPrompt });
+            if (!imageResult.media) {
+                throw new Error("The AI failed to generate an image for an unknown reason.");
+            }
+            
+            const fullPromptWithStyle = `A decal design for a ${deviceName}. ${basePrompt}, in the style of ${selectedStyle.name}, high resolution, clean edges, sticker, vector art`;
+            const textResult = await generateUiSpec({ prompt: fullPromptWithStyle });
             
             const newDecal = { 
                 url: imageResult.media!, 
@@ -235,7 +239,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
             setStory(textResult.story);
 
         } catch (error: any) {
-            toast({ variant: "destructive", title: "Generation Error", description: error.message });
+            toast({ variant: "destructive", title: "Generation Error", description: error.message, duration: 5000 });
         } finally {
             setIsLoading(false);
         }
