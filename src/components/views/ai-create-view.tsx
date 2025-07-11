@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from "@/hooks/use-toast";
 import { enhancePrompt } from '@/ai/flows/enhance-prompt';
+import { generateImage } from '@/ai/flows/generate-image';
 import { generateUiSpec } from '@/ai/flows/generate-ui-spec';
 import { getCreativeFeedback } from '@/ai/flows/get-creative-feedback';
 import { getRemixSuggestions } from '@/ai/flows/get-remix-suggestions';
@@ -213,17 +214,26 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
             const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
             const fullPrompt = `A decal design for a ${deviceName}. ${basePrompt}, in the style of ${selectedStyle.name}, high resolution, clean edges, sticker, vector art`;
             
-            const result = await generateUiSpec({ prompt: fullPrompt });
+            const imageResult = await generateImage({ prompt: basePrompt });
+
+            if (imageResult.blocked) {
+                toast({ variant: "destructive", title: "Prompt Blocked", description: imageResult.reason });
+                setIsLoading(false);
+                return;
+            }
+
+            const textResult = await generateUiSpec({ prompt: fullPrompt });
             
             const newDecal = { 
-                url: result.imageUrl, 
+                url: imageResult.media!, 
                 prompt: basePrompt, 
                 style: selectedStyle.name, 
                 deviceType: deviceName,
-                title: result.title 
+                title: textResult.title 
             };
             setGeneratedDecal(newDecal);
-            setStory(result.story);
+            setStory(textResult.story);
+
         } catch (error: any) {
             toast({ variant: "destructive", title: "Generation Error", description: error.message });
         } finally {
