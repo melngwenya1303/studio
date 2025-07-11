@@ -9,7 +9,7 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/design-studio');
+    router.replace('/dashboard');
   }, [router]);
 
   return (
