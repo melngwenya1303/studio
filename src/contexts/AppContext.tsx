@@ -52,12 +52,14 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           const newUserPayload = {
             email: firebaseUser.email,
             isAdmin: isDefaultAdmin,
+            name: firebaseUser.displayName || firebaseUser.email,
+            createdAt: serverTimestamp(),
           };
           await setDoc(userDocRef, newUserPayload);
           finalIsAdmin = isDefaultAdmin;
         }
         
-        setUser({ uid: firebaseUser.uid, isAnonymous: firebaseUser.isAnonymous, email: firebaseUser.email });
+        setUser({ uid: firebaseUser.uid, email: firebaseUser.email, name: firebaseUser.displayName });
         setIsAdmin(finalIsAdmin);
       } else {
         setUser(null);
@@ -164,3 +166,5 @@ export const useApp = () => {
   }
   return context;
 };
+
+    

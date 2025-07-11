@@ -48,8 +48,8 @@ export type Creation = {
 
 export type User = {
     uid: string;
-    isAnonymous: boolean;
     email: string | null;
+    name: string | null;
 };
 
 export type GalleryItem = {
@@ -61,3 +61,5 @@ export type GalleryItem = {
     'data-ai-hint': string;
     likes: number;
 };
+
+    
