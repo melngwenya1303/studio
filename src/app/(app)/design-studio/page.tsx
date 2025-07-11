@@ -1,18 +1,30 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Icon from '@/components/shared/icon';
 import AiCreateView from '@/components/views/ai-create-view';
 import UploadView from '@/components/views/upload-view';
+import { useApp } from '@/contexts/AppContext';
 
 type Flow = 'ai' | 'upload' | null;
 
 export default function DesignStudioPage() {
+    const { remixData } = useApp();
     const [flow, setFlow] = useState<Flow>(null);
 
-    const handleResetFlow = () => setFlow(null);
+    useEffect(() => {
+        // If there's remix data (e.g., from Prompt Enhancer),
+        // automatically set the flow to 'ai'.
+        if (remixData) {
+            setFlow('ai');
+        }
+    }, [remixData]);
+
+    const handleResetFlow = () => {
+        setFlow(null);
+    };
 
     const SelectionScreen = () => (
         <motion.div 
