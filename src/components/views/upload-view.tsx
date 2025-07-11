@@ -141,131 +141,128 @@ export default function UploadView({ onBack }: UploadViewProps) {
         <TooltipProvider>
             <div className="flex h-full w-full">
                 {/* Left Column: Controls */}
-                <motion.div 
-                    initial={{ x: -50, opacity: 0 }} 
-                    animate={{ x: 0, opacity: 1 }} 
-                    transition={{ duration: 0.5 }} 
-                    className="w-[400px] flex-shrink-0"
-                >
-                     <Card className="shadow-lg flex flex-col h-full m-4 rounded-2xl">
-                        <CardHeader className="flex-row items-center justify-between">
-                            <CardTitle className="text-h3 font-medium font-headline">Upload Artwork</CardTitle>
-                            <Button variant="ghost" onClick={onBack}><Icon name="Undo2" className="mr-2" /> Back</Button>
-                        </CardHeader>
-                        <CardContent className="flex flex-col flex-grow">
-                             <Tabs defaultValue="design" className="w-full flex flex-col flex-grow">
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="design">Design</TabsTrigger>
-                                    <TabsTrigger value="mockups">Mockups</TabsTrigger>
-                                </TabsList>
-                                <TabsContent value="design" className="flex-grow flex flex-col">
-                                    <div className="space-y-6 py-6 flex-grow">
-                                        <div className="space-y-4">
-                                            <h3 className="text-xl font-semibold font-headline">1. Upload Your Image</h3>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="upload-button">Artwork File</Label>
-                                                <Button id="upload-button" variant="outline" className="w-full h-32 border-dashed" onClick={() => fileInputRef.current?.click()}>
-                                                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                                                        <Icon name="ImageIcon" className="w-8 h-8" />
-                                                        <span>Click to upload</span>
-                                                        <span className="text-xs">PNG, JPG, GIF</span>
-                                                    </div>
-                                                </Button>
-                                            </div>
-                                            <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+                 <div className="w-[450px] flex-shrink-0 flex flex-col p-6">
+                    <div className="flex-grow flex flex-col">
+                        <header className="mb-8 flex items-center justify-between">
+                            <div>
+                                <h1 className="text-h1 font-headline">Upload Artwork</h1>
+                                <p className="text-muted-foreground text-body">Bring your own designs to life.</p>
+                            </div>
+                            <Button variant="ghost" onClick={onBack} size="sm"><Icon name="Undo2" className="mr-2" /> Back</Button>
+                        </header>
+                        
+                         <Tabs defaultValue="design" className="w-full flex flex-col flex-grow">
+                            <TabsList className="grid w-full grid-cols-2">
+                                <TabsTrigger value="design"><Icon name="Brush" /> Design</TabsTrigger>
+                                <TabsTrigger value="mockups"><Icon name="ImageIcon" /> Mockups</TabsTrigger>
+                            </TabsList>
+                            <TabsContent value="design" className="flex-grow flex flex-col">
+                                <div className="space-y-6 py-6 flex-grow">
+                                    <div className="space-y-4">
+                                        <h3 className="text-h2 font-headline">1. Upload Your Image</h3>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="upload-button">Artwork File</Label>
+                                            <Button id="upload-button" variant="outline" className="w-full h-32 border-dashed" onClick={() => fileInputRef.current?.click()}>
+                                                <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                                                    <Icon name="ImageIcon" className="w-8 h-8" />
+                                                    <span>Click to upload</span>
+                                                    <span className="text-xs">PNG, JPG, GIF</span>
+                                                </div>
+                                            </Button>
                                         </div>
-                                        
-                                        <Separator />
+                                        <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+                                    </div>
+                                    
+                                    <Separator />
 
-                                        <div className="space-y-4">
-                                            <h3 className="text-xl font-semibold font-headline">2. Select Product</h3>
-                                            <div className="space-y-2">
-                                                <Label htmlFor="device-type">Product Type</Label>
+                                    <div className="space-y-4">
+                                        <h3 className="text-h2 font-headline">2. Select Product</h3>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="device-type">Product Type</Label>
+                                            <Select
+                                                value={selectedDevice.name}
+                                                onValueChange={(value) => {
+                                                    const device = DEVICES.find(d => d.name === value);
+                                                    if (device) handleDeviceSelection(device);
+                                                }}
+                                            >
+                                                <SelectTrigger id="device-type" className="w-full">
+                                                    <SelectValue placeholder="Select a device" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    {DEVICES.map(device => (
+                                                        <SelectItem key={device.name} value={device.name}>
+                                                            <div className="flex items-center gap-2">
+                                                                <Icon name={device.icon as any} className="w-4 h-4" />
+                                                                {device.name}
+                                                            </div>
+                                                        </SelectItem>
+                                                    ))}
+                                                </SelectContent>
+                                            </Select>
+                                        </div>
+
+                                        {selectedDevice.models && selectedDevice.models.length > 0 && (
+                                            <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.3 }} className="space-y-2 overflow-hidden">
+                                                <Label htmlFor="device-model">Model</Label>
                                                 <Select
-                                                    value={selectedDevice.name}
+                                                    value={selectedModel?.name}
                                                     onValueChange={(value) => {
-                                                        const device = DEVICES.find(d => d.name === value);
-                                                        if (device) handleDeviceSelection(device);
+                                                        const model = selectedDevice.models?.find(m => m.name === value);
+                                                        if (model) setSelectedModel(model);
                                                     }}
                                                 >
-                                                    <SelectTrigger id="device-type" className="w-full">
-                                                        <SelectValue placeholder="Select a device" />
+                                                    <SelectTrigger id="device-model" className="w-full">
+                                                        <SelectValue placeholder="Select a model" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        {DEVICES.map(device => (
-                                                            <SelectItem key={device.name} value={device.name}>
-                                                                <div className="flex items-center gap-2">
-                                                                    <Icon name={device.icon as any} className="w-4 h-4" />
-                                                                    {device.name}
-                                                                </div>
+                                                        {selectedDevice.models.map(model => (
+                                                            <SelectItem key={model.name} value={model.name}>
+                                                                {model.name}
                                                             </SelectItem>
                                                         ))}
                                                     </SelectContent>
                                                 </Select>
-                                            </div>
-
-                                            {selectedDevice.models && selectedDevice.models.length > 0 && (
-                                                <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.3 }} className="space-y-2 overflow-hidden">
-                                                    <Label htmlFor="device-model">Model</Label>
-                                                    <Select
-                                                        value={selectedModel?.name}
-                                                        onValueChange={(value) => {
-                                                            const model = selectedDevice.models?.find(m => m.name === value);
-                                                            if (model) setSelectedModel(model);
-                                                        }}
-                                                    >
-                                                        <SelectTrigger id="device-model" className="w-full">
-                                                            <SelectValue placeholder="Select a model" />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {selectedDevice.models.map(model => (
-                                                                <SelectItem key={model.name} value={model.name}>
-                                                                    {model.name}
-                                                                </SelectItem>
-                                                            ))}
-                                                        </SelectContent>
-                                                    </Select>
-                                                </motion.div>
-                                            )}
-                                        </div>
+                                            </motion.div>
+                                        )}
                                     </div>
-                                    
-                                    <div className="mt-auto pt-4 space-y-3 border-t">
-                                        <div className="flex gap-3">
-                                            <Button variant="outline" onClick={handleSaveCreation} disabled={isSaving || !uploadedImage} className="w-full">
-                                                {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
-                                                {isSaving ? 'Saving...' : 'Save Design'}
+                                </div>
+                                
+                                <div className="mt-auto pt-4 space-y-3 border-t">
+                                    <div className="flex gap-3">
+                                        <Button variant="outline" onClick={handleSaveCreation} disabled={isSaving || !uploadedImage} className="w-full">
+                                            {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
+                                            {isSaving ? 'Saving...' : 'Save Design'}
+                                        </Button>
+                                        <Button onClick={handlePurchase} disabled={!uploadedImage} className="w-full bg-green-600 hover:bg-green-700">
+                                            <Icon name="ShoppingCart" /> Purchase
+                                        </Button>
+                                    </div>
+                                </div>
+                            </TabsContent>
+                            <TabsContent value="mockups" className="flex-grow flex flex-col">
+                                 <div className="py-6 space-y-4 flex-grow">
+                                    <h3 className="text-h2 font-headline">Change Background</h3>
+                                    <p className="text-muted-foreground text-body">Change the product color to see how your design looks.</p>
+                                    <div className="flex flex-wrap gap-3">
+                                        {[
+                                          { name: 'Light', color: 'bg-gray-200' },
+                                          { name: 'Dark', color: 'bg-gray-800' },
+                                          { name: 'Blue', color: 'bg-blue-500' },
+                                          { name: 'Red', color: 'bg-red-500' },
+                                          { name: 'Green', color: 'bg-green-500' },
+                                        ].map(c => (
+                                            <Button key={c.name} variant="outline" className="flex items-center gap-2" onClick={() => setMockupColor(c.color)}>
+                                                <div className={cn("w-4 h-4 rounded-full border", c.color)} />
+                                                {c.name}
                                             </Button>
-                                            <Button onClick={handlePurchase} disabled={!uploadedImage} className="w-full bg-green-600 hover:bg-green-700">
-                                                <Icon name="ShoppingCart" /> Purchase
-                                            </Button>
-                                        </div>
+                                        ))}
                                     </div>
-                                </TabsContent>
-                                <TabsContent value="mockups">
-                                     <div className="py-6 space-y-4">
-                                        <h3 className="text-xl font-semibold font-headline">Change Background</h3>
-                                        <p className="text-muted-foreground">Change the product color to see how your design looks.</p>
-                                        <div className="flex flex-wrap gap-3">
-                                            {[
-                                              { name: 'Light', color: 'bg-gray-200' },
-                                              { name: 'Dark', color: 'bg-gray-800' },
-                                              { name: 'Blue', color: 'bg-blue-500' },
-                                              { name: 'Red', color: 'bg-red-500' },
-                                              { name: 'Green', color: 'bg-green-500' },
-                                            ].map(c => (
-                                                <Button key={c.name} variant="outline" className="flex items-center gap-2" onClick={() => setMockupColor(c.color)}>
-                                                    <div className={cn("w-4 h-4 rounded-full border", c.color)} />
-                                                    {c.name}
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                </TabsContent>
-                            </Tabs>
-                        </CardContent>
-                    </Card>
-                </motion.div>
+                                </div>
+                            </TabsContent>
+                        </Tabs>
+                    </div>
+                </div>
 
                 {/* Right Column: Canvas/Preview */}
                  <motion.div 

@@ -357,21 +357,16 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                 <audio ref={audioRef} className="hidden" />
 
                 {/* Left Column: Palette / Controls */}
-                <motion.div 
-                    initial={{ x: -50, opacity: 0 }} 
-                    animate={{ x: 0, opacity: 1 }} 
-                    transition={{ duration: 0.5 }} 
-                    className="w-[450px] flex-shrink-0 flex flex-col"
-                >
-                     <div className="flex-grow flex flex-col p-6">
-                        <div className="flex-row items-center justify-between mb-8">
+                <div className="w-[450px] flex-shrink-0 flex flex-col p-6">
+                    <div className="flex-grow flex flex-col">
+                        <header className="mb-8">
                             <h1 className="text-h1 font-headline">Creator's Palette</h1>
-                            <p className="text-muted-foreground">Follow the steps to bring your vision to life.</p>
-                        </div>
+                            <p className="text-muted-foreground text-body">Follow the steps to bring your vision to life.</p>
+                        </header>
                         
                         <div className="flex-grow space-y-8 overflow-y-auto pr-4">
                             {/* Step 1: Canvas */}
-                            <div className="space-y-4">
+                            <section className="space-y-4">
                                 <h2 className="text-h2 font-headline">1. Select Product</h2>
                                 <div className="space-y-2">
                                     <Label htmlFor="device-type">Product Type</Label>
@@ -423,10 +418,10 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                         </Select>
                                     </motion.div>
                                 )}
-                            </div>
+                            </section>
 
                             {/* Step 2: Vision */}
-                            <div className="space-y-4">
+                            <section className="space-y-4">
                                 <div className="flex items-center gap-2">
                                     <h2 className="text-h2 font-headline">2. Describe Your Vision</h2>
                                     <Tooltip>
@@ -530,46 +525,48 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                         </motion.div>
                                     )}
                                 </div>
-                            </div>
+                            </section>
                             
                             {/* Step 3: Style */}
-                            <div className="space-y-4">
+                            <section className="space-y-4">
                                 <h2 className="text-h2 font-headline">3. Choose Style</h2>
                                 <div className="space-y-2">
                                     <Label>Selected Style: {selectedStyle.name}</Label>
-                                    <Carousel opts={{ align: "start", loop: false }} className="w-full max-w-full">
-                                        <CarouselContent className="-ml-2">
-                                            {STYLES.map((style, index) => (
-                                                <CarouselItem key={index} className="pl-2 basis-1/2 md:basis-1/3">
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <div className="p-1">
-                                                                <motion.button 
-                                                                    onClick={() => setSelectedStyle(style)}
-                                                                    className={`w-full rounded-lg transition-all duration-200 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'ring-2 ring-primary ring-offset-background ring-offset-2' : ''}`}
-                                                                    disabled={isLoading}
-                                                                    whileHover={{ scale: 1.05 }}
-                                                                    whileTap={{ scale: 0.98 }}
-                                                                >
-                                                                    <div className="border-0 aspect-video relative">
-                                                                        <Image src={style.image} alt={style.name} fill className="object-cover rounded-md" {...{ 'data-ai-hint': style['data-ai-hint'] }} />
-                                                                        <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors rounded-md" />
-                                                                    </div>
-                                                                </motion.button>
-                                                            </div>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                          <p>{style.name}</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </CarouselItem>
-                                            ))}
-                                        </CarouselContent>
-                                        <CarouselPrevious className="hidden sm:flex -left-4" />
-                                        <CarouselNext className="hidden sm:flex -right-4"/>
-                                    </Carousel>
+                                    <div className="pb-4">
+                                        <Carousel opts={{ align: "start", loop: false }} className="w-full max-w-full">
+                                            <CarouselContent className="-ml-2">
+                                                {STYLES.map((style, index) => (
+                                                    <CarouselItem key={index} className="pl-2 basis-1/2 md:basis-1/3">
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <div className="p-1">
+                                                                    <motion.button 
+                                                                        onClick={() => setSelectedStyle(style)}
+                                                                        className={`w-full rounded-lg transition-all duration-200 overflow-hidden group focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary ${selectedStyle.name === style.name ? 'ring-2 ring-primary ring-offset-background ring-offset-2' : ''}`}
+                                                                        disabled={isLoading}
+                                                                        whileHover={{ scale: 1.05 }}
+                                                                        whileTap={{ scale: 0.98 }}
+                                                                    >
+                                                                        <div className="border-0 aspect-video relative">
+                                                                            <Image src={style.image} alt={style.name} fill className="object-cover rounded-md" {...{ 'data-ai-hint': style['data-ai-hint'] }} />
+                                                                            <div className="absolute inset-0 bg-black/30 group-hover:bg-black/10 transition-colors rounded-md" />
+                                                                        </div>
+                                                                    </motion.button>
+                                                                </div>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                              <p>{style.name}</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </CarouselItem>
+                                                ))}
+                                            </CarouselContent>
+                                            <CarouselPrevious className="hidden sm:flex -left-4" />
+                                            <CarouselNext className="hidden sm:flex -right-4"/>
+                                        </Carousel>
+                                    </div>
                                 </div>
-                            </div>
+                            </section>
                         </div>
                         
                         <div className="mt-auto pt-6 space-y-3 border-t">
@@ -633,7 +630,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                             )}
                         </div>
                     </div>
-                </motion.div>
+                </div>
 
 
                 {/* Right Column: Canvas/Preview */}
