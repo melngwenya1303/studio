@@ -37,31 +37,39 @@ export default function DesignStudioPage() {
                 </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-2xl">
-                <motion.div whileHover={{ y: -5 }} className="h-full">
-                    <Button
-                        onClick={() => setFlow('ai')}
-                        className="w-full h-full p-8 flex flex-col items-start text-left bg-card text-card-foreground border hover:bg-card/90"
-                        variant="outline"
+                <motion.div 
+                    whileHover={{ y: -5 }} 
+                    className="h-full"
+                    onClick={() => setFlow('ai')}
+                >
+                    <div
+                        className="w-full h-full p-8 flex flex-col items-start text-left bg-card text-card-foreground border rounded-lg hover:bg-card/90 cursor-pointer transition-colors"
+                        role="button"
+                        tabIndex={0}
                     >
                         <Icon name="Sparkles" className="w-8 h-8 mb-4 text-primary" />
                         <h2 className="text-h3 font-semibold mb-2">Create with AI</h2>
                         <p className="text-muted-foreground text-body">
                             Describe your vision and let our AI bring it to life. Perfect for exploring new ideas.
                         </p>
-                    </Button>
+                    </div>
                 </motion.div>
-                <motion.div whileHover={{ y: -5 }} className="h-full">
-                     <Button
-                        onClick={() => setFlow('upload')}
-                        className="w-full h-full p-8 flex flex-col items-start text-left bg-card text-card-foreground border hover:bg-card/90"
-                        variant="outline"
+                <motion.div 
+                    whileHover={{ y: -5 }} 
+                    className="h-full"
+                    onClick={() => setFlow('upload')}
+                >
+                     <div
+                        className="w-full h-full p-8 flex flex-col items-start text-left bg-card text-card-foreground border rounded-lg hover:bg-card/90 cursor-pointer transition-colors"
+                        role="button"
+                        tabIndex={0}
                     >
                         <Icon name="ImageIcon" className="w-8 h-8 mb-4 text-accent" />
                         <h2 className="text-h3 font-semibold mb-2">Upload Artwork</h2>
                         <p className="text-muted-foreground text-body">
                             Already have a design? Upload your image and see how it looks on our products.
                         </p>
-                    </Button>
+                    </div>
                 </motion.div>
             </div>
         </motion.div>
