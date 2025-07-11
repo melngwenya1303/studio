@@ -122,6 +122,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             createdAt: serverTimestamp(),
             creationsCount: 0,
             remixesCount: 0,
+            followers: 0,
+            following: 0,
+            bio: 'A new SurfaceStory creator exploring the digital canvas.',
           };
           await setDoc(userDocRef, newUserPayload);
           finalIsAdmin = isDefaultAdmin;
@@ -131,28 +134,23 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         setUser(currentUser);
         setIsAdmin(finalIsAdmin);
 
-        // Fetch data *after* user is confirmed
         fetchInitialCreations(firebaseUser.uid);
         if (galleryItems.length === 0) {
             fetchInitialGalleryItems();
         }
       } else {
-        // Handle user sign-out
         setUser(null);
         setIsAdmin(false);
         setCreations([]);
         setLastVisibleCreation(null);
         setHasMoreCreations(true);
-        // We can keep gallery items for signed-out users if we want
         if (galleryItems.length === 0) {
             fetchInitialGalleryItems();
         }
       }
     });
 
-    return () => {
-        unsubscribe();
-    };
+    return unsubscribe;
   }, [db, fetchInitialCreations, fetchInitialGalleryItems, galleryItems.length]);
 
 

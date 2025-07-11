@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useMemo } from 'react';
@@ -24,10 +25,6 @@ type ProfileUser = {
     creationsCount: number;
 };
 
-// Mock Bio
-const MOCK_BIO = 'Digital artist exploring the intersection of dreams and code. Turning imagination into tangible surfaces.';
-
-
 export default function ProfilePage({ params }: { params: { userId: string } }) {
     const { user: loggedInUser } = useApp();
     const router = useRouter();
@@ -53,7 +50,7 @@ export default function ProfilePage({ params }: { params: { userId: string } }) 
                         id: userDocSnap.id,
                         name: data.name || data.email,
                         email: data.email,
-                        bio: data.bio || MOCK_BIO,
+                        bio: data.bio || 'Digital artist exploring the intersection of dreams and code.',
                         followers: data.followers || 0,
                         following: data.following || 0,
                         creationsCount: data.creationsCount || 0,

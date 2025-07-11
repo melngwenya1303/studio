@@ -20,17 +20,6 @@ type LeaderboardUser = {
     avatar: string;
 };
 
-// In a real app, this function would be a Cloud Function triggered on creation/remix events.
-// This is a client-side simulation for demonstration.
-async function updateUserStats(userId: string, type: 'creation' | 'remix') {
-    console.log(`Simulating updating ${type} count for user ${userId}`);
-    // In a real Cloud Function:
-    // const userRef = doc(db, 'users', userId);
-    // await updateDoc(userRef, {
-    //   [`${type}sCount`]: increment(1)
-    // });
-}
-
 export default function LeaderboardPage() {
     const [leaderboardData, setLeaderboardData] = useState<LeaderboardUser[]>([]);
     const [isLoading, setIsLoading] = useState(true);
@@ -39,22 +28,23 @@ export default function LeaderboardPage() {
         const fetchLeaderboard = async () => {
             setIsLoading(true);
             const db = getFirestore(firebaseApp);
-            // Query users ordered by creationsCount. In a real app, you might have a composite score.
             const usersRef = collection(db, 'users');
             const q = query(usersRef, orderBy('creationsCount', 'desc'), limit(10));
             
             try {
                 const querySnapshot = await getDocs(q);
-                const users: LeaderboardUser[] = querySnapshot.docs.map((doc, index) => {
+                const users: LeaderboardUser[] = querySnapshot.docs.map((doc) => {
                     const data = doc.data();
                     return {
                         id: doc.id,
                         name: data.name || data.email,
-                        creationsCount: data.creationsCount || 0,
-                        remixesCount: data.remixesCount || 0,
+                        creationsCount: data.creationsCount || Math.floor(Math.random() * 100), // Add mock data for testing
+                        remixesCount: data.remixesCount || Math.floor(Math.random() * 50), // Add mock data for testing
                         avatar: `https://i.pravatar.cc/40?u=${doc.id}`,
                     };
                 });
+                // Sort client-side since our counts are mocked for now
+                users.sort((a, b) => (b.creationsCount + b.remixesCount) - (a.creationsCount + a.remixesCount));
                 setLeaderboardData(users);
             } catch (error) {
                 console.error("Error fetching leaderboard:", error);
