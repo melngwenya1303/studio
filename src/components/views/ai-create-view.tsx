@@ -52,7 +52,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     const [isGettingFeedback, setIsGettingFeedback] = useState(false);
     const [remixSuggestions, setRemixSuggestions] = useState<string[]>([]);
     const [isGettingRemix, setIsGettingRemix] = useState(false);
-    const [story, setStory] = useState<string | null>(null);
+    const [story, setStory] = useState<{ text: string; audio: string } | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [policyAccepted, setPolicyAccepted] = useState(false);
     const [modal, setModal] = useState({ isOpen: false, title: '', children: <></>, size: 'md' as 'md' | 'lg' | 'xl' });
@@ -236,7 +236,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                 title: textResult.title 
             };
             setGeneratedDecal(newDecal);
-            setStory(textResult.story);
+            setStory({ text: textResult.story, audio: textResult.storyAudio });
 
         } catch (error: any) {
             toast({ variant: "destructive", title: "Generation Error", description: error.message, duration: 5000 });
@@ -327,13 +327,13 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     };
 
     const handleTellStory = async () => {
-        if (!story) return;
-        setModal({
-            isOpen: true,
-            title: 'A Creation\'s Story',
-            size: 'lg',
-            children: <p className="leading-relaxed">{story}</p>
-        });
+        if (!story || isSpeaking) return;
+        setIsSpeaking(true);
+        if (audioRef.current) {
+            audioRef.current.src = story.audio;
+            audioRef.current.play();
+            audioRef.current.onended = () => setIsSpeaking(false);
+        }
     }
     
     const handleStartOver = () => {
@@ -635,9 +635,9 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                         {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
                                                         Edit with AI ✨
                                                     </Button>
-                                                    <Button variant="outline" onClick={handleTellStory} disabled={!story} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
-                                                        <Icon name="BookOpen" />
-                                                        View Story
+                                                    <Button variant="outline" onClick={handleTellStory} disabled={!story || isSpeaking} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
+                                                        <Icon name={isSpeaking ? "Volume2" : "BookOpen"} className={isSpeaking ? "animate-pulse" : ""} />
+                                                        {isSpeaking ? "Playing..." : "Tell Me the Story"}
                                                     </Button>
                                                 </div>
                                             </motion.div>
