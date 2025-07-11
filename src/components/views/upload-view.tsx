@@ -100,8 +100,9 @@ export default function UploadView({ onBack }: UploadViewProps) {
         setIsSaving(true);
         try {
             const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
+            // Save a placeholder to avoid storing large data URI in state
             const newCreation: Omit<Creation, 'id' | 'createdAt'> = {
-                url: uploadedImage,
+                url: 'https://placehold.co/512x512.png',
                 prompt: 'User Uploaded Artwork',
                 title: 'My Uploaded Design',
                 style: 'Custom',
@@ -119,6 +120,7 @@ export default function UploadView({ onBack }: UploadViewProps) {
     const handlePurchase = () => {
         if (!uploadedImage) return;
         const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
+        // Pass the full-quality image to the cart
         const cartItem = {
             url: uploadedImage,
             prompt: 'User Uploaded Artwork',

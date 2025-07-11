@@ -44,7 +44,6 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     const [prompt, setPrompt] = useState('');
     const [selectedDevice, setSelectedDevice] = useState<Device>(DEVICES[0]);
     const [selectedModel, setSelectedModel] = useState<DeviceModel | null>(DEVICES[0].models ? DEVICES[0].models[0] : null);
-    const [selectedStyle, setSelectedStyle] = useState<Style>(STYLES[0]);
     const [generatedDecal, setGeneratedDecal] = useState<Omit<Creation, 'id' | 'createdAt'> | null>(null);
     const [isLoading, setIsLoading] = useState(false);
     const [isEnhancing, setIsEnhancing] = useState(false);
@@ -260,7 +259,12 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         if (!generatedDecal || !user) return;
         setIsSaving(true);
         try {
-            const savedCreation = addCreation(generatedDecal);
+            // Save a placeholder to avoid storing large data URI in state
+            const creationToSave = {
+                ...generatedDecal,
+                url: 'https://placehold.co/512x512.png',
+            };
+            const savedCreation = addCreation(creationToSave);
             toast({ title: 'Success!', description: `'${savedCreation.title}' has been saved to My Designs.` });
         } catch (error: any) {
             toast({ variant: "destructive", title: "Save Error", description: error.message });
@@ -271,6 +275,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
 
     const handlePurchase = useCallback(() => {
       if (!generatedDecal) return;
+      // Pass the full-quality image to the cart
       addToCart(generatedDecal);
       router.push('/checkout');
     }, [generatedDecal, addToCart, router]);
