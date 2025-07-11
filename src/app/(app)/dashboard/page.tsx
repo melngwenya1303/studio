@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import Icon from '@/components/shared/icon';
@@ -64,7 +64,7 @@ export default function DashboardPage() {
         return items;
     }, [creations, searchTerm, productFilter, sortOrder]);
 
-    const handleDescribe = async (creation: Creation) => {
+    const handleDescribe = useCallback(async (creation: Creation) => {
         setIsDescribing(creation.id);
         try {
             const result = await describeImage({ imageDataUri: creation.url });
@@ -92,9 +92,9 @@ export default function DashboardPage() {
         } finally {
             setIsDescribing(null);
         }
-    };
+    }, [startRemix, toast]);
     
-    const handleRemix = async (creation: Creation) => {
+    const handleRemix = useCallback(async (creation: Creation) => {
         setIsRemixing(creation.id);
         try {
             const result = await getRemixSuggestions({ prompt: creation.prompt });
@@ -129,12 +129,12 @@ export default function DashboardPage() {
         } finally {
             setIsRemixing(null);
         }
-    };
+    }, [startRemix, toast]);
     
-    const handleLike = (creationId: string) => {
+    const handleLike = useCallback((creationId: string) => {
         // Placeholder for like functionality
         toast({ title: 'Liked!', description: 'You have favorited this design.' });
-    };
+    }, [toast]);
 
     return (
         <TooltipProvider>

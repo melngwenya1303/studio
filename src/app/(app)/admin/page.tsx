@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import Icon from '@/components/shared/icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -91,15 +91,15 @@ export default function AdminPage() {
     const [userAction, setUserAction] = useState<{action: 'delete' | 'suspend' | 'promote', userId: string, userName: string} | null>(null);
 
 
-    const handleAddBlockword = (e: React.FormEvent) => {
+    const handleAddBlockword = useCallback((e: React.FormEvent) => {
         e.preventDefault();
         const word = newBlockword.trim();
         if (!word || blocklist.some(item => item.word === word)) return;
         setBlocklist(prev => [...prev, { word, category: newBlockwordCategory }].sort((a, b) => a.word.localeCompare(b.word)));
         setNewBlockword('');
-    };
+    }, [newBlockword, blocklist, newBlockwordCategory]);
     
-    const handleBulkAdd = (e: React.FormEvent) => {
+    const handleBulkAdd = useCallback((e: React.FormEvent) => {
         e.preventDefault();
         const words = bulkWords.split(',').map(w => w.trim()).filter(Boolean);
         const newWords = words
@@ -109,14 +109,14 @@ export default function AdminPage() {
             setBlocklist(prev => [...prev, ...newWords].sort((a, b) => a.word.localeCompare(b.word)));
         }
         setBulkWords('');
-    };
+    }, [bulkWords, blocklist]);
 
-    const handleDeleteBlockword = (word: string) => {
+    const handleDeleteBlockword = useCallback((word: string) => {
         setBlocklist(prev => prev.filter(item => item.word !== word));
         setWordToDelete(null);
-    };
+    }, []);
 
-    const handleAddOrUpdatePartner = (e: React.FormEvent) => {
+    const handleAddOrUpdatePartner = useCallback((e: React.FormEvent) => {
         e.preventDefault();
         if (!newPartnerName.trim() || !newPartnerApiKey.trim()) return;
 
@@ -132,21 +132,21 @@ export default function AdminPage() {
 
         setNewPartnerName('');
         setNewPartnerApiKey('');
-    }
+    }, [newPartnerName, newPartnerApiKey, partnerToEdit, toast]);
 
-    const handleDeletePodPartner = (id: string) => {
+    const handleDeletePodPartner = useCallback((id: string) => {
         setPodPartners(prev => prev.filter(p => p.id !== id));
         setPartnerToDelete(null);
         toast({ title: 'Integration Removed', description: 'The POD partner has been successfully removed.' });
-    }
+    }, [toast]);
 
-    const handleCopyKey = () => {
+    const handleCopyKey = useCallback(() => {
         if (!newlyAddedPartner) return;
         navigator.clipboard.writeText(newlyAddedPartner.apiKey);
         toast({ title: 'Copied!', description: 'The API key has been copied to your clipboard.' });
-    }
+    }, [newlyAddedPartner, toast]);
 
-    const handleConfirmUserAction = () => {
+    const handleConfirmUserAction = useCallback(() => {
         if (!userAction) return;
         const { action, userId, userName } = userAction;
 
@@ -163,9 +163,9 @@ export default function AdminPage() {
             toast({ title: `Role Changed`, description: `${userName} is now a ${newRole}.` });
         }
         setUserAction(null);
-    }
+    }, [userAction, users, toast]);
 
-    const getAlertDialogContent = () => {
+    const getAlertDialogContent = useCallback(() => {
         if (!userAction) return { title: '', description: ''};
         const { action, userName } = userAction;
         if (action === 'delete') return { title: 'Delete User?', description: `This will permanently delete ${userName} and all their data. This action is irreversible.`};
@@ -178,7 +178,7 @@ export default function AdminPage() {
             return { title: `${currentRole === 'Admin' ? 'Demote' : 'Promote'} User?`, description: `Are you sure you want to ${currentRole === 'Admin' ? 'demote' : 'promote'} ${userName} to ${currentRole === 'Admin' ? 'a User' : 'an Admin'}?`};
         }
         return { title: '', description: ''};
-    }
+    }, [userAction, users]);
 
     const filteredBlocklist = useMemo(() => {
         return blocklist.filter(item => 
