@@ -24,16 +24,26 @@ interface AppContextType {
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
+// --- MOCK USER DATA ---
+const MOCK_USER: User = {
+  uid: 'mock-admin-user-id',
+  email: 'admin@surfacestoryai.com',
+  isAnonymous: false,
+};
+
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false);
+  // Set mock user and admin status directly
+  const [user, setUser] = useState<User | null>(MOCK_USER);
+  const [isAdmin, setIsAdmin] = useState(true);
   const [creations, setCreations] = useState<Creation[]>([]);
   const [remixData, setRemixData] = useState<Partial<Creation & GalleryItem> | null>(null);
   const [cart, setCart] = useState<Creation[]>([]);
   const db = getFirestore(firebaseApp);
   const storage = getStorage(firebaseApp);
 
+  // The original Firebase auth logic is commented out to bypass login.
+  /*
   useEffect(() => {
     const auth = getAuth(firebaseApp);
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
@@ -48,7 +58,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
             email: firebaseUser.email,
             isAdmin: isDefaultAdmin,
           };
-          await setDoc(userDocRef, newUserPayload);
+          await setDoc(userDocRef, newUserPayload, { merge: true });
           userData = newUserPayload;
         } else {
           userData = userDocSnap.data();
@@ -67,6 +77,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
     return () => unsubscribe();
   }, [db]);
+  */
 
   useEffect(() => {
     if (user?.uid) {
