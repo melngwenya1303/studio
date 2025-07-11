@@ -25,7 +25,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
   const [user, setUser] = useState<User | null>(null);
-  const [isAdmin, setIsAdmin] = useState(false); // Default to false for real auth
+  const [isAdmin, setIsAdmin] = useState(false);
   const [creations, setCreations] = useState<Creation[]>([]);
   const [remixData, setRemixData] = useState<Partial<Creation & GalleryItem> | null>(null);
   const [cart, setCart] = useState<Creation[]>([]);
@@ -34,7 +34,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const auth = getAuth(firebaseApp);
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
-        setUser({ uid: firebaseUser.uid, isAnonymous: firebaseUser.isAnonymous });
+        setUser({ uid: firebaseUser.uid, isAnonymous: firebaseUser.isAnonymous, email: firebaseUser.email });
         // In a real app, you'd check for admin role from a custom claim or Firestore
         setIsAdmin(firebaseUser.email === 'admin@surfacestory.com'); 
       } else {

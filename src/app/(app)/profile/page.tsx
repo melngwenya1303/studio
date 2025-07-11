@@ -10,10 +10,11 @@ import { Button } from '@/components/ui/button';
 import { useApp } from '@/contexts/AppContext';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 
 // Mock data for a generic user profile (can be replaced with real data)
 const profileUser = {
-    name: 'PixelProphet',
+    name: 'Creative User',
     followers: 1234,
     following: 56,
     bio: 'Digital artist exploring the intersection of dreams and code. Turning imagination into tangible surfaces.',
@@ -30,7 +31,9 @@ export default function ProfilePage() {
                 <Icon name="UserCircle" className="w-24 h-24 text-muted-foreground mb-6" />
                 <h1 className="text-h1 font-headline">Please Log In</h1>
                 <p className="text-muted-foreground mt-2 mb-6">You need to be logged in to view your profile.</p>
-                <Button onClick={() => router.push('/login')}>Sign In</Button>
+                <Button asChild>
+                  <Link href="/login">Sign In</Link>
+                </Button>
             </div>
         );
     }
@@ -49,10 +52,10 @@ export default function ProfilePage() {
                     >
                         <Avatar className="w-24 h-24 border-4 border-primary">
                             <AvatarImage src={loggedInUserAvatar} />
-                            <AvatarFallback>{profileUser.name.charAt(0)}</AvatarFallback>
+                            <AvatarFallback>{user.email ? user.email.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
                         </Avatar>
                         <div className="flex-grow text-center md:text-left">
-                            <h1 className="text-h1 font-headline">{profileUser.name}</h1>
+                            <h1 className="text-h1 font-headline">{user.email || profileUser.name}</h1>
                             <p className="text-muted-foreground mt-1 text-body">{profileUser.bio}</p>
                             <div className="flex justify-center md:justify-start items-center gap-6 mt-4 text-sm">
                                 <div><span className="font-bold">{creations.length}</span> Creations</div>

@@ -47,6 +47,7 @@ export type Creation = {
 export type User = {
     uid: string;
     isAnonymous: boolean;
+    email: string | null;
 };
 
 export type GalleryItem = {

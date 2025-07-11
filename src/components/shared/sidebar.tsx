@@ -131,12 +131,14 @@ const SidebarContent = () => {
       >
         {user ? (
           <>
-            <Avatar className="w-10 h-10">
-               <AvatarImage src={`https://i.pravatar.cc/40?u=${user.uid}`} alt="User Avatar" />
-               <AvatarFallback>U</AvatarFallback>
-            </Avatar>
+             <Link href="/profile" passHref>
+                <Avatar className="w-10 h-10 cursor-pointer">
+                   <AvatarImage src={`https://i.pravatar.cc/40?u=${user.uid}`} alt="User Avatar" />
+                   <AvatarFallback>{user.email ? user.email.charAt(0).toUpperCase() : 'U'}</AvatarFallback>
+                </Avatar>
+             </Link>
             <div className="flex-grow">
-              <p className="font-semibold text-foreground text-sm">Creative User {isAdmin && <span className="text-xs text-primary">(Admin)</span>}</p>
+              <p className="font-semibold text-foreground text-sm truncate">{user.email || 'Creative User'} {isAdmin && <span className="text-xs text-primary">(Admin)</span>}</p>
               <button onClick={handleSignOut} className="text-xs text-muted-foreground hover:text-primary">Sign Out</button>
             </div>
           </>
