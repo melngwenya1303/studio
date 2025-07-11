@@ -366,12 +366,11 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                     transition={{ duration: 0.5 }} 
                     className="w-[400px] flex-shrink-0"
                 >
-                     <Card className="shadow-lg flex flex-col h-full m-4 rounded-2xl">
-                        <CardHeader className="flex-row items-center justify-between">
-                            <CardTitle>Creator's Palette</CardTitle>
-                            <Button variant="ghost" onClick={onBack}><Icon name="Undo2" className="mr-2" /> Back</Button>
-                        </CardHeader>
-                        <CardContent className="flex flex-col flex-grow">
+                     <div className="flex flex-col h-full m-4">
+                        <div className="flex-row items-center justify-between mb-4">
+                            <h2 className="text-h2 font-headline">Creator's Palette</h2>
+                        </div>
+                        <div className="flex-grow flex flex-col bg-card rounded-2xl p-6 border">
                              <Tabs defaultValue="design" className="w-full flex flex-col flex-grow">
                                 <TabsList className="grid w-full grid-cols-3">
                                     <TabsTrigger value="design">Design</TabsTrigger>
@@ -712,8 +711,8 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                     </div>
                                 </TabsContent>
                             </Tabs>
-                        </CardContent>
-                    </Card>
+                        </div>
+                    </div>
                 </motion.div>
 
 

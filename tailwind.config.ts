@@ -13,13 +13,13 @@ export default {
         headline: ['var(--font-montserrat)', 'sans-serif'],
       },
       fontSize: {
-        'h1': ['32px', { lineHeight: '1.3', fontWeight: '700' }],
-        'h2': ['24px', { lineHeight: '1.4', fontWeight: '700' }],
-        'h3': ['20px', { lineHeight: '1.4', fontWeight: '500' }],
-        'body': ['16px', { lineHeight: '1.5', fontWeight: '400' }],
-        'label': ['14px', { lineHeight: '1.5', fontWeight: '500' }],
-        'button': ['16px', { lineHeight: '1.0', fontWeight: '700' }],
-        'micro': ['14px', { lineHeight: '1.5', fontWeight: '400' }],
+        'h1': ['2rem', { lineHeight: '1.3', fontWeight: '700' }], // 32px
+        'h2': ['1.5rem', { lineHeight: '1.4', fontWeight: '700' }], // 24px
+        'h3': ['1.25rem', { lineHeight: '1.4', fontWeight: '500' }], // 20px
+        'body': ['1rem', { lineHeight: '1.5', fontWeight: '400' }], // 16px
+        'label': ['0.875rem', { lineHeight: '1.5', fontWeight: '500' }], // 14px
+        'button': ['1rem', { lineHeight: '1.0', fontWeight: '700' }], // 16px
+        'micro': ['0.875rem', { lineHeight: '1.5', fontWeight: '400' }], // 14px
       },
       colors: {
         border: 'hsl(var(--border))',
