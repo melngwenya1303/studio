@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Creation, User, GalleryItem } from '@/lib/types';
 
@@ -28,7 +28,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [remixData, setRemixData] = useState<Partial<Creation & GalleryItem> | null>(null);
   const [cart, setCart] = useState<Creation[]>([]);
 
-  const addCreation = (creationData: Omit<Creation, 'id' | 'createdAt'>) => {
+  const addCreation = useCallback((creationData: Omit<Creation, 'id' | 'createdAt'>) => {
     const newCreation: Creation = {
       ...creationData,
       id: crypto.randomUUID(),
@@ -36,7 +36,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
     setCreations(prev => [newCreation, ...prev]);
     return newCreation;
-  };
+  }, []);
   
   const startRemix = useCallback((item: Partial<Creation & GalleryItem>) => {
     setRemixData(item);
@@ -47,7 +47,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setRemixData(null);
   }, []);
 
-  const addToCart = (item: Omit<Creation, 'id' | 'createdAt'>) => {
+  const addToCart = useCallback((item: Omit<Creation, 'id' | 'createdAt'>) => {
     const newCartItem: Creation = {
         ...item,
         id: crypto.randomUUID(),
@@ -55,14 +55,27 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     };
     // For now, the cart only holds one item for a simple checkout
     setCart([newCartItem]);
-  };
+  }, []);
 
-  const clearCart = () => {
+  const clearCart = useCallback(() => {
     setCart([]);
-  }
+  }, []);
+
+  const contextValue = useMemo(() => ({
+    user,
+    isAdmin,
+    creations,
+    addCreation,
+    startRemix,
+    remixData,
+    clearRemixData,
+    cart,
+    addToCart,
+    clearCart
+  }), [user, isAdmin, creations, addCreation, startRemix, remixData, clearRemixData, cart, addToCart, clearCart]);
 
   return (
-    <AppContext.Provider value={{ user, isAdmin, creations, addCreation, startRemix, remixData, clearRemixData, cart, addToCart, clearCart }}>
+    <AppContext.Provider value={contextValue}>
       {children}
     </AppContext.Provider>
   );
