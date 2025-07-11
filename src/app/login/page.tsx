@@ -92,9 +92,12 @@ export default function LoginPage() {
         <div className="flex h-screen w-full items-center justify-center bg-gray-100 dark:bg-background p-4">
              <Card className="w-full max-w-sm">
                 <CardHeader className="text-center">
-                     <div className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4">
+                     <motion.div
+                        className="w-16 h-16 bg-gradient-to-br from-primary to-accent rounded-2xl flex items-center justify-center shadow-lg mx-auto mb-4"
+                        whileHover={{ scale: 1.1, rotate: 10 }}
+                    >
                         <Icon name="Wand2" className="w-8 h-8 text-white" />
-                    </div>
+                    </motion.div>
                     <CardTitle>Welcome to SurfaceStory</CardTitle>
                     <CardDescription>Sign in or create an account to begin.</CardDescription>
                 </CardHeader>
@@ -158,5 +161,3 @@ export default function LoginPage() {
         </div>
     );
 }
-
-    
