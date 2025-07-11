@@ -12,7 +12,7 @@ export default {
     extend: {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
-        headline: ['Montserrat', 'sans-serif'],
+        headline: ['Space Grotesk', 'sans-serif'],
       },
       fontSize: {
         'h1': ['39px', { lineHeight: '1.3' }],
