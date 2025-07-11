@@ -1,5 +1,5 @@
 
-'use client';
+'use server';
 
 /**
  * @fileOverview An AI agent that enhances decal prompts to improve the quality of generated images.
