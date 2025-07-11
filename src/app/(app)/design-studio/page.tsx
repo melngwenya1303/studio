@@ -557,40 +557,37 @@ export default function DesignStudioPage() {
                                     <motion.div
                                         animate={{ y: [0, -8, 0] }}
                                         transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                                        className="relative"
-                                        style={{
-                                            width: currentCanvas.previewWidth,
-                                            height: currentCanvas.previewHeight,
-                                        }}
+                                        className="relative w-full h-full"
                                     >
                                         <Image
                                             src={currentCanvas.previewImage}
                                             alt={`${currentCanvas.name} preview`}
-                                            width={800}
-                                            height={800}
-                                            className="object-contain max-w-full max-h-full"
+                                            fill
+                                            className="object-contain"
                                             data-ai-hint={currentCanvas['data-ai-hint']}
                                             key={currentCanvas.name}
                                             priority
                                         />
                                         {generatedDecal && (
                                             <motion.div
-                                                className="absolute top-0 left-0"
+                                                className="absolute"
                                                 initial={{ opacity: 0, scale: 0.8 }}
                                                 animate={{ opacity: 1, scale: 1 }}
                                                 transition={{ duration: 0.5 }}
-                                                style={currentCanvas.decal ? {
-                                                    transform: currentCanvas.decal.transform,
-                                                    transformOrigin: currentCanvas.decal.transformOrigin,
-                                                    width: currentCanvas.decal.width,
-                                                    height: currentCanvas.decal.height,
-                                                } : {}}
+                                                style={{
+                                                  top: currentCanvas.decal?.top ?? '0%',
+                                                  left: currentCanvas.decal?.left ?? '0%',
+                                                  width: currentCanvas.decal?.width ?? '100%',
+                                                  height: currentCanvas.decal?.height ?? '100%',
+                                                  transform: currentCanvas.decal?.transform,
+                                                  transformOrigin: currentCanvas.decal?.transformOrigin,
+                                                }}
                                             >
                                                 <Image
                                                     src={generatedDecal.url}
                                                     alt="Generated Decal"
                                                     fill
-                                                    className="object-cover"
+                                                    className="object-contain"
                                                 />
                                             </motion.div>
                                         )}

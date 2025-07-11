@@ -2,19 +2,17 @@
 import type { ComponentType } from 'react';
 
 export type DecalDetails = {
-  transform: string;
-  transformOrigin: string;
+  transform?: string;
+  transformOrigin?: string;
   width: string;
   height: string;
+  top: string;
+  left: string;
 }
 
 export type DeviceModel = {
   name: string;
   previewImage: string;
-  previewWidth: number;
-  previewHeight: number;
-  decalWidth?: number;
-  decalHeight?: number;
   'data-ai-hint': string;
   decal?: DecalDetails;
 }
@@ -24,10 +22,6 @@ export type Device = {
   icon: string;
   description: string;
   previewImage: string;
-  previewWidth: number;
-  previewHeight: number;
-  decalWidth?: number;
-  decalHeight?: number;
   'data-ai-hint': string;
   models?: DeviceModel[];
   decal?: DecalDetails;
