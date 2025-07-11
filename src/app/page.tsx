@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect } from 'react';
@@ -7,10 +8,17 @@ import Icon from '@/components/shared/icon';
 
 export default function Home() {
   const router = useRouter();
+  const { user } = useApp();
 
   useEffect(() => {
-    router.replace('/dashboard');
-  }, [router]);
+    // This will redirect to login if not authenticated,
+    // or to dashboard if authentication is successful.
+    if (user) {
+      router.replace('/dashboard');
+    } else {
+      router.replace('/login');
+    }
+  }, [user, router]);
 
   return (
     <div className="flex h-screen w-full items-center justify-center bg-background">

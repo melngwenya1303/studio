@@ -12,15 +12,6 @@ import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage"
 const CREATIONS_PAGE_SIZE = 8;
 const GALLERY_PAGE_SIZE = 8;
 
-// --- Mock User for Bypass ---
-const MOCK_USER: User = {
-  uid: 'mock-user-123',
-  email: 'designer@surfacestory.com',
-  name: 'Creative Designer',
-};
-const MOCK_IS_ADMIN = true;
-// --------------------------
-
 interface AppContextType {
   user: User | null;
   isAdmin: boolean;
@@ -114,65 +105,56 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }, [db]);
 
   useEffect(() => {
-    // This effect now sets up the mock user and fetches data.
-    // The onAuthStateChanged logic is commented out to enable the bypass.
-    setUser(MOCK_USER);
-    setIsAdmin(MOCK_IS_ADMIN);
-    fetchInitialCreations(MOCK_USER.uid);
-    if (galleryItems.length === 0) {
-        fetchInitialGalleryItems();
-    }
-    
-    // const auth = getAuth(firebaseApp);
-    // const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-    //   if (firebaseUser) {
-    //     const userDocRef = doc(db, 'users', firebaseUser.uid);
-    //     let userDocSnap = await getDoc(userDocRef);
+    const auth = getAuth(firebaseApp);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const userDocRef = doc(db, 'users', firebaseUser.uid);
+        let userDocSnap = await getDoc(userDocRef);
 
-    //     if (!userDocSnap.exists()) {
-    //       const isDefaultAdmin = firebaseUser.email === 'admin@surfacestoryai.com';
-    //       const newUserPayload = {
-    //         email: firebaseUser.email,
-    //         isAdmin: isDefaultAdmin,
-    //         name: firebaseUser.displayName || firebaseUser.email,
-    //         createdAt: serverTimestamp(),
-    //         creationsCount: 0,
-    //         remixesCount: 0,
-    //         followers: Math.floor(Math.random() * 100),
-    //         following: Math.floor(Math.random() * 100),
-    //         bio: 'A new SurfaceStory creator exploring the digital canvas.',
-    //       };
-    //       await setDoc(userDocRef, newUserPayload);
-    //       userDocSnap = await getDoc(userDocRef);
-    //     }
+        if (!userDocSnap.exists()) {
+          const isDefaultAdmin = firebaseUser.email === 'admin@surfacestoryai.com';
+          const newUserPayload = {
+            email: firebaseUser.email,
+            isAdmin: isDefaultAdmin,
+            name: firebaseUser.displayName || firebaseUser.email,
+            createdAt: serverTimestamp(),
+            creationsCount: 0,
+            remixesCount: 0,
+            followers: Math.floor(Math.random() * 100),
+            following: Math.floor(Math.random() * 100),
+            bio: 'A new SurfaceStory creator exploring the digital canvas.',
+          };
+          await setDoc(userDocRef, newUserPayload);
+          userDocSnap = await getDoc(userDocRef);
+        }
         
-    //     const userData = userDocSnap.data();
-    //     const finalIsAdmin = userData?.isAdmin || false;
-    //     const currentUser = { 
-    //         uid: firebaseUser.uid, 
-    //         email: firebaseUser.email, 
-    //         name: userData?.name || firebaseUser.displayName 
-    //     };
-    //     setUser(currentUser);
-    //     setIsAdmin(finalIsAdmin);
+        const userData = userDocSnap.data();
+        const finalIsAdmin = userData?.isAdmin || false;
+        const currentUser = { 
+            uid: firebaseUser.uid, 
+            email: firebaseUser.email, 
+            name: userData?.name || firebaseUser.displayName 
+        };
+        setUser(currentUser);
+        setIsAdmin(finalIsAdmin);
 
-    //     fetchInitialCreations(firebaseUser.uid);
-    //     if (galleryItems.length === 0) {
-    //         fetchInitialGalleryItems();
-    //     }
-    //   } else {
-    //     setUser(null);
-    //     setIsAdmin(false);
-    //     setCreations([]);
-    //     setLastVisibleCreation(null);
-    //     setHasMoreCreations(true);
-    //     if (galleryItems.length === 0) {
-    //         fetchInitialGalleryItems();
-    //     }
-    //   }
-    // });
+        fetchInitialCreations(firebaseUser.uid);
+        if (galleryItems.length === 0) {
+            fetchInitialGalleryItems();
+        }
+      } else {
+        setUser(null);
+        setIsAdmin(false);
+        setCreations([]);
+        setLastVisibleCreation(null);
+        setHasMoreCreations(true);
+        if (galleryItems.length === 0) {
+            fetchInitialGalleryItems();
+        }
+      }
+    });
     
-    // return unsubscribe;
+    return unsubscribe;
   }, [db, fetchInitialCreations, fetchInitialGalleryItems, galleryItems.length]);
 
   const fetchMoreCreations = useCallback(async () => {

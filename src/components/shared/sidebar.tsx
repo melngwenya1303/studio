@@ -60,10 +60,8 @@ const SidebarContent = () => {
   const cartItem = { href: '/checkout', name: 'Cart', icon: 'ShoppingCart' as IconName, count: cart.length };
 
   const handleSignOut = () => {
-    // This is disabled for the mock user bypass
-    // const auth = getAuth();
-    // signOut(auth);
-    alert("Sign out is disabled while in login-bypass mode.");
+    const auth = getAuth();
+    signOut(auth);
   };
 
 
@@ -141,7 +139,7 @@ const SidebarContent = () => {
              </Link>
             <div className="flex-grow">
               <p className="font-semibold text-foreground text-sm truncate">{user.name || 'Creative User'} {isAdmin && <span className="text-xs text-primary">(Admin)</span>}</p>
-              <button onClick={handleSignOut} className="text-xs text-muted-foreground hover:text-primary">Sign Out (Bypassed)</button>
+              <button onClick={handleSignOut} className="text-xs text-muted-foreground hover:text-primary">Sign Out</button>
             </div>
           </>
         ) : (

@@ -1,4 +1,5 @@
-'use server';
+
+'use client';
 
 /**
  * @fileOverview A flow that generates audio from text using Text-to-Speech.
