@@ -111,14 +111,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         let userDocSnap = await getDoc(userDocRef);
 
-        let finalIsAdmin = false;
         // If user document doesn't exist, create it.
         if (!userDocSnap.exists()) {
           const isDefaultAdmin = firebaseUser.email === 'admin@surfacestoryai.com';
           const newUserPayload = {
             email: firebaseUser.email,
             isAdmin: isDefaultAdmin,
-            name: firebaseUser.displayName || firebaseUser.email, // Default name to email
+            name: firebaseUser.displayName || firebaseUser.email,
             createdAt: serverTimestamp(),
             creationsCount: 0,
             remixesCount: 0,
@@ -128,12 +127,15 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
           };
           await setDoc(userDocRef, newUserPayload);
           userDocSnap = await getDoc(userDocRef); // Re-fetch
-          finalIsAdmin = isDefaultAdmin;
-        } else {
-           finalIsAdmin = userDocSnap.data()?.isAdmin || false;
         }
         
-        const currentUser = { uid: firebaseUser.uid, email: firebaseUser.email, name: userDocSnap.data()?.name || firebaseUser.displayName };
+        const userData = userDocSnap.data();
+        const finalIsAdmin = userData?.isAdmin || false;
+        const currentUser = { 
+            uid: firebaseUser.uid, 
+            email: firebaseUser.email, 
+            name: userData?.name || firebaseUser.displayName 
+        };
         setUser(currentUser);
         setIsAdmin(finalIsAdmin);
 
