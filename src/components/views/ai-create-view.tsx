@@ -574,12 +574,12 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                     initial={{ scale: 0.8, opacity: 0 }} 
                     animate={{ scale: 1, opacity: 1 }} 
                     transition={{ duration: 0.7, delay: 0.2 }} 
-                    className={cn(
-                        "flex-1 flex flex-col items-center justify-center rounded-2xl min-h-0 p-8 transition-colors m-4",
-                        mockupColor
-                    )}
+                    className="flex-1 flex flex-col p-4"
                 >
-                    <div className="flex-grow w-full h-full flex items-center justify-center relative">
+                    <div className={cn(
+                        "flex-1 flex flex-col items-center justify-center rounded-2xl min-h-0 p-4 transition-colors relative",
+                        mockupColor
+                    )}>
                         {isLoading ? (
                             <div className="flex flex-col items-center justify-center text-primary text-center">
                                 <motion.div
@@ -595,19 +595,27 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                             <>
                                 {previewMode === '2D' && (
                                     <motion.div
-                                        animate={{ y: [0, -8, 0] }}
-                                        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
                                         className="relative w-full h-full"
+                                        initial={{ opacity: 0, scale: 0.95 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        transition={{ duration: 0.5 }}
                                     >
-                                        <Image
-                                            src={currentCanvas.previewImage}
-                                            alt={`${currentCanvas.name} preview`}
-                                            fill
-                                            className="object-contain"
-                                            data-ai-hint={currentCanvas['data-ai-hint']}
-                                            key={currentCanvas.name}
-                                            priority
-                                        />
+                                        <motion.div 
+                                            className="w-full h-full"
+                                            animate={{ y: [0, -8, 0] }}
+                                            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                                        >
+                                            <Image
+                                                src={currentCanvas.previewImage}
+                                                alt={`${currentCanvas.name} preview`}
+                                                fill
+                                                className="object-contain"
+                                                data-ai-hint={currentCanvas['data-ai-hint']}
+                                                key={currentCanvas.name}
+                                                priority
+                                            />
+                                        </motion.div>
+
                                         {generatedDecal && (
                                             <motion.div
                                                 className="absolute"
@@ -654,20 +662,20 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                 )}
                             </>
                         )}
-                    </div>
-                    <div className="mt-4 w-full flex justify-between items-center">
-                        <ToggleGroup type="single" value={previewMode} onValueChange={(value: '2D' | '3D') => value && setPreviewMode(value)} className="bg-background/50 rounded-lg p-1">
-                            <ToggleGroupItem value="2D" aria-label="2D Preview">
-                               <Icon name="ImageIcon" className="w-4 h-4 mr-2" /> 2D
-                            </ToggleGroupItem>
-                            <ToggleGroupItem value="3D" aria-label="3D Preview">
-                               <Icon name="Box" className="w-4 h-4 mr-2" /> 3D
-                            </ToggleGroupItem>
-                        </ToggleGroup>
-                        <Button variant="outline" disabled>
-                            <Icon name="Camera" className="w-4 h-4 mr-2" />
-                            View in AR (Coming Soon)
-                        </Button>
+                        <div className="absolute bottom-4 right-4 w-full flex justify-between items-center px-4">
+                            <ToggleGroup type="single" value={previewMode} onValueChange={(value: '2D' | '3D') => value && setPreviewMode(value)} className="bg-background/50 rounded-lg p-1">
+                                <ToggleGroupItem value="2D" aria-label="2D Preview">
+                                   <Icon name="ImageIcon" className="w-4 h-4 mr-2" /> 2D
+                                </ToggleGroupItem>
+                                <ToggleGroupItem value="3D" aria-label="3D Preview">
+                                   <Icon name="Box" className="w-4 h-4 mr-2" /> 3D
+                                </ToggleGroupItem>
+                            </ToggleGroup>
+                            <Button variant="outline" disabled>
+                                <Icon name="Camera" className="w-4 h-4 mr-2" />
+                                View in AR (Coming Soon)
+                            </Button>
+                        </div>
                     </div>
                 </motion.div>
             </div>
