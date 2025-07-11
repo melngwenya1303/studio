@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from "@/hooks/use-toast";
@@ -95,7 +95,7 @@ export default function UploadView({ onBack }: UploadViewProps) {
         }
     };
 
-    const handleSaveCreation = async () => {
+    const handleSaveCreation = useCallback(async () => {
         if (!uploadedImage) return;
         if (!user) {
             toast({ variant: "destructive", title: "Login Required", description: "Please sign in to save your creations." });
@@ -105,9 +105,8 @@ export default function UploadView({ onBack }: UploadViewProps) {
         setIsSaving(true);
         try {
             const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
-            // Save a placeholder to avoid storing large data URI in state
             const newCreation: Omit<Creation, 'id' | 'createdAt'> = {
-                url: 'https://placehold.co/512x512.png',
+                url: uploadedImage, // Pass the full data URI for upload
                 prompt: 'User Uploaded Artwork',
                 title: 'My Uploaded Design',
                 style: 'Custom',
@@ -120,12 +119,11 @@ export default function UploadView({ onBack }: UploadViewProps) {
         } finally {
             setIsSaving(false);
         }
-    };
+    }, [uploadedImage, user, addCreation, toast, router, selectedDevice, selectedModel]);
     
-    const handlePurchase = () => {
+    const handlePurchase = useCallback(() => {
         if (!uploadedImage) return;
         const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
-        // Pass the full-quality image to the cart
         const cartItem = {
             url: uploadedImage,
             prompt: 'User Uploaded Artwork',
@@ -135,7 +133,7 @@ export default function UploadView({ onBack }: UploadViewProps) {
         };
         addToCart(cartItem);
         router.push('/checkout');
-    };
+    }, [uploadedImage, selectedDevice, selectedModel, addToCart, router]);
 
     const currentCanvas = selectedModel || selectedDevice;
 

@@ -71,14 +71,14 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     const audioRef = useRef<HTMLAudioElement>(null);
     const recognitionRef = useRef<any>(null);
 
-    const handleDeviceSelection = (device: Device) => {
+    const handleDeviceSelection = useCallback((device: Device) => {
         setSelectedDevice(device);
         if (device.models && device.models.length > 0) {
             setSelectedModel(device.models[0]);
         } else {
             setSelectedModel(null);
         }
-    };
+    }, []);
     
     const currentCanvas = selectedModel || selectedDevice;
 
@@ -114,7 +114,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
             
             clearRemixData();
         }
-    }, [remixData, clearRemixData]);
+    }, [remixData, clearRemixData, handleDeviceSelection]);
 
     useEffect(() => {
         // @ts-ignore
@@ -265,12 +265,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         }
         setIsSaving(true);
         try {
-            // Save a placeholder to avoid storing large data URI in state
-            const creationToSave = {
-                ...generatedDecal,
-                url: 'https://placehold.co/512x512.png',
-            };
-            const savedCreation = await addCreation(creationToSave);
+            const savedCreation = await addCreation(generatedDecal);
             toast({ title: 'Success!', description: `'${savedCreation.title}' has been saved to My Designs.` });
         } catch (error: any) {
             toast({ variant: "destructive", title: "Save Error", description: error.message });
@@ -281,7 +276,6 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
 
     const handlePurchase = useCallback(() => {
       if (!generatedDecal) return;
-      // Pass the full-quality image to the cart
       addToCart(generatedDecal);
       router.push('/checkout');
     }, [generatedDecal, addToCart, router]);

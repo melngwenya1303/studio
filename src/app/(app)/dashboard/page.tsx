@@ -56,8 +56,8 @@ export default function DashboardPage() {
 
         // Sort
         items.sort((a, b) => {
-            const dateA = new Date(a.createdAt).getTime();
-            const dateB = new Date(b.createdAt).getTime();
+            const dateA = a.createdAt?.seconds ? new Date(a.createdAt.seconds * 1000).getTime() : 0;
+            const dateB = b.createdAt?.seconds ? new Date(b.createdAt.seconds * 1000).getTime() : 0;
             return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
         });
 
@@ -67,29 +67,37 @@ export default function DashboardPage() {
     const handleDescribe = useCallback(async (creation: Creation) => {
         setIsDescribing(creation.id);
         try {
-            const result = await describeImage({ imageDataUri: creation.url });
-            setModal({
-                isOpen: true,
-                title: 'AI-Generated Prompts',
-                children: (
-                  <div className="space-y-4">
-                      <p>Here are a few prompts our AI thinks could create an image like this. Click one to remix!</p>
-                      <ul className="space-y-3">
-                          {result.prompts.map((p, i) => (
-                              <li key={i} onClick={() => {
-                                startRemix({ ...creation, prompt: p });
-                                setModal(prev => ({...prev, isOpen: false}));
-                              }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
-                                  <p className="font-mono text-sm">"{p}"</p>
-                              </li>
-                          ))}
-                      </ul>
-                  </div>
-                ),
-            });
+            // Because we now store URLs instead of data URIs, we need to fetch the image data first.
+            const response = await fetch(creation.url);
+            const blob = await response.blob();
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = async () => {
+                const base64data = reader.result as string;
+                const result = await describeImage({ imageDataUri: base64data });
+                setModal({
+                    isOpen: true,
+                    title: 'AI-Generated Prompts',
+                    children: (
+                      <div className="space-y-4">
+                          <p>Here are a few prompts our AI thinks could create an image like this. Click one to remix!</p>
+                          <ul className="space-y-3">
+                              {result.prompts.map((p, i) => (
+                                  <li key={i} onClick={() => {
+                                    startRemix({ ...creation, prompt: p });
+                                    setModal(prev => ({...prev, isOpen: false}));
+                                  }} className="p-3 bg-gray-100 dark:bg-gray-700/50 rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+                                      <p className="font-mono text-sm">"{p}"</p>
+                                  </li>
+                              ))}
+                          </ul>
+                      </div>
+                    ),
+                });
+                setIsDescribing(null);
+            };
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Error Describing Image', description: error.message });
-        } finally {
             setIsDescribing(null);
         }
     }, [startRemix, toast]);
@@ -223,7 +231,7 @@ export default function DashboardPage() {
                                         <Badge variant="secondary">{creation.deviceType}</Badge>
                                     </div>
                                     <p className="text-xs text-muted-foreground mt-2">
-                                        Created: {new Date(creation.createdAt).toLocaleDateString()}
+                                        Created: {creation.createdAt?.seconds ? new Date(creation.createdAt.seconds * 1000).toLocaleDateString() : 'Just now'}
                                     </p>
                                     <motion.div 
                                         className={`flex items-center gap-2 mt-2 ${viewMode === 'grid' ? 'opacity-0 group-hover:opacity-100' : ''} transition-opacity duration-300`}

@@ -1,5 +1,6 @@
 
 import type { ComponentType } from 'react';
+import type { Timestamp } from 'firebase/firestore';
 
 export type DecalDetails = {
   transform?: string;
@@ -41,7 +42,8 @@ export type Creation = {
   style: string;
   title: string;
   deviceType: string;
-  createdAt?: any;
+  createdAt?: Timestamp | Date;
+  userId?: string;
 };
 
 export type User = {

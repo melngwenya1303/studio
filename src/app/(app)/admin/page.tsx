@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import Icon from '@/components/shared/icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -48,15 +48,15 @@ const mockOrders = [
 ];
 
 const initialUsers = [
-    { id: 'usr_1', name: 'PixelProphet', email: 'prophet@surfacestory.com', role: 'Admin', status: 'Active', creations: 124, avatar: 'https://i.pravatar.cc/40?u=prophet' },
-    { id: 'usr_2', name: 'ArtfulAntics', email: 'antics@surfacestory.com', role: 'User', status: 'Active', creations: 98, avatar: 'https://i.pravatar.cc/40?u=antics' },
-    { id: 'usr_3', name: 'VectorVixen', email: 'vixen@surfacestory.com', role: 'User', status: 'Suspended', creations: 150, avatar: 'https://i.pravatar.cc/40?u=vixen' },
-    { id: 'usr_4', name: 'DesignDroid', email: 'droid@surfacestory.com', role: 'User', status: 'Active', creations: 80, avatar: 'https://i.pravatar.cc/40?u=droid' },
-    { id: 'usr_5', name: 'StaticSpark', email: 'spark@surfacestory.com', role: 'User', status: 'Active', creations: 110, avatar: 'https://i.pravatar.cc/40?u=spark' },
+    { id: 'usr_1', name: 'PixelProphet', email: 'prophet@surfacestory.com', role: 'Admin', status: 'Active', creations: 124, avatar: `https://i.pravatar.cc/40?u=prophet` },
+    { id: 'usr_2', name: 'ArtfulAntics', email: 'antics@surfacestory.com', role: 'User', status: 'Active', creations: 98, avatar: `https://i.pravatar.cc/40?u=antics` },
+    { id: 'usr_3', name: 'VectorVixen', email: 'vixen@surfacestory.com', role: 'User', status: 'Suspended', creations: 150, avatar: `https://i.pravatar.cc/40?u=vixen` },
+    { id: 'usr_4', name: 'DesignDroid', email: 'droid@surfacestory.com', role: 'User', status: 'Active', creations: 80, avatar: `https://i.pravatar.cc/40?u=droid` },
+    { id: 'usr_5', name: 'StaticSpark', email: 'spark@surfacestory.com', role: 'User', status: 'Active', creations: 110, avatar: `https://i.pravatar.cc/40?u=spark` },
 ]
 
 export default function AdminPage() {
-    const { isAdmin } = useApp();
+    const { user, isAdmin } = useApp();
     const { toast } = useToast();
     
     // Blocklist state
@@ -194,32 +194,32 @@ export default function AdminPage() {
         );
     }, [users, userSearchTerm]);
     
-    const getCategoryVariant = (category: string) => {
+    const getCategoryVariant = useCallback((category: string) => {
         switch (category) {
             case 'Copyright Infringement': return 'secondary';
             case 'Offensive Content': return 'destructive';
             case 'Hate Speech': return 'destructive';
             default: return 'outline';
         }
-    }
+    }, []);
     
-    const getStatusVariant = (status: string) => {
+    const getStatusVariant = useCallback((status: string) => {
         switch (status) {
             case 'Shipped': return 'default';
             case 'Processing': return 'secondary';
             case 'Delivered': return 'outline';
             default: return 'outline';
         }
-    }
+    }, []);
 
-     const getRoleVariant = (role: string) => role === 'Admin' ? 'default' : 'secondary';
-     const getUserStatusVariant = (status: string) => status === 'Active' ? 'default' : 'destructive';
+     const getRoleVariant = useCallback((role: string) => role === 'Admin' ? 'default' : 'secondary', []);
+     const getUserStatusVariant = useCallback((status: string) => status === 'Active' ? 'default' : 'destructive', []);
 
     if (!isAdmin) {
       return (
         <div className="p-8 text-center text-destructive">
           <h2 className="text-2xl font-bold">Access Denied</h2>
-          <p>You do not have permission to view this page.</p>
+          <p>You do not have permission to view this page. This feature is restricted to administrators only.</p>
         </div>
       );
     }
@@ -344,7 +344,7 @@ export default function AdminPage() {
                     <Card>
                         <CardHeader>
                             <CardTitle>Sales Overview</CardTitle>
-                            <CardDescription>Monthly sales performance.</CardDescription>
+                            <CardDescription>Monthly sales performance for the last 6 months.</CardDescription>
                         </CardHeader>
                         <CardContent className="h-[300px]">
                             <ResponsiveContainer width="100%" height="100%">

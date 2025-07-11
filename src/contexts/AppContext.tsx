@@ -6,7 +6,8 @@ import { useRouter } from 'next/navigation';
 import type { Creation, User, GalleryItem } from '@/lib/types';
 import { onAuthStateChanged, getAuth } from 'firebase/auth';
 import { firebaseApp } from '@/lib/firebase';
-import { getFirestore, collection, addDoc, query, where, serverTimestamp, onSnapshot } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, where, serverTimestamp, onSnapshot, doc, getDoc } from "firebase/firestore";
+import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 
 interface AppContextType {
   user: User | null;
@@ -31,13 +32,24 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [remixData, setRemixData] = useState<Partial<Creation & GalleryItem> | null>(null);
   const [cart, setCart] = useState<Creation[]>([]);
   const db = getFirestore(firebaseApp);
+  const storage = getStorage(firebaseApp);
 
   useEffect(() => {
     const auth = getAuth(firebaseApp);
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
+        const userDocRef = doc(db, "users", firebaseUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        let finalIsAdmin = false;
+        if (userDoc.exists() && userDoc.data().isAdmin) {
+          finalIsAdmin = true;
+        } else if (firebaseUser.email === 'admin@surfacestory.com') {
+           finalIsAdmin = true;
+        }
+        
         setUser({ uid: firebaseUser.uid, isAnonymous: firebaseUser.isAnonymous, email: firebaseUser.email });
-        setIsAdmin(firebaseUser.email === 'admin@surfacestory.com'); 
+        setIsAdmin(finalIsAdmin); 
+
       } else {
         setUser(null);
         setIsAdmin(false);
@@ -46,7 +58,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
-  }, []);
+  }, [db]);
 
   useEffect(() => {
     if (user) {
@@ -68,8 +80,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const addCreation = useCallback(async (creationData: Omit<Creation, 'id' | 'createdAt'>) => {
     if (!user) throw new Error("You must be logged in to save a creation.");
     
+    // 1. Upload image to Cloud Storage
+    const imageId = crypto.randomUUID();
+    const storageRef = ref(storage, `creations/${user.uid}/${imageId}.png`);
+    // The `url` from the creation data is a data URI (e.g., "data:image/png;base64,...")
+    const uploadResult = await uploadString(storageRef, creationData.url, 'data_url');
+    const downloadURL = await getDownloadURL(uploadResult.ref);
+    
+    // 2. Create Firestore document with the storage URL
     const creationPayload = {
       ...creationData,
+      url: downloadURL, // Overwrite with the public storage URL
       userId: user.uid,
       createdAt: serverTimestamp(),
     };
@@ -79,9 +100,10 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return {
       ...creationData,
       id: docRef.id,
+      url: downloadURL,
       createdAt: new Date(), // Return a client-side date for immediate UI update
     };
-  }, [user, db]);
+  }, [user, db, storage]);
   
   const startRemix = useCallback((item: Partial<Creation & GalleryItem>) => {
     setRemixData(item);
