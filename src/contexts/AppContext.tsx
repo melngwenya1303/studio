@@ -40,21 +40,22 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
       if (firebaseUser) {
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         const userDocSnap = await getDoc(userDocRef);
-        let userData;
 
-        if (!userDocSnap.exists()) {
+        let finalIsAdmin = false;
+
+        if (userDocSnap.exists()) {
+          finalIsAdmin = userDocSnap.data()?.isAdmin || false;
+        } else {
+          // If the user doc doesn't exist, this is their first sign-in.
+          // Create the document now.
           const isDefaultAdmin = firebaseUser.email === 'admin@surfacestoryai.com';
           const newUserPayload = {
             email: firebaseUser.email,
             isAdmin: isDefaultAdmin,
           };
-          await setDoc(userDocRef, newUserPayload, { merge: true });
-          userData = newUserPayload;
-        } else {
-          userData = userDocSnap.data();
+          await setDoc(userDocRef, newUserPayload);
+          finalIsAdmin = isDefaultAdmin;
         }
-
-        const finalIsAdmin = userData?.isAdmin || false;
         
         setUser({ uid: firebaseUser.uid, isAnonymous: firebaseUser.isAnonymous, email: firebaseUser.email });
         setIsAdmin(finalIsAdmin);
