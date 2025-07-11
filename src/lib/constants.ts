@@ -9,7 +9,7 @@ export const DEVICES: Device[] = [
         models: [
             { 
                 name: 'MacBook Air 13"', 
-                previewImage: '/previews/macbook-air-13.png', 
+                previewImage: 'https://placehold.co/800x600.png', 
                 'data-ai-hint': 'laptop back', 
                 decal: {
                     top: '12%',
@@ -22,7 +22,7 @@ export const DEVICES: Device[] = [
             },
             { 
                 name: 'Surface Pro 15"', 
-                previewImage: '/previews/macbook-air-13.png', 
+                previewImage: 'https://placehold.co/800x600.png', 
                 'data-ai-hint': 'laptop back', 
                 decal: {
                     top: '12%',
@@ -35,7 +35,7 @@ export const DEVICES: Device[] = [
             },
             { 
                 name: 'Dell XPS 16"', 
-                previewImage: '/previews/macbook-air-13.png', 
+                previewImage: 'https://placehold.co/800x600.png', 
                 'data-ai-hint': 'laptop back', 
                 decal: {
                     top: '12%',
@@ -47,7 +47,7 @@ export const DEVICES: Device[] = [
                 }
             },
         ],
-        previewImage: '/previews/macbook-air-13.png',
+        previewImage: 'https://placehold.co/800x600.png',
         'data-ai-hint': 'laptop back', 
         decal: {
             top: '12%',
@@ -65,7 +65,7 @@ export const DEVICES: Device[] = [
         models: [
             { 
                 name: 'iPhone 15 Pro', 
-                previewImage: '/previews/iphone-15-pro.png', 
+                previewImage: 'https://placehold.co/400x800.png', 
                 'data-ai-hint': 'phone back', 
                 decal: {
                     top: '12%',
@@ -77,7 +77,7 @@ export const DEVICES: Device[] = [
             },
             { 
                 name: 'Pixel 8 Pro', 
-                previewImage: '/previews/iphone-15-pro.png', 
+                previewImage: 'https://placehold.co/400x800.png', 
                 'data-ai-hint': 'phone back', 
                 decal: {
                     top: '12%',
@@ -89,7 +89,7 @@ export const DEVICES: Device[] = [
             },
             { 
                 name: 'Galaxy S24', 
-                previewImage: '/previews/iphone-15-pro.png', 
+                previewImage: 'https://placehold.co/400x800.png', 
                 'data-ai-hint': 'phone back', 
                 decal: {
                     top: '12%',
@@ -100,7 +100,7 @@ export const DEVICES: Device[] = [
                 }
             },
         ],
-        previewImage: '/previews/iphone-15-pro.png', 
+        previewImage: 'https://placehold.co/400x800.png', 
         'data-ai-hint': 'phone back', 
         decal: {
             top: '12%',
@@ -117,7 +117,7 @@ export const DEVICES: Device[] = [
         models: [
             { 
                 name: 'iPad Air', 
-                previewImage: '/previews/ipad-air.png', 
+                previewImage: 'https://placehold.co/600x800.png', 
                 'data-ai-hint': 'tablet back', 
                 decal: {
                     top: '10%',
@@ -129,7 +129,7 @@ export const DEVICES: Device[] = [
             },
             { 
                 name: 'Galaxy Tab S9', 
-                previewImage: '/previews/ipad-air.png', 
+                previewImage: 'https://placehold.co/600x800.png', 
                 'data-ai-hint': 'tablet back', 
                 decal: {
                     top: '10%',
@@ -141,7 +141,7 @@ export const DEVICES: Device[] = [
             },
             { 
                 name: 'Surface Go', 
-                previewImage: '/previews/ipad-air.png', 
+                previewImage: 'https://placehold.co/600x800.png', 
                 'data-ai-hint': 'tablet back', 
                 decal: {
                     top: '10%',
@@ -152,7 +152,7 @@ export const DEVICES: Device[] = [
                 }
             },
         ],
-        previewImage: '/previews/ipad-air.png', 
+        previewImage: 'https://placehold.co/600x800.png', 
         'data-ai-hint': 'tablet back', 
         decal: {
             top: '10%',
@@ -165,12 +165,12 @@ export const DEVICES: Device[] = [
 ];
 
 export const STYLES: Style[] = [
-    { name: 'Photorealistic', image: '/styles/photorealistic.png', 'data-ai-hint': 'photorealistic woman' },
-    { name: 'Anime', image: '/styles/anime.png', 'data-ai-hint': 'anime character' },
-    { name: 'Cyberpunk', image: '/styles/cyberpunk.png', 'data-ai-hint': 'cyberpunk city' },
-    { name: 'Dark Academia', image: '/styles/dark-academia.png', 'data-ai-hint': 'dark library' },
-    { name: 'Cottagecore', image: '/styles/cottagecore.png', 'data-ai-hint': 'cozy cottage' },
-    { name: 'Fantasy Art', image: '/styles/fantasy.png', 'data-ai-hint': 'fantasy landscape' },
+    { name: 'Photorealistic', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'photorealistic woman' },
+    { name: 'Anime', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'anime character' },
+    { name: 'Cyberpunk', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'cyberpunk city' },
+    { name: 'Dark Academia', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'dark library' },
+    { name: 'Cottagecore', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'cozy cottage' },
+    { name: 'Fantasy Art', image: 'https://placehold.co/400x300.png', 'data-ai-hint': 'fantasy landscape' },
 ];
 
 export const GALLERY_ITEMS: GalleryItem[] = [
