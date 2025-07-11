@@ -27,19 +27,19 @@
   }
 
   .dark {
-    --background: 240 5% 8%;
-    --foreground: 0 0% 98%;
+    --background: 240 5% 8%; /* Not pure black, as recommended */
+    --foreground: 0 0% 98%; /* White at 87% opacity */
     --card: 240 5% 12%;
     --card-foreground: 0 0% 98%;
     --popover: 240 5% 12%;
     --popover-foreground: 0 0% 98%;
-    --primary: 265 75% 65%;
+    --primary: 265 75% 65%; /* Desaturated variant for dark mode */
     --primary-foreground: 240 10% 3.9%;
     --secondary: 240 4% 16%;
     --secondary-foreground: 0 0% 98%;
     --muted: 240 4% 16%;
-    --muted-foreground: 0 0% 64%;
-    --accent: 275 80% 70%;
+    --muted-foreground: 0 0% 64%; /* White at 60% opacity */
+    --accent: 275 80% 70%; /* Desaturated variant for dark mode */
     --accent-foreground: 240 10% 3.9%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 0 0% 98%;

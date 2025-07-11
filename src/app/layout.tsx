@@ -1,18 +1,20 @@
 import type {Metadata} from 'next';
-import { Inter, Montserrat } from 'next/font/google';
+import { Lato, Montserrat } from 'next/font/google';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster";
 import { AppProvider } from '@/contexts/AppContext';
 
-const inter = Inter({
+const lato = Lato({
   subsets: ['latin'],
-  variable: '--font-inter',
+  variable: '--font-lato',
+  weight: ['400', '700'],
   display: 'swap',
 });
 
 const montserrat = Montserrat({
   subsets: ['latin'],
   variable: '--font-montserrat',
+  weight: ['500', '700'],
   display: 'swap',
 });
 
@@ -27,7 +29,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} ${montserrat.variable} dark`} suppressHydrationWarning>
+    <html lang="en" className={`${lato.variable} ${montserrat.variable} dark`} suppressHydrationWarning>
       <head />
       <body className="font-body antialiased" suppressHydrationWarning>
         <AppProvider>

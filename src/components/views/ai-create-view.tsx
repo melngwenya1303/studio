@@ -368,7 +368,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                 >
                      <div className="flex flex-col h-full m-4">
                         <div className="flex-row items-center justify-between mb-4">
-                            <h2 className="text-h2 font-headline">Creator's Palette</h2>
+                            <h1 className="text-h1 font-headline">Creator's Palette</h1>
                         </div>
                         <div className="flex-grow flex flex-col bg-card rounded-2xl p-6 border">
                              <Tabs defaultValue="design" className="w-full flex flex-col flex-grow">
@@ -381,7 +381,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                     <div className="space-y-6 py-6 flex-grow overflow-y-auto pr-2">
                                         {/* Step 1: Canvas */}
                                         <div className="space-y-4">
-                                            <h3 className="text-h3 font-headline">1. Select Product</h3>
+                                            <h2 className="text-h2 font-headline">1. Select Product</h2>
                                             <div className="space-y-2">
                                                 <Label htmlFor="device-type">Product Type</Label>
                                                 <Select
@@ -439,7 +439,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                         {/* Step 2: Vision */}
                                         <div className="space-y-4">
                                             <div className="flex items-center gap-2">
-                                                <h3 className="text-h3 font-headline">2. Describe Your Vision</h3>
+                                                <h2 className="text-h2 font-headline">2. Describe Your Vision</h2>
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <button className="text-muted-foreground hover:text-foreground">
@@ -513,7 +513,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                         {/* AI Coach */}
                                         <div className="space-y-3 p-3 bg-muted/50 rounded-lg">
                                             <div className="flex items-center justify-between">
-                                              <h4 className="font-semibold text-sm flex items-center gap-2"><Icon name="Bot" className="text-primary" /> AI Coach</h4>
+                                              <h3 className="text-h3 font-headline flex items-center gap-2"><Icon name="Bot" className="text-primary" /> AI Coach</h3>
                                               <Button variant="outline" size="sm" onClick={handleGetRemixSuggestions} disabled={!prompt.trim() || isGettingRemix || isLoading}>
                                                   {isGettingRemix ? 'Getting ideas...' : 'Get Remix Ideas'}
                                               </Button>
@@ -548,7 +548,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
 
                                         {/* Step 3: Style */}
                                         <div className="space-y-4">
-                                            <h3 className="text-h3 font-headline">3. Choose Style</h3>
+                                            <h2 className="text-h2 font-headline">3. Choose Style</h2>
                                             <div className="space-y-2">
                                                 <Label>Selected Style: {selectedStyle.name}</Label>
                                                 <Carousel opts={{ align: "start", loop: false }} className="w-full max-w-full">
@@ -603,7 +603,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                             <Button asChild disabled={isLoading || !prompt.trim() || !policyAccepted}
                                                 className="flex-grow text-lg text-white transition-all duration-300 bg-gradient-to-r from-primary to-accent hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none">
                                                 <motion.button onClick={() => handleGenerate(prompt)} whileHover={{ y: -2 }} whileTap={{ y: 1 }}>
-                                                    {isLoading ? 'Designing...' : 'Create My Design'}
+                                                    {isLoading ? 'Designing...' : 'Generate My Vision'}
                                                 </motion.button>
                                             </Button>
                                              <Tooltip>
