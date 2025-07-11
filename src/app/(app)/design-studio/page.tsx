@@ -554,48 +554,47 @@ export default function DesignStudioPage() {
                         ) : (
                             <>
                                 {previewMode === '2D' && (
-                                    <div className="relative w-full h-full flex items-center justify-center">
-                                        <motion.div
-                                            animate={{ y: [0, -8, 0] }}
-                                            transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
-                                            className="relative"
-                                            style={{
-                                                width: currentCanvas.previewWidth,
-                                                height: currentCanvas.previewHeight,
-                                            }}
-                                        >
-                                            <Image
-                                                src={currentCanvas.previewImage}
-                                                alt={`${currentCanvas.name} preview`}
-                                                width={800}
-                                                height={800}
-                                                className="object-contain max-w-full max-h-full"
-                                                data-ai-hint={currentCanvas['data-ai-hint']}
-                                                key={currentCanvas.name}
-                                            />
-                                            {generatedDecal && (
-                                                <motion.div
-                                                    className="absolute"
-                                                    initial={{ opacity: 0, scale: 0.8 }}
-                                                    animate={{ opacity: 1, scale: 1 }}
-                                                    transition={{ duration: 0.5 }}
-                                                    style={currentCanvas.decal ? {
-                                                        transform: currentCanvas.decal.transform,
-                                                        transformOrigin: currentCanvas.decal.transformOrigin,
-                                                        width: currentCanvas.decal.width,
-                                                        height: currentCanvas.decal.height,
-                                                    } : {}}
-                                                >
-                                                    <Image
-                                                        src={generatedDecal.url}
-                                                        alt="Generated Decal"
-                                                        fill
-                                                        className="object-cover"
-                                                    />
-                                                </motion.div>
-                                            )}
-                                        </motion.div>
-                                    </div>
+                                    <motion.div
+                                        animate={{ y: [0, -8, 0] }}
+                                        transition={{ duration: 3, repeat: Infinity, ease: 'easeInOut' }}
+                                        className="relative"
+                                        style={{
+                                            width: currentCanvas.previewWidth,
+                                            height: currentCanvas.previewHeight,
+                                        }}
+                                    >
+                                        <Image
+                                            src={currentCanvas.previewImage}
+                                            alt={`${currentCanvas.name} preview`}
+                                            width={800}
+                                            height={800}
+                                            className="object-contain max-w-full max-h-full"
+                                            data-ai-hint={currentCanvas['data-ai-hint']}
+                                            key={currentCanvas.name}
+                                            priority
+                                        />
+                                        {generatedDecal && (
+                                            <motion.div
+                                                className="absolute top-0 left-0"
+                                                initial={{ opacity: 0, scale: 0.8 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ duration: 0.5 }}
+                                                style={currentCanvas.decal ? {
+                                                    transform: currentCanvas.decal.transform,
+                                                    transformOrigin: currentCanvas.decal.transformOrigin,
+                                                    width: currentCanvas.decal.width,
+                                                    height: currentCanvas.decal.height,
+                                                } : {}}
+                                            >
+                                                <Image
+                                                    src={generatedDecal.url}
+                                                    alt="Generated Decal"
+                                                    fill
+                                                    className="object-cover"
+                                                />
+                                            </motion.div>
+                                        )}
+                                    </motion.div>
                                 )}
                                 {previewMode === '3D' && (
                                      <div className="text-center text-muted-foreground flex flex-col items-center justify-center gap-4">
