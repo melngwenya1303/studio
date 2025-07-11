@@ -4,7 +4,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import Icon from '@/components/shared/icon';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { useApp } from '@/contexts/AppContext';
@@ -72,9 +72,9 @@ export default function ProfilePage() {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-20 bg-gray-50 dark:bg-gray-800/50 rounded-xl border border-dashed border-gray-300 dark:border-gray-700">
-                        <Icon name="ImageIcon" className="w-16 h-16 mx-auto text-gray-400 mb-4" />
-                        <h4 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">{profileUser.name} hasn't created anything yet.</h4>
+                    <div className="text-center py-20 bg-card rounded-xl border border-dashed">
+                        <Icon name="ImageIcon" className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                        <h4 className="text-xl font-semibold mb-2">{profileUser.name} hasn't created anything yet.</h4>
                     </div>
                 )}
             </div>

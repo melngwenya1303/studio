@@ -22,7 +22,7 @@ export default function LeaderboardPage() {
         if (rank === 1) return 'text-yellow-400';
         if (rank === 2) return 'text-gray-400';
         if (rank === 3) return 'text-yellow-600';
-        return 'text-gray-500';
+        return 'text-muted-foreground';
     };
 
     return (
@@ -40,7 +40,7 @@ export default function LeaderboardPage() {
                         {leaderboardData.map((user, index) => (
                             <motion.div
                                 key={user.name}
-                                className="flex items-center p-4 border-b last:border-b-0 dark:border-gray-700 hover:bg-muted/50 transition-colors"
+                                className="flex items-center p-4 border-b last:border-b-0 dark:border-border/50 hover:bg-muted/50 transition-colors"
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: index * 0.1 }}
