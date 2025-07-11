@@ -61,23 +61,18 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gray-100 dark:bg-background">
+    <div className="relative flex items-center justify-center min-h-screen bg-gray-100 dark:bg-background">
+       <div className="absolute top-6 left-6 flex items-center space-x-3">
+          <motion.div
+            className="w-10 h-10 bg-gradient-to-br from-primary to-accent rounded-lg flex items-center justify-center shadow-lg"
+            whileHover={{ scale: 1.1, rotate: 10 }}
+          >
+            <Icon name="Wand2" className="w-6 h-6 text-white" />
+          </motion.div>
+          <h1 className="text-2xl font-bold font-headline text-foreground">SurfaceStory</h1>
+        </div>
       <Card className="w-full max-w-md mx-4">
         <CardHeader className="text-center">
-            <motion.div 
-              className="flex items-center justify-center space-x-3 mb-4"
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-            >
-              <motion.div
-                className="w-12 h-12 bg-gradient-to-br from-primary to-accent rounded-xl flex items-center justify-center shadow-lg"
-                whileHover={{ scale: 1.1, rotate: 10 }}
-              >
-                <Icon name="Wand2" className="w-7 h-7 text-white" />
-              </motion.div>
-              <h1 className="text-3xl font-bold font-headline text-foreground">SurfaceStory</h1>
-            </motion.div>
           <CardTitle>{isSignUp ? 'Create an Account' : 'Welcome Back'}</CardTitle>
           <CardDescription>
             {isSignUp ? 'Join to start creating your unique designs.' : 'Sign in to access your creations.'}
