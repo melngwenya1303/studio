@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useMemo, useCallback } from 'react';
@@ -108,7 +109,7 @@ export default function InspirationGalleryPage() {
                     </div>
                 ),
             });
-        } catch (error: any) => {
+        } catch (error: any) {
             toast({ variant: 'destructive', title: 'Error Getting Suggestions', description: error.message });
             startRemix(item);
         } finally {
