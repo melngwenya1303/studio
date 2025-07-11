@@ -90,12 +90,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     
     const imageId = crypto.randomUUID();
     const storageRef = ref(storage, `creations/${user.uid}/${imageId}.png`);
-    const uploadResult = await uploadString(storageRef, creationData.url, 'data_url');
-    const downloadURL = await getDownloadURL(uploadResult.ref);
+    
+    // The uploaded image can be a data URI or a public URL. Handle both cases.
+    let uploadURL = creationData.url;
+    if (creationData.url.startsWith('data:')) {
+      const uploadResult = await uploadString(storageRef, creationData.url, 'data_url');
+      uploadURL = await getDownloadURL(uploadResult.ref);
+    }
     
     const creationPayload = {
       ...creationData,
-      url: downloadURL, 
+      url: uploadURL, 
       userId: user.uid,
       createdAt: serverTimestamp(),
     };
@@ -105,7 +110,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     return {
       ...creationData,
       id: docRef.id,
-      url: downloadURL,
+      url: uploadURL,
       createdAt: new Date(),
     };
   }, [user, db, storage]);
