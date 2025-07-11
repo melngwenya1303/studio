@@ -84,19 +84,13 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         if (remixData) {
             if (remixData.prompt) {
                 setPrompt(remixData.prompt);
-            }
-            if (remixData.style) {
-                const style = STYLES.find(s => s.name === remixData.style) || STYLES[0];
-                setSelectedStyle(style);
-            }
+                // When a prompt is passed from enhancer, clear the existing image if it's not a full remix
+                if (!remixData.url) {
+                    setGeneratedDecal(null);
+                }
+            } 
             
-            // The type guard is needed because GalleryItem doesn't have deviceType
-            if ('deviceType' in remixData && remixData.deviceType) {
-                const device = DEVICES.find(d => remixData.deviceType!.includes(d.name)) || DEVICES[0];
-                handleDeviceSelection(device);
-            }
-            
-            if (remixData.url) { // only set decal if there's an image
+            if (remixData.url) { 
                  setGeneratedDecal({
                     url: remixData.url,
                     prompt: remixData.prompt || '',
@@ -104,10 +98,18 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                     style: remixData.style || STYLES[0].name,
                     deviceType: ('deviceType' in remixData && remixData.deviceType) ? remixData.deviceType : DEVICES[0].name,
                 });
-            } else if (remixData.prompt) {
-                // If we only have a prompt (from enhancer), don't set a decal image.
-                setGeneratedDecal(null);
             }
+
+            if (remixData.style) {
+                const style = STYLES.find(s => s.name === remixData.style) || STYLES[0];
+                setSelectedStyle(style);
+            }
+            
+            if ('deviceType' in remixData && remixData.deviceType) {
+                const device = DEVICES.find(d => remixData.deviceType!.includes(d.name)) || DEVICES[0];
+                handleDeviceSelection(device);
+            }
+            
             clearRemixData();
         }
     }, [remixData, clearRemixData]);
@@ -809,7 +811,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                         </ToggleGroup>
                                     </motion.div>
                                 )}
-                            </AnPresence>
+                            </AnimatePresence>
                             
                             <Button variant="outline" onClick={() => setIsPreviewingAr(!isPreviewingAr)}>
                                 {isPreviewingAr ? <><Icon name="Undo2" className="w-4 h-4 mr-2" /> Back to Editor</> : <><Icon name="Camera" className="w-4 h-4 mr-2" /> View in AR</>}
