@@ -35,6 +35,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const storage = getStorage(firebaseApp);
 
   useEffect(() => {
+    // --- LOGIN BYPASS ---
+    // This will automatically log you in as an admin for development purposes.
+    const mockAdminUser = {
+        uid: 'admin-bypass-uid',
+        email: 'admin@surfacestoryai.com',
+        name: 'Admin User',
+    };
+    setUser(mockAdminUser);
+    setIsAdmin(true);
+    // --- END LOGIN BYPASS ---
+
+    /*
+    // Original Firebase Auth logic is commented out below. We can restore it later.
     const auth = getAuth(firebaseApp);
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -69,10 +82,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
+    */
   }, [db]);
 
   useEffect(() => {
-    if (user?.uid) {
+    if (user?.uid && user.uid !== 'admin-bypass-uid') { // Don't fetch for bypass user
       const q = query(collection(db, "creations"), where("userId", "==", user.uid));
       const unsubscribe = onSnapshot(q, (querySnapshot) => {
         const userCreations: Creation[] = [];
