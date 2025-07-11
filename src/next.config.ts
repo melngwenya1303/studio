@@ -32,6 +32,9 @@ const nextConfig: NextConfig = {
     // This allows the Next.js dev server to accept requests from the
     // Firebase Studio preview window.
     allowedDevOrigins: ['https://*.cloudworkstations.dev'],
+     // Disabling PPR is a temporary workaround for a bug in Next.js 15
+    // that causes issues with some libraries.
+    ppr: false,
   },
 };
 
