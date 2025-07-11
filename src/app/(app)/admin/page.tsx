@@ -1,7 +1,6 @@
-
 'use client';
 
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import Icon from '@/components/shared/icon';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,22 +13,12 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Area, AreaChart, ResponsiveContainer, Bar, BarChart, XAxis, YAxis, Tooltip } from "recharts";
+import { Bar, BarChart, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const BLOCKLIST_CATEGORIES = ['All', 'Copyright Infringement', 'Offensive Content', 'Hate Speech', 'General'];
-
-// Mock data for charts
-const chartData = [
-    { date: 'Jan', value: 86 },
-    { date: 'Feb', value: 120 },
-    { date: 'Mar', value: 95 },
-    { date: 'Apr', value: 150 },
-    { date: 'May', value: 130 },
-    { date: 'Jun', value: 180 },
-];
 
 const salesData = [
     { name: 'Jan', sales: 4000 },
@@ -56,7 +45,7 @@ const initialUsers = [
 ]
 
 export default function AdminPage() {
-    const { user, isAdmin } = useApp();
+    const { isAdmin } = useApp();
     const { toast } = useToast();
     
     // Blocklist state

@@ -1,7 +1,6 @@
-
 'use client';
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { GALLERY_ITEMS, STYLES } from '@/lib/constants';
@@ -50,7 +49,7 @@ export default function InspirationGalleryPage() {
     }, [categoryFilter, styleFilter]);
 
 
-    const handleDescribe = async (item: GalleryItem) => {
+    const handleDescribe = useCallback(async (item: GalleryItem) => {
         setIsDescribing(item.id);
         try {
             const result = await describeImage({ imageDataUri: item.url });
@@ -78,9 +77,9 @@ export default function InspirationGalleryPage() {
         } finally {
             setIsDescribing(null);
         }
-    };
+    }, [startRemix, toast]);
 
-    const handleRemix = async (item: GalleryItem) => {
+    const handleRemix = useCallback(async (item: GalleryItem) => {
         setIsRemixing(item.id);
         try {
             const result = await getRemixSuggestions({ prompt: item.prompt });
@@ -115,11 +114,11 @@ export default function InspirationGalleryPage() {
         } finally {
             setIsRemixing(null);
         }
-    };
+    }, [startRemix, toast]);
 
-    const handleLike = (itemId: number) => {
+    const handleLike = useCallback((itemId: number) => {
         toast({ title: 'Liked!', description: 'You liked this design.' });
-    };
+    }, [toast]);
 
     const GalleryCard = ({ item }: { item: GalleryItem }) => (
         <Card className="group h-full flex flex-col">
