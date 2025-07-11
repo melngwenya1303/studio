@@ -4,48 +4,48 @@
 
 @layer base {
   :root {
-    --background: 228 94% 98%; /* Lighter gray for a clean look */
+    --background: 228 94% 98%;
     --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
-    --primary: 277 82% 56%; /* Deep Indigo */
+    --primary: 265 82% 52%; /* Adjusted Indigo for 4.5:1 contrast */
     --primary-foreground: 0 0% 98%;
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 240 5.9% 10%;
     --muted: 0 0% 96.1%;
     --muted-foreground: 240 3.8% 46.1%;
-    --accent: 266 94% 63%; /* Vibrant Violet */
+    --accent: 275 94% 60%; /* Adjusted Violet for 4.5:1 contrast */
     --accent-foreground: 0 0% 98%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
-    --ring: 277 82% 56%;
+    --ring: 265 82% 52%;
     --radius: 0.75rem;
   }
 
   .dark {
-    --background: 0 0% 7.1%; /* #121212 - Base surface */
-    --foreground: 0 0% 95%; /* High-emphasis text */
-    --card: 0 0% 11.8%; /* #1E1E1E - Elevation 1 (e.g., cards) */
-    --card-foreground: 0 0% 95%;
-    --popover: 0 0% 17.3%; /* #2C2C2C - Elevation 2 (e.g., modals, popovers) */
-    --popover-foreground: 0 0% 95%;
-    --primary: 277 70% 75%; /* Desaturated Indigo for dark mode */
-    --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 15%; /* Elevated interactive elements */
+    --background: 240 10% 3.9%; /* Darker background */
+    --foreground: 0 0% 98%;
+    --card: 240 5% 12%; /* Slightly lighter card */
+    --card-foreground: 0 0% 98%;
+    --popover: 240 5% 12%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 265 75% 65%; /* Lighter Indigo for dark mode contrast */
+    --primary-foreground: 240 10% 3.9%;
+    --secondary: 240 4% 16%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 15%; /* Muted backgrounds */
-    --muted-foreground: 0 0% 63.9%; /* Medium-emphasis text */
-    --accent: 266 80% 78%; /* Desaturated Violet for dark mode */
-    --accent-foreground: 0 0% 98%;
+    --muted: 240 4% 16%;
+    --muted-foreground: 0 0% 63.9%;
+    --accent: 275 80% 70%; /* Lighter Violet for dark mode contrast */
+    --accent-foreground: 240 10% 3.9%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 15%; /* Borders on elevated surfaces */
-    --input: 0 0% 15%;
-    --ring: 277 70% 75%;
+    --border: 240 4% 16%;
+    --input: 240 4% 16%;
+    --ring: 265 75% 65%;
   }
 }
 
