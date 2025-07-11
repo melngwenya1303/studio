@@ -10,6 +10,7 @@ import { getFirestore, collection, addDoc, query, where, serverTimestamp, onSnap
 import { getStorage, ref, uploadString, getDownloadURL } from "firebase/storage";
 
 const CREATIONS_PAGE_SIZE = 8;
+const GALLERY_PAGE_SIZE = 8;
 
 interface AppContextType {
   user: User | null;
@@ -25,6 +26,10 @@ interface AppContextType {
   fetchMoreCreations: () => void;
   hasMoreCreations: boolean;
   isLoadingCreations: boolean;
+  galleryItems: GalleryItem[];
+  fetchMoreGalleryItems: () => void;
+  hasMoreGalleryItems: boolean;
+  isLoadingGalleryItems: boolean;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -39,10 +44,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const db = getFirestore(firebaseApp);
   const storage = getStorage(firebaseApp);
 
-  // Pagination state
+  // Pagination state for creations
   const [lastVisibleCreation, setLastVisibleCreation] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
   const [hasMoreCreations, setHasMoreCreations] = useState(true);
   const [isLoadingCreations, setIsLoadingCreations] = useState(false);
+
+  // Pagination state for gallery
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [lastVisibleGalleryItem, setLastVisibleGalleryItem] = useState<QueryDocumentSnapshot<DocumentData> | null>(null);
+  const [hasMoreGalleryItems, setHasMoreGalleryItems] = useState(true);
+  const [isLoadingGalleryItems, setIsLoadingGalleryItems] = useState(false);
+
 
   useEffect(() => {
     // Bypass login for development
@@ -204,6 +216,47 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     setCart([]);
   }, []);
 
+  // Gallery Fetching Logic
+  const fetchInitialGalleryItems = useCallback(async () => {
+    setIsLoadingGalleryItems(true);
+    const galleryQuery = query(
+        collection(db, "gallery"),
+        orderBy("likes", "desc"),
+        limit(GALLERY_PAGE_SIZE)
+    );
+    const documentSnapshots = await getDocs(galleryQuery);
+    const items = documentSnapshots.docs.map(doc => ({ ...doc.data() } as GalleryItem));
+    
+    setGalleryItems(items);
+    setLastVisibleGalleryItem(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
+    setHasMoreGalleryItems(documentSnapshots.docs.length === GALLERY_PAGE_SIZE);
+    setIsLoadingGalleryItems(false);
+  }, [db]);
+
+  useEffect(() => {
+    fetchInitialGalleryItems();
+  }, [fetchInitialGalleryItems]);
+
+  const fetchMoreGalleryItems = useCallback(async () => {
+      if (!lastVisibleGalleryItem || !hasMoreGalleryItems) return;
+      setIsLoadingGalleryItems(true);
+      const galleryQuery = query(
+          collection(db, "gallery"),
+          orderBy("likes", "desc"),
+          startAfter(lastVisibleGalleryItem),
+          limit(GALLERY_PAGE_SIZE)
+      );
+
+      const documentSnapshots = await getDocs(galleryQuery);
+      const newItems: GalleryItem[] = documentSnapshots.docs.map(doc => ({ ...doc.data() } as GalleryItem));
+
+      setGalleryItems(prev => [...prev, ...newItems]);
+      setLastVisibleGalleryItem(documentSnapshots.docs[documentSnapshots.docs.length - 1]);
+      setHasMoreGalleryItems(documentSnapshots.docs.length === GALLERY_PAGE_SIZE);
+      setIsLoadingGalleryItems(false);
+  }, [db, lastVisibleGalleryItem, hasMoreGalleryItems]);
+
+
   const contextValue = useMemo(() => ({
     user,
     isAdmin,
@@ -217,8 +270,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     clearCart,
     fetchMoreCreations,
     hasMoreCreations,
-    isLoadingCreations
-  }), [user, isAdmin, creations, addCreation, startRemix, remixData, clearRemixData, cart, addToCart, clearCart, fetchMoreCreations, hasMoreCreations, isLoadingCreations]);
+    isLoadingCreations,
+    galleryItems,
+    fetchMoreGalleryItems,
+    hasMoreGalleryItems,
+    isLoadingGalleryItems,
+  }), [user, isAdmin, creations, addCreation, startRemix, remixData, clearRemixData, cart, addToCart, clearCart, fetchMoreCreations, hasMoreCreations, isLoadingCreations, galleryItems, fetchMoreGalleryItems, hasMoreGalleryItems, isLoadingGalleryItems]);
 
   return (
     <AppContext.Provider value={contextValue}>

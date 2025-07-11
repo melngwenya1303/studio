@@ -4,7 +4,7 @@
 import React, { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
-import { GALLERY_ITEMS, STYLES } from '@/lib/constants';
+import { STYLES } from '@/lib/constants';
 import { Button } from '@/components/ui/button';
 import Image from 'next/image';
 import Modal from '@/components/shared/modal';
@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
 
 type CategoryFilter = 'all' | 'trending' | 'popular' | 'recent';
 type ViewMode = 'grid' | 'list';
@@ -165,7 +166,7 @@ const GalleryListItem = React.memo(function GalleryListItem({
 });
 
 export default function InspirationGalleryView() {
-    const { startRemix } = useApp();
+    const { startRemix, galleryItems, fetchMoreGalleryItems, hasMoreGalleryItems, isLoadingGalleryItems } = useApp();
     const { toast } = useToast();
 
     const [modal, setModal] = useState({ isOpen: false, title: '', children: <></> });
@@ -178,10 +179,10 @@ export default function InspirationGalleryView() {
     const [viewMode, setViewMode] = useState<ViewMode>('grid');
 
     const filteredItems = useMemo(() => {
-        let items = [...GALLERY_ITEMS];
+        let items = [...galleryItems];
         
         if (categoryFilter !== 'all') {
-            items = items.sort(() => 0.5 - Math.random());
+            items = items.filter(item => (item.tags || []).includes(categoryFilter));
         }
 
         if (styleFilter !== 'all') {
@@ -189,35 +190,43 @@ export default function InspirationGalleryView() {
         }
 
         return items;
-    }, [categoryFilter, styleFilter]);
+    }, [galleryItems, categoryFilter, styleFilter]);
 
 
     const handleDescribe = useCallback(async (item: GalleryItem) => {
         setIsDescribing(item.id);
         try {
-            const result = await describeImage({ imageDataUri: item.url });
-            setModal({
-                isOpen: true,
-                title: 'AI-Generated Prompts',
-                children: (
-                  <div className="space-y-4">
-                      <p>Here are a few prompts our AI thinks could create an image like this. Click one to remix!</p>
-                      <ul className="space-y-3">
-                          {result.prompts.map((p, i) => (
-                              <li key={i} onClick={() => {
-                                startRemix({ ...item, prompt: p });
-                                setModal(prev => ({...prev, isOpen: false}));
-                              }} className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
-                                  <p className="font-mono text-sm">"{p}"</p>
-                              </li>
-                          ))}
-                      </ul>
-                  </div>
-                ),
-            });
+            // Need to fetch the image as a data URI to send to the AI
+            const response = await fetch(item.url);
+            const blob = await response.blob();
+            const reader = new FileReader();
+            reader.readAsDataURL(blob);
+            reader.onloadend = async () => {
+              const base64data = reader.result as string;
+              const result = await describeImage({ imageDataUri: base64data });
+              setModal({
+                  isOpen: true,
+                  title: 'AI-Generated Prompts',
+                  children: (
+                    <div className="space-y-4">
+                        <p>Here are a few prompts our AI thinks could create an image like this. Click one to remix!</p>
+                        <ul className="space-y-3">
+                            {result.prompts.map((p, i) => (
+                                <li key={i} onClick={() => {
+                                  startRemix({ ...item, prompt: p });
+                                  setModal(prev => ({...prev, isOpen: false}));
+                                }} className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
+                                    <p className="font-mono text-sm">"{p}"</p>
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                  ),
+              });
+              setIsDescribing(null);
+            }
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Error Describing Image', description: error.message });
-        } finally {
             setIsDescribing(null);
         }
     }, [startRemix, toast]);
@@ -263,6 +272,36 @@ export default function InspirationGalleryView() {
         toast({ title: 'Liked!', description: 'You liked this design.' });
     }, [toast]);
 
+    const GallerySkeleton = () => (
+        <div className={viewMode === 'grid' 
+            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+            : "space-y-4"
+        }>
+            {[...Array(8)].map((_, i) => (
+                <div key={i}>
+                    {viewMode === 'grid' ? (
+                        <Card>
+                            <Skeleton className="w-full aspect-square rounded-t-lg" />
+                            <CardContent className="p-4 space-y-2">
+                                <Skeleton className="h-4 w-3/4" />
+                                <Skeleton className="h-4 w-1/2" />
+                            </CardContent>
+                        </Card>
+                    ) : (
+                        <Card className="flex items-center p-4 gap-4">
+                            <Skeleton className="w-24 h-24 rounded-lg" />
+                            <div className="flex-grow space-y-2">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-2/3" />
+                                <Skeleton className="h-8 w-1/2" />
+                            </div>
+                        </Card>
+                    )}
+                </div>
+            ))}
+        </div>
+    );
+
     return (
         <TooltipProvider>
             <div className="p-4 md:p-8 animate-fade-in">
@@ -299,45 +338,58 @@ export default function InspirationGalleryView() {
                     </ToggleGroup>
                 </div>
 
-                <div className={viewMode === 'grid' 
-                    ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
-                    : "space-y-4"
-                }>
-                    {filteredItems.map(item => (
-                        <motion.div
-                            key={item.id}
-                            initial={{ opacity: 0, y: 20 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.5 }}
-                        >
-                           {viewMode === 'grid' ? (
-                               <GalleryCard 
-                                 item={item} 
-                                 isDescribing={isDescribing === item.id}
-                                 isRemixing={isRemixing === item.id}
-                                 onDescribe={handleDescribe}
-                                 onRemix={handleRemix}
-                                 onLike={handleLike}
-                                />
-                            ) : (
-                                <GalleryListItem
-                                  item={item} 
-                                  isDescribing={isDescribing === item.id}
-                                  isRemixing={isRemixing === item.id}
-                                  onDescribe={handleDescribe}
-                                  onRemix={handleRemix}
-                                  onLike={handleLike}
-                                />
-                            )}
-                        </motion.div>
-                    ))}
-                </div>
-                 {filteredItems.length === 0 && (
-                    <div className="text-center py-20 bg-card rounded-xl border border-dashed col-span-full">
-                        <Icon name="Search" className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
-                        <h4 className="text-xl font-semibold mb-2">No matching designs found</h4>
-                        <p className="text-muted-foreground text-body">Try adjusting your style filter to see more results.</p>
-                    </div>
+                {isLoadingGalleryItems && galleryItems.length === 0 ? <GallerySkeleton /> : (
+                    <>
+                        <div className={viewMode === 'grid' 
+                            ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+                            : "space-y-4"
+                        }>
+                            {filteredItems.map(item => (
+                                <motion.div
+                                    key={item.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ duration: 0.5 }}
+                                >
+                                {viewMode === 'grid' ? (
+                                    <GalleryCard 
+                                        item={item} 
+                                        isDescribing={isDescribing === item.id}
+                                        isRemixing={isRemixing === item.id}
+                                        onDescribe={handleDescribe}
+                                        onRemix={handleRemix}
+                                        onLike={handleLike}
+                                    />
+                                    ) : (
+                                        <GalleryListItem
+                                        item={item} 
+                                        isDescribing={isDescribing === item.id}
+                                        isRemixing={isRemixing === item.id}
+                                        onDescribe={handleDescribe}
+                                        onRemix={handleRemix}
+                                        onLike={handleLike}
+                                        />
+                                    )}
+                                </motion.div>
+                            ))}
+                        </div>
+                        
+                        {hasMoreGalleryItems && (
+                            <div className="mt-8 text-center">
+                                <Button onClick={fetchMoreGalleryItems} disabled={isLoadingGalleryItems}>
+                                    {isLoadingGalleryItems ? 'Loading More...' : 'Load More'}
+                                </Button>
+                            </div>
+                        )}
+
+                        {filteredItems.length === 0 && !isLoadingGalleryItems && (
+                            <div className="text-center py-20 bg-card rounded-xl border border-dashed col-span-full">
+                                <Icon name="Search" className="w-16 h-16 mx-auto text-muted-foreground mb-4" />
+                                <h4 className="text-xl font-semibold mb-2">No matching designs found</h4>
+                                <p className="text-muted-foreground text-body">Try adjusting your style filter to see more results.</p>
+                            </div>
+                        )}
+                    </>
                 )}
             </div>
         </TooltipProvider>
