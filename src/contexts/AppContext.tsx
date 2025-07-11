@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import type { Creation, User, GalleryItem } from '@/lib/types';
 import { onAuthStateChanged, getAuth } from 'firebase/auth';
 import { firebaseApp } from '@/lib/firebase';
-import { getFirestore, collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot } from "firebase/firestore";
+import { getFirestore, collection, addDoc, query, where, serverTimestamp, onSnapshot } from "firebase/firestore";
 
 interface AppContextType {
   user: User | null;
