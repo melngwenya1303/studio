@@ -45,6 +45,17 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   const [isLoadingCreations, setIsLoadingCreations] = useState(false);
 
   useEffect(() => {
+    // Bypass login for development
+    const adminUser = {
+        uid: 'admin-bypass-uid',
+        email: 'admin@surfacestoryai.com',
+        name: 'Admin User',
+    };
+    setUser(adminUser);
+    setIsAdmin(true);
+
+    // The original auth logic is commented out to enforce the bypass
+    /*
     const auth = getAuth(firebaseApp);
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -80,15 +91,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
+    */
   }, [db]);
 
   const fetchInitialCreations = useCallback(async () => {
-    if (!user?.uid) return;
+    // Use the bypassed admin user's UID for fetching data if no other user is set.
+    const userId = user?.uid || 'admin-bypass-uid';
+    if (!userId) return;
+
 
     setIsLoadingCreations(true);
     const creationsQuery = query(
         collection(db, "creations"), 
-        where("userId", "==", user.uid),
+        where("userId", "==", userId),
         orderBy("createdAt", "desc"),
         limit(CREATIONS_PAGE_SIZE)
     );
@@ -113,12 +128,13 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }, [user, fetchInitialCreations]);
 
   const fetchMoreCreations = useCallback(async () => {
-    if (!user?.uid || !lastVisibleCreation || !hasMoreCreations) return;
+    const userId = user?.uid || 'admin-bypass-uid';
+    if (!userId || !lastVisibleCreation || !hasMoreCreations) return;
 
     setIsLoadingCreations(true);
     const creationsQuery = query(
         collection(db, "creations"), 
-        where("userId", "==", user.uid),
+        where("userId", "==", userId),
         orderBy("createdAt", "desc"),
         startAfter(lastVisibleCreation),
         limit(CREATIONS_PAGE_SIZE)
@@ -135,10 +151,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
 
 
   const addCreation = useCallback(async (creationData: Omit<Creation, 'id' | 'createdAt'>) => {
-    if (!user) throw new Error("You must be logged in to save a creation.");
+    const userId = user?.uid || 'admin-bypass-uid';
+    if (!userId) throw new Error("You must be logged in to save a creation.");
     
     const imageId = crypto.randomUUID();
-    const storageRef = ref(storage, `creations/${user.uid}/${imageId}.png`);
+    const storageRef = ref(storage, `creations/${userId}/${imageId}.png`);
     
     let uploadURL = creationData.url;
     if (creationData.url.startsWith('data:')) {
@@ -149,14 +166,12 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     const creationPayload = {
       ...creationData,
       url: uploadURL, 
-      userId: user.uid,
+      userId: userId,
       createdAt: serverTimestamp(),
     };
 
     const docRef = await addDoc(collection(db, "creations"), creationPayload);
     
-    // This is where you would call a Cloud Function to update the user's creationsCount
-    // For now, we fetch again to see the new creation.
     fetchInitialCreations();
 
     return {
