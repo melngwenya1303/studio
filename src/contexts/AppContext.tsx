@@ -103,58 +103,19 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }, [db]);
 
   useEffect(() => {
-    const auth = getAuth(firebaseApp);
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
-      if (firebaseUser) {
-        const userDocRef = doc(db, 'users', firebaseUser.uid);
-        let userDocSnap = await getDoc(userDocRef);
-
-        if (!userDocSnap.exists()) {
-          const isDefaultAdmin = firebaseUser.email === 'admin@surfacestoryai.com';
-          await setDoc(userDocRef, { 
-              email: firebaseUser.email, 
-              isAdmin: isDefaultAdmin,
-              name: firebaseUser.displayName || firebaseUser.email,
-              createdAt: serverTimestamp(),
-              creationsCount: 0,
-              remixesCount: 0,
-              followers: 0,
-              following: 0,
-              bio: 'A new SurfaceStory creator.',
-          });
-          userDocSnap = await getDoc(userDocRef);
-        }
-        
-        const userData = userDocSnap.data();
-        const finalIsAdmin = userData?.isAdmin || false;
-        
-        const currentUser = { 
-            uid: firebaseUser.uid, 
-            email: firebaseUser.email, 
-            name: userData?.name || firebaseUser.displayName,
-            bio: userData?.bio || 'Digital artist exploring the intersection of dreams and code.',
-            followers: userData?.followers || 0,
-            following: userData?.following || 0,
-            creationsCount: userData?.creationsCount || 0,
-        };
-        
-        setUser(currentUser);
-        setIsAdmin(finalIsAdmin);
-        fetchInitialCreations(firebaseUser.uid);
-        
-        if (galleryItems.length === 0) {
-          fetchInitialGalleryItems();
-        }
-
-      } else {
-        setUser(null);
-        setIsAdmin(false);
-        setCreations([]);
-      }
-    });
-    
-    return unsubscribe;
-  }, [db, fetchInitialCreations, fetchInitialGalleryItems, galleryItems.length]);
+    // LOGIN BYPASS FOR TESTING
+    const mockUser = {
+        uid: 'mock-admin-user-01',
+        email: 'admin@surfacestory.dev',
+        name: 'Super Admin',
+    };
+    setUser(mockUser);
+    setIsAdmin(true);
+    fetchInitialCreations(mockUser.uid);
+    if (galleryItems.length === 0) {
+      fetchInitialGalleryItems();
+    }
+  }, [fetchInitialCreations, fetchInitialGalleryItems, galleryItems.length]);
 
   const fetchMoreCreations = useCallback(async () => {
     const userId = user?.uid;
