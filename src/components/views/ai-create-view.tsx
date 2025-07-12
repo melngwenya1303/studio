@@ -784,53 +784,56 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                             exit={{opacity: 0, y: -10}}
                                             className="space-y-2"
                                          >
-                                            <div className="relative">
-                                                <Textarea
-                                                    id="prompt-input"
-                                                    className="w-full p-4 pr-4 pb-12 rounded-lg bg-muted text-base border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
-                                                    placeholder={`A decal for my ${currentCanvas.name}...`}
-                                                    value={prompt}
-                                                    onChange={(e) => setPrompt(e.target.value)}
-                                                    rows={4}
-                                                    disabled={isLoading || isEnhancing || isListening}
-                                                />
-                                                <div className="absolute bottom-2 right-2 flex items-center gap-1">
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing} className={`text-cyan-600 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}>
-                                                                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleToggleListening}>
-                                                                    <Icon name="Mic" className="w-5 h-5" />
-                                                                </motion.div>
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                          <p>Speak Your Prompt</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking} className="text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
-                                                                 <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleTextToSpeech}>
-                                                                    <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
-                                                                </motion.div>
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                          <p>Listen to Prompt</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing || !prompt.trim()} className="text-primary dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50">
-                                                                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleEnhancePrompt}>
-                                                                    <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
-                                                                </motion.div>
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                          <p>Enhance with AI ✨</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
+                                            <div className="space-y-1.5">
+                                                <Label htmlFor="prompt-input">Your Prompt</Label>
+                                                <div className="relative">
+                                                    <Textarea
+                                                        id="prompt-input"
+                                                        className="w-full p-4 pr-4 pb-12 rounded-lg bg-muted text-base border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+                                                        placeholder={`A decal for my ${currentCanvas.name}...`}
+                                                        value={prompt}
+                                                        onChange={(e) => setPrompt(e.target.value)}
+                                                        rows={4}
+                                                        disabled={isLoading || isEnhancing || isListening}
+                                                    />
+                                                    <div className="absolute bottom-2 right-2 flex items-center gap-1">
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing} className={`text-cyan-600 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}>
+                                                                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleToggleListening}>
+                                                                        <Icon name="Mic" className="w-5 h-5" />
+                                                                    </motion.div>
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                            <p>Speak Your Prompt</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking} className="text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
+                                                                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleTextToSpeech}>
+                                                                        <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
+                                                                    </motion.div>
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                            <p>Listen to Prompt</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing || !prompt.trim()} className="text-primary dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50">
+                                                                    <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleEnhancePrompt}>
+                                                                        <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
+                                                                    </motion.div>
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                            <p>Enhance with AI ✨</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </motion.div>
@@ -850,28 +853,25 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                             {/* Style */}
                             <section className="space-y-4">
                                 <h3 className="text-h3 font-headline">Style</h3>
-                                <ToggleGroup 
-                                    type="single" 
-                                    value={selectedStyle.name} 
-                                    onValueChange={(value) => {
-                                        if (value) {
-                                            const style = STYLES.find(s => s.name === value);
-                                            if (style) setSelectedStyle(style);
-                                        }
-                                    }} 
-                                    className="grid grid-cols-2 gap-2"
-                                >
+                                <div className="grid grid-cols-2 gap-2">
                                     {STYLES.map(style => (
-                                        <ToggleGroupItem key={style.name} value={style.name} className="h-auto p-0 rounded-lg border focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 data-[state=on]:border-primary data-[state=on]:ring-2 data-[state=on]:ring-primary data-[state=on]:ring-offset-2">
+                                        <button 
+                                            key={style.name} 
+                                            onClick={() => setSelectedStyle(style)}
+                                            className={cn(
+                                                "h-auto p-0 rounded-lg border focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 relative transition-all duration-200",
+                                                selectedStyle.name === style.name ? "border-primary ring-2 ring-primary ring-offset-2" : "border-border"
+                                            )}
+                                        >
                                             <div className="relative w-full aspect-video rounded-md overflow-hidden">
-                                                <Image src={style.image} alt={style.name} fill className="object-cover" {...{ 'data-ai-hint': style['data-ai-hint'] }} />
+                                                <Image src={style.image} alt={style.name} fill className="object-cover" data-ai-hint={style['data-ai-hint']} />
                                                 <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
                                                     <p className="text-white font-semibold text-sm">{style.name}</p>
                                                 </div>
                                             </div>
-                                        </ToggleGroupItem>
+                                        </button>
                                     ))}
-                                </ToggleGroup>
+                                </div>
                             </section>
 
                             {/* AI Coach */}
