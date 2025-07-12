@@ -19,6 +19,7 @@ import { Bar, BarChart, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGri
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { promptToUi } from '@/ai/flows/prompt-to-ui';
 
 const BLOCKLIST_CATEGORIES = ['All', 'Copyright Infringement', 'Offensive Content', 'Hate Speech', 'General'];
 
@@ -55,6 +56,11 @@ export default function SuperAdminView() {
     const [users, setUsers] = useState<{ id: string; name: string; email: string; role: string; status: string; creations: number; avatar: string; }[]>([]);
     const [userSearchTerm, setUserSearchTerm] = useState('');
     const [userAction, setUserAction] = useState<{action: 'delete' | 'suspend' | 'promote', userId: string, userName: string} | null>(null);
+
+    // Prompt-to-UI State
+    const [uiPrompt, setUiPrompt] = useState('A pricing page with 3 tiers');
+    const [generatedJsx, setGeneratedJsx] = useState('');
+    const [isGeneratingUi, setIsGeneratingUi] = useState(false);
 
     const fetchBlocklist = useCallback(async () => {
         const blocklistCol = collection(db, 'blocklist');
@@ -210,6 +216,21 @@ export default function SuperAdminView() {
      const getRoleVariant = useCallback((role: string) => role === 'Admin' ? 'default' : 'secondary', []);
      const getUserStatusVariant = useCallback((status: string) => status === 'Active' ? 'default' : 'destructive', []);
 
+     const handleGenerateUi = async () => {
+        if (!uiPrompt.trim()) return;
+        setIsGeneratingUi(true);
+        setGeneratedJsx('');
+        try {
+            const result = await promptToUi({ prompt: uiPrompt });
+            setGeneratedJsx(result.jsx);
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'UI Generation Failed', description: error.message });
+            setGeneratedJsx(`<div class="text-destructive">Error: ${error.message}</div>`);
+        } finally {
+            setIsGeneratingUi(false);
+        }
+     };
+
     if (!isAdmin) {
       return (
         <div className="p-8 text-center text-destructive">
@@ -253,11 +274,12 @@ export default function SuperAdminView() {
             </header>
 
             <Tabs defaultValue="analytics" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+                <TabsList className="grid w-full grid-cols-5">
                     <TabsTrigger value="analytics"><Icon name="PieChart" /> Analytics</TabsTrigger>
                     <TabsTrigger value="orders"><Icon name="Package" /> All Orders</TabsTrigger>
                     <TabsTrigger value="users"><Icon name="Users" /> Users</TabsTrigger>
                     <TabsTrigger value="content"><Icon name="Filter" /> Content Filter</TabsTrigger>
+                    <TabsTrigger value="labs"><Icon name="Bot" /> Labs</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="analytics" className="mt-4">
@@ -485,6 +507,37 @@ export default function SuperAdminView() {
                                       </div>
                                   )) : <p className="text-sm text-muted-foreground text-center py-4">No matching words found.</p>}
                               </div>
+                            </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+                <TabsContent value="labs" className="mt-4">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Icon name="Bot" /> AI Labs: Prompt-to-UI</CardTitle>
+                            <CardDescription>Experimental feature to generate UI components from a text description.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-4">
+                            <div className="flex gap-2">
+                                <Input 
+                                    value={uiPrompt}
+                                    onChange={(e) => setUiPrompt(e.target.value)}
+                                    placeholder="Describe the UI you want to create..."
+                                />
+                                <Button onClick={handleGenerateUi} disabled={isGeneratingUi}>
+                                    {isGeneratingUi ? <Icon name="Wand2" className="animate-pulse" /> : 'Generate UI'}
+                                </Button>
+                            </div>
+                            <div className="min-h-[200px] w-full rounded-lg border bg-background p-4">
+                                {isGeneratingUi ? (
+                                    <div className="flex items-center justify-center h-full text-muted-foreground">
+                                        <p>Generating component...</p>
+                                    </div>
+                                ) : (
+                                    <pre className="text-xs whitespace-pre-wrap font-mono">
+                                        <code>{generatedJsx}</code>
+                                    </pre>
+                                )}
                             </div>
                         </CardContent>
                     </Card>

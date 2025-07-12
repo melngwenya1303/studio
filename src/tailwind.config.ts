@@ -16,7 +16,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['var(--font-roboto)', 'sans-serif'],
+        body: ['var(--font-lato)', 'sans-serif'],
         headline: ['var(--font-montserrat)', 'sans-serif'],
       },
       fontSize: {
