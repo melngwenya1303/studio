@@ -1,11 +1,12 @@
-
 'use server';
 
 /**
  * @fileOverview A flow for handling Print-on-Demand (POD) order fulfillment.
  *
  * This file defines a Genkit flow that takes order details and uses a tool
- * to send them to a POD service for fulfillment.
+ * to send them to a POD service for fulfillment. This flow is designed to be
+ * triggered by a server-side process, such as a Cloud Function responding to
+ * a Shopify webhook.
  *
  * - fulfillOrder - The main function to trigger order fulfillment.
  * - FulfillOrderInput - The input schema for the fulfillment flow.
@@ -17,12 +18,12 @@ import {z} from 'genkit';
 
 // Input and Output Schemas
 const FulfillOrderInputSchema = z.object({
-  orderId: z.string().describe('The unique identifier for the order.'),
+  orderId: z.string().describe('The unique identifier for the order from the e-commerce platform (e.g., Shopify).'),
   customerName: z.string().describe("The customer's full name."),
   shippingAddress: z.string().describe("The customer's full shipping address."),
   imageUrl: z
     .string()
-    .describe('The data URI of the design image to be printed.'),
+    .describe('The public URL of the design image to be printed.'),
   productType: z.string().describe('The type of product being ordered (e.g., "iPhone 15 Pro Decal").'),
   podPartner: z.string().describe('The name of the POD partner to fulfill the order (e.g., "Printify").'),
 });
@@ -45,24 +46,24 @@ const sendOrderToPodService = ai.defineTool(
         outputSchema: FulfillOrderOutputSchema,
     },
     async (input) => {
-        console.log(`Simulating sending order ${input.orderId} to ${input.podPartner}.`);
-        // In a real implementation, this would make an API call to the POD service.
-        // It would use the partner name to look up the correct API key and endpoint.
+        console.log(`Simulating sending order ${input.orderId} to ${input.podPartner} for fulfillment.`);
+        // In a real implementation, this function would contain the logic to make an API call
+        // to the actual POD service (e.g., Printify, Printful) using the creator's saved API key.
         const isSuccess = Math.random() > 0.1; // 90% success rate for simulation
         
         if (isSuccess) {
-            const confirmation = `POD_CONF_${crypto.randomUUID().substring(0, 12)}`;
-            console.log(`Order ${input.orderId} successfully sent. Confirmation: ${confirmation}`);
+            const confirmation = `POD_CONF_${crypto.randomUUID().substring(0, 12).toUpperCase()}`;
+            console.log(`Order ${input.orderId} successfully sent. POD Confirmation: ${confirmation}`);
             return {
                 success: true,
                 confirmationNumber: confirmation,
-                message: `Order successfully submitted to ${input.podPartner}.`,
+                message: `Order successfully submitted to ${input.podPartner}. Confirmation: ${confirmation}.`,
             };
         } else {
             console.error(`Failed to send order ${input.orderId} to ${input.podPartner}.`);
             return {
                 success: false,
-                message: `Failed to submit order to ${input.podPartner}. Please check logs.`,
+                message: `Failed to submit order to ${input.podPartner}. Please check system logs for details.`,
             };
         }
     }
@@ -75,8 +76,8 @@ const fulfillmentPrompt = ai.definePrompt({
     input: {schema: FulfillOrderInputSchema},
     output: {schema: FulfillOrderOutputSchema},
     tools: [sendOrderToPodService],
-    prompt: `You are a fulfillment coordinator for SurfaceStory.
-A new order has been placed. Your task is to send the order details to the correct Print-on-Demand (POD) partner using the available tools.
+    prompt: `You are an automated fulfillment coordinator for the SurfaceStory platform.
+A new order fulfillment request has been received. Your task is to process this request by sending the order details to the correct Print-on-Demand (POD) partner using the available tools.
 
 Order Details:
 - Order ID: {{{orderId}}}
@@ -84,9 +85,9 @@ Order Details:
 - Address: {{{shippingAddress}}}
 - Product: {{{productType}}}
 - POD Partner: {{{podPartner}}}
+- Image URL: {{{imageUrl}}}
 
-Use the 'sendOrderToPodService' tool to process this fulfillment request.
-Image for printing is available at: {{media url=imageUrl}}
+Use the 'sendOrderToPodService' tool to process this fulfillment request. Do not add any commentary; just execute the tool with the provided details.
 `,
 });
 
@@ -104,10 +105,14 @@ const fulfillOrderFlow = ai.defineFlow(
     outputSchema: FulfillOrderOutputSchema,
   },
   async (input) => {
+    // This flow is designed to be called by a server-side process, like a Cloud Function.
+    // The function would receive a webhook from Shopify, extract the necessary data,
+    // and then invoke this flow with the correct input.
+    
     const {output} = await fulfillmentPrompt(input);
     
     if (!output) {
-        throw new Error('The fulfillment flow failed to produce an output.');
+        throw new Error('The fulfillment flow failed to produce a valid output. The tool call may have failed.');
     }
 
     return output;
