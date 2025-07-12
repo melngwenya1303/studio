@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview A flow that generates a UI spec from a prompt.
@@ -18,6 +19,10 @@ import {generateTitle} from './generate-title';
 // Input and Output Schemas
 const GenerateUiSpecInputSchema = z.object({
   prompt: z.string().describe('The user-provided prompt for the decal design.'),
+  style: z.string().optional().describe('The artistic style for the decal.'),
+  deviceType: z.string().optional().describe('The target device for the decal.'),
+  setting: z.string().optional().describe('The setting or background for the subject.'),
+  negativePrompt: z.string().optional().describe('Elements to exclude from the image.'),
 });
 export type GenerateUiSpecInput = z.infer<typeof GenerateUiSpecInputSchema>;
 
@@ -65,8 +70,17 @@ const generateUiSpecFlow = ai.defineFlow(
     outputSchema: GenerateUiSpecOutputSchema,
   },
   async input => {
+    
+    let finalPrompt = input.prompt;
+    if (input.setting || input.style || input.deviceType) {
+        finalPrompt = `A decal design for a ${input.deviceType}, ${input.prompt}, ${input.setting || ''}, in the style of ${input.style}.`;
+    }
+    if (input.negativePrompt) {
+        finalPrompt += ` --no ${input.negativePrompt}`;
+    }
+
     // Run image generation first to check for blocked content
-    const imageResult = await generateImage({ prompt: input.prompt });
+    const imageResult = await generateImage({ prompt: finalPrompt });
     
     if (imageResult.blocked || !imageResult.media) {
       return {
@@ -80,8 +94,8 @@ const generateUiSpecFlow = ai.defineFlow(
     
     // If not blocked, proceed with title and story generation in parallel
     const [titleResult, storyResult] = await Promise.all([
-      generateTitle(input),
-      storyPrompt(input),
+      generateTitle({ prompt: finalPrompt }),
+      storyPrompt({ prompt: finalPrompt }),
     ]);
 
     const title = titleResult.title;
@@ -93,7 +107,7 @@ const generateUiSpecFlow = ai.defineFlow(
       throw new Error('The AI failed to generate a title for this prompt.');
     }
      if (!story) {
-      throw new Error('The AI failed to generate a story.');
+      throw a new Error('The AI failed to generate a story.');
     }
 
     return {title, story, imageUrl, blocked: false };

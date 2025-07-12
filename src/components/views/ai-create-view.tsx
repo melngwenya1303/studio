@@ -5,7 +5,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import { useToast } from "@/hooks/use-toast";
-import { generateUiSpec } from '@/ai/flows/generate-ui-spec';
+import { generateUiSpec, GenerateUiSpecInput } from '@/ai/flows/generate-ui-spec';
 import { generateImage } from '@/ai/flows/generate-image';
 import { getCreativeFeedback } from '@/ai/flows/get-creative-feedback';
 import { getRemixSuggestions } from '@/ai/flows/get-remix-suggestions';
@@ -30,10 +30,17 @@ import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import { Input } from '../ui/input';
+import { Switch } from '../ui/switch';
 
 type AiCreateViewProps = {
     onBack: () => void;
 };
+
+type StructuredPrompt = {
+    subject: string;
+    setting: string;
+    negativePrompt: string;
+}
 
 export default function AiCreateView({ onBack }: AiCreateViewProps) {
     const { user, addCreation, remixData, clearRemixData, addToCart } = useApp();
@@ -71,6 +78,14 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     const [isSpeaking, setIsSpeaking] = useState(false);
     const audioRef = useRef<HTMLAudioElement>(null);
     const recognitionRef = useRef<any>(null);
+
+    // Advanced Prompting State
+    const [isAdvancedPrompt, setIsAdvancedPrompt] = useState(false);
+    const [structuredPrompt, setStructuredPrompt] = useState<StructuredPrompt>({
+        subject: '',
+        setting: '',
+        negativePrompt: ''
+    });
 
     const handleDeviceSelection = useCallback((device: Device) => {
         setSelectedDevice(device);
@@ -208,7 +223,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         try {
             const result = await generateCreativePrompt();
             setPrompt(result.prompt);
-            toast({ title: "Prompt Generated!", description: "A new idea has been sparked." });
+            setStructuredPrompt({subject: result.prompt, setting: '', negativePrompt: ''});
         } catch (error: any) {
             toast({ variant: "destructive", title: "Could not get prompt", description: error.message });
         } finally {
@@ -216,21 +231,39 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         }
     };
 
-    const handleGenerate = useCallback(async (basePrompt: string) => {
-        if (!basePrompt.trim()) {
+    const handleGenerate = useCallback(async () => {
+        const hasSimplePrompt = prompt.trim() !== '';
+        const hasAdvancedPrompt = structuredPrompt.subject.trim() !== '';
+        if (!hasSimplePrompt && !hasAdvancedPrompt) {
             toast({ variant: "destructive", title: "Input Required", description: "Please enter a prompt." });
             return;
         }
+
         setIsLoading(true);
         setGeneratedDecal(null);
         setGeneratedMockup(null);
         setStory(null);
         setRemixSuggestions([]);
+        
         try {
             const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
-            const fullPromptWithStyle = `A decal design for a ${deviceName}. ${basePrompt}, in the style of ${selectedStyle.name}, high resolution, clean edges, sticker, vector art`;
+
+            let generationInput: GenerateUiSpecInput;
+
+            if (isAdvancedPrompt) {
+                generationInput = {
+                    prompt: structuredPrompt.subject,
+                    setting: structuredPrompt.setting,
+                    negativePrompt: structuredPrompt.negativePrompt,
+                    style: selectedStyle.name,
+                    deviceType: deviceName,
+                };
+            } else {
+                 const fullPromptWithStyle = `A decal design for a ${deviceName}. ${prompt}, in the style of ${selectedStyle.name}, high resolution, clean edges, sticker, vector art`;
+                 generationInput = { prompt: fullPromptWithStyle };
+            }
             
-            const result = await generateUiSpec({ prompt: fullPromptWithStyle });
+            const result = await generateUiSpec(generationInput);
 
             if (result.blocked) {
                 toast({ variant: "destructive", title: "Prompt Blocked", description: result.blockedReason, duration: 5000 });
@@ -240,7 +273,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
             
             const newDecal = { 
                 url: result.imageUrl, 
-                prompt: basePrompt, 
+                prompt: isAdvancedPrompt ? `${structuredPrompt.subject}, ${structuredPrompt.setting}` : prompt,
                 style: selectedStyle.name, 
                 deviceType: deviceName,
                 title: result.title 
@@ -253,7 +286,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         } finally {
             setIsLoading(false);
         }
-    }, [selectedModel, selectedDevice, selectedStyle.name, toast]);
+    }, [prompt, structuredPrompt, isAdvancedPrompt, selectedModel, selectedDevice, selectedStyle.name, toast]);
     
      const handleGenerateMockup = useCallback(async () => {
         if (!generatedDecal?.url || !mockupPrompt.trim()) {
@@ -403,6 +436,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     
     const handleStartOver = useCallback(() => {
         setPrompt('');
+        setStructuredPrompt({subject: '', setting: '', negativePrompt: ''});
         setSelectedDevice(DEVICES[0]);
         setSelectedModel(DEVICES[0].models ? DEVICES[0].models[0] : null);
         setSelectedStyle(STYLES[0]);
@@ -425,6 +459,10 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         } finally {
             setIsGettingCreativePrompt(false);
         }
+    }
+    
+    const handleStructuredPromptChange = (field: keyof StructuredPrompt, value: string) => {
+        setStructuredPrompt(prev => ({...prev, [field]: value}));
     }
 
     return (
@@ -503,77 +541,101 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                             <section className="space-y-4">
                                 <div className="flex items-center gap-2">
                                     <h2 className="text-h2 font-headline">2. Describe Your Vision</h2>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <button className="text-muted-foreground hover:text-foreground">
-                                              <Icon name="Info" className="w-4 h-4" />
-                                            </button>
-                                        </TooltipTrigger>
-                                        <TooltipContent align="end" className="max-w-xs">
-                                            <p className="font-bold mb-2">Prompting Tips:</p>
-                                            <ul className="list-disc list-inside text-xs space-y-1">
-                                              <li>Be descriptive! Mention the subject, colors, mood, and style.</li>
-                                              <li>Example: "A majestic stag with crystal antlers in a dark, enchanted forest, photorealistic."</li>
-                                              <li>Use the ✨ button to let our AI enhance your idea.</li>
-                                            </ul>
-                                        </TooltipContent>
-                                    </Tooltip>
                                 </div>
-                                 <div className="space-y-2">
-                                    <Label htmlFor="prompt-input">Prompt</Label>
+                                
+                                <AnimatePresence mode="wait">
+                                    {isAdvancedPrompt ? (
+                                        <motion.div 
+                                            key="advanced-prompt"
+                                            initial={{opacity: 0, y: -10}}
+                                            animate={{opacity: 1, y: 0}}
+                                            exit={{opacity: 0, y: -10}}
+                                            className="space-y-3 p-3 bg-muted/50 rounded-lg"
+                                        >
+                                            <div className="space-y-1">
+                                                <Label htmlFor="subject">Subject</Label>
+                                                <Input id="subject" placeholder="e.g., A majestic stag with crystal antlers" value={structuredPrompt.subject} onChange={e => handleStructuredPromptChange('subject', e.target.value)} />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label htmlFor="setting">Setting / Scene</Label>
+                                                <Input id="setting" placeholder="e.g., in a dark, enchanted forest" value={structuredPrompt.setting} onChange={e => handleStructuredPromptChange('setting', e.target.value)} />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <Label htmlFor="negativePrompt">Negative Prompt (exclude things)</Label>
+                                                <Input id="negativePrompt" placeholder="e.g., blurry, text, watermark" value={structuredPrompt.negativePrompt} onChange={e => handleStructuredPromptChange('negativePrompt', e.target.value)} />
+                                            </div>
+                                        </motion.div>
+                                    ) : (
+                                         <motion.div 
+                                            key="simple-prompt"
+                                            initial={{opacity: 0, y: -10}}
+                                            animate={{opacity: 1, y: 0}}
+                                            exit={{opacity: 0, y: -10}}
+                                            className="space-y-2"
+                                         >
+                                            <div className="relative">
+                                                <Textarea
+                                                    id="prompt-input"
+                                                    className="w-full p-4 pr-4 pb-12 rounded-lg bg-muted text-base border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
+                                                    placeholder={`A decal for my ${currentCanvas.name}...`}
+                                                    value={prompt}
+                                                    onChange={(e) => setPrompt(e.target.value)}
+                                                    rows={4}
+                                                    disabled={isLoading || isEnhancing || isListening}
+                                                />
+                                                <div className="absolute bottom-2 right-2 flex items-center gap-1">
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing} className={`text-cyan-600 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}>
+                                                                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleToggleListening}>
+                                                                    <Icon name="Mic" className="w-5 h-5" />
+                                                                </motion.div>
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                          <p>Speak Your Prompt</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking} className="text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
+                                                                 <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleTextToSpeech}>
+                                                                    <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
+                                                                </motion.div>
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                          <p>Listen to Prompt</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing || !prompt.trim()} className="text-primary dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50">
+                                                                <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleEnhancePrompt}>
+                                                                    <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
+                                                                </motion.div>
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                          <p>Enhance with AI ✨</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                </div>
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+
+                                <div className="flex items-center justify-between">
                                      <Button variant="link" className="p-0 h-auto text-sm" onClick={handleCreativePrompt} disabled={isGettingCreativePrompt || isLoading}>
                                          {isGettingCreativePrompt ? 'Thinking...' : 'Not sure? Get a random idea!'}
                                      </Button>
-                                    <div className="relative">
-                                        <Textarea
-                                            id="prompt-input"
-                                            className="w-full p-4 pr-4 pb-12 rounded-lg bg-muted text-base border-border focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-200 resize-none"
-                                            placeholder={`A decal for my ${currentCanvas.name}...`}
-                                            value={prompt}
-                                            onChange={(e) => setPrompt(e.target.value)}
-                                            rows={4}
-                                            disabled={isLoading || isEnhancing || isListening}
-                                        />
-                                        <div className="absolute bottom-2 right-2 flex items-center gap-1">
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing} className={`text-cyan-600 dark:text-cyan-300 hover:bg-cyan-100 dark:hover:bg-cyan-900/50 ${isListening ? 'animate-pulse ring-2 ring-cyan-400' : ''}`}>
-                                                        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleToggleListening}>
-                                                            <Icon name="Mic" className="w-5 h-5" />
-                                                        </motion.div>
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                  <p>Speak Your Prompt</p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing || !prompt.trim() || isSpeaking} className="text-blue-600 dark:text-blue-300 hover:bg-blue-100 dark:hover:bg-blue-900/50">
-                                                         <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleTextToSpeech}>
-                                                            <Icon name="Volume2" className={`w-5 h-5 ${isSpeaking ? 'animate-pulse' : ''}`} />
-                                                        </motion.div>
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                  <p>Listen to Prompt</p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button asChild variant="ghost" size="icon" disabled={isLoading || isEnhancing || !prompt.trim()} className="text-primary dark:text-purple-300 hover:bg-purple-100 dark:hover:bg-purple-900/50">
-                                                        <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={handleEnhancePrompt}>
-                                                            <Icon name="Sparkles" className={`w-5 h-5 ${isEnhancing ? 'animate-pulse' : ''}`} />
-                                                        </motion.div>
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                  <p>Enhance with AI ✨</p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                        </div>
+                                     <div className="flex items-center space-x-2">
+                                        <Label htmlFor="advanced-prompt-switch" className="text-sm">Advanced</Label>
+                                        <Switch id="advanced-prompt-switch" checked={isAdvancedPrompt} onCheckedChange={setIsAdvancedPrompt} />
                                     </div>
                                 </div>
+                                
                                 {/* AI Coach */}
                                 <div className="space-y-3 p-3 bg-muted/50 rounded-lg">
                                     <div className="flex items-center justify-between">
@@ -595,7 +657,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                         className="px-3 py-1 bg-background rounded-full text-xs hover:bg-primary/10 border"
                                                         onClick={() => {
                                                             setPrompt(suggestion);
-                                                            handleGenerate(suggestion);
+                                                            handleGenerate();
                                                             setRemixSuggestions([]);
                                                         }}
                                                         whileHover={{scale: 1.05}} whileTap={{scale: 0.95}}
@@ -665,7 +727,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                 </label>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Button onClick={() => handleGenerate(prompt)} disabled={isLoading || !prompt.trim() || !policyAccepted}
+                                <Button onClick={handleGenerate} disabled={isLoading || !(prompt.trim() || structuredPrompt.subject.trim()) || !policyAccepted}
                                     className="flex-grow text-lg h-12 text-white transition-all duration-300 bg-gradient-to-r from-primary to-accent hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none">
                                     <motion.span whileHover={{ y: -1 }} whileTap={{ y: 1 }}>
                                         {isLoading ? 'Designing...' : 'Generate My Vision'}
