@@ -25,11 +25,11 @@ const navItems = [
 ];
 
 const bottomNavItems = [
-    { href: '/settings', name: 'Settings', icon: 'Settings' as IconName },
+    { href: '/settings', name: 'Creator Settings', icon: 'Settings' as IconName },
 ]
 
 const adminNavItems = [
-    { href: '/admin', name: 'Admin Center', icon: 'ShieldCheck' as IconName },
+    { href: '/super-admin', name: 'Super Admin', icon: 'ShieldCheck' as IconName },
 ];
 
 const SidebarHeader = () => (

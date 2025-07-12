@@ -5,7 +5,7 @@ import React, { Suspense } from 'react';
 import dynamic from 'next/dynamic';
 import { Skeleton } from '@/components/ui/skeleton';
 
-const AdminView = dynamic(() => import('@/components/views/admin-view'), {
+const SuperAdminView = dynamic(() => import('@/components/views/super-admin-view'), {
     suspense: true,
     loading: () => <AdminSkeleton />,
 });
@@ -29,10 +29,10 @@ const AdminSkeleton = () => (
     </div>
 );
 
-export default function AdminPage() {
+export default function SuperAdminPage() {
     return (
         <Suspense fallback={<AdminSkeleton />}>
-            <AdminView />
+            <SuperAdminView />
         </Suspense>
     );
 }

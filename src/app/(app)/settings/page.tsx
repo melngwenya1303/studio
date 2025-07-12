@@ -17,6 +17,8 @@ import { firebaseApp } from '@/lib/firebase';
 import { useToast } from '@/hooks/use-toast';
 import Modal from '@/components/shared/modal';
 import { Switch } from '@/components/ui/switch';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+
 
 // Types
 type Address = {
@@ -121,7 +123,17 @@ export default function SettingsPage() {
 
     const [addresses, setAddresses] = useState<Address[]>([]);
     const [orders, setOrders] = useState<Order[]>([]);
-    const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]); // Mock for now
+    
+    // POD Partner State
+    const [podPartners, setPodPartners] = useState([
+        { id: '1', name: 'Printify', apiKey: '...key1' },
+        { id: '2', name: 'Printful', apiKey: '...key2' }
+    ]);
+    const [newPartnerName, setNewPartnerName] = useState('');
+    const [newPartnerApiKey, setNewPartnerApiKey] = useState('');
+    const [partnerToDelete, setPartnerToDelete] = useState<{id: string, name: string} | null>(null);
+    const [partnerToEdit, setPartnerToEdit] = useState<{id: string, name: string} | null>(null);
+    const [newlyAddedPartner, setNewlyAddedPartner] = useState<{id: string, name: string, apiKey: string} | null>(null);
 
     const [isAddressModalOpen, setIsAddressModalOpen] = useState(false);
     const [editingAddress, setEditingAddress] = useState<Address | null>(null);
@@ -181,13 +193,6 @@ export default function SettingsPage() {
         }
     }, [user, db, toast]);
     
-    // Mock Payment data for now
-    useEffect(() => {
-        setPaymentMethods([
-            { id: 'pm_1', type: 'Visa', last4: '4242', expiry: '08/26', isDefault: true }
-        ]);
-    }, []);
-
     const getStatusVariant = useCallback((status: string) => {
         switch (status.toLowerCase()) {
             case 'shipped': return 'default';
@@ -197,8 +202,70 @@ export default function SettingsPage() {
         }
     }, []);
 
+    const handleAddOrUpdatePartner = useCallback((e: React.FormEvent) => {
+        e.preventDefault();
+        if (!newPartnerName.trim() || !newPartnerApiKey.trim()) return;
+
+        if (partnerToEdit) {
+            setPodPartners(prev => prev.map(p => p.id === partnerToEdit.id ? {...p, apiKey: newPartnerApiKey} : p));
+            toast({ title: 'Success!', description: `API Key for ${partnerToEdit.name} has been updated.`});
+            setPartnerToEdit(null);
+        } else {
+            const newPartner = { id: crypto.randomUUID(), name: newPartnerName.trim(), apiKey: newPartnerApiKey.trim() };
+            setPodPartners(prev => [...prev, newPartner]);
+            setNewlyAddedPartner(newPartner);
+        }
+
+        setNewPartnerName('');
+        setNewPartnerApiKey('');
+    }, [newPartnerName, newPartnerApiKey, partnerToEdit, toast]);
+
+    const handleDeletePodPartner = useCallback((id: string) => {
+        setPodPartners(prev => prev.filter(p => p.id !== id));
+        setPartnerToDelete(null);
+        toast({ title: 'Integration Removed', description: 'The POD partner has been successfully removed.' });
+    }, [toast]);
+
+     const handleCopyKey = useCallback(() => {
+        if (!newlyAddedPartner) return;
+        navigator.clipboard.writeText(newlyAddedPartner.apiKey);
+        toast({ title: 'Copied!', description: 'The API key has been copied to your clipboard.' });
+    }, [newlyAddedPartner, toast]);
+
     return (
         <div className="p-4 md:p-8 animate-fade-in">
+             <AlertDialog open={!!partnerToDelete} onOpenChange={() => setPartnerToDelete(null)}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle className="flex items-center gap-2"><Icon name="Trash2" /> Delete Integration?</AlertDialogTitle>
+                        <AlertDialogDescription>This will permanently delete the {partnerToDelete?.name} integration and immediately stop all related operations. This action cannot be undone.</AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogAction className="bg-destructive hover:bg-destructive/90" onClick={() => handleDeletePodPartner(partnerToDelete!.id)}>Confirm Delete</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            <Modal isOpen={!!partnerToEdit} onClose={() => setPartnerToEdit(null)} title={`Rotate API Key for ${partnerToEdit?.name}`}>
+                 <form onSubmit={handleAddOrUpdatePartner} className="space-y-4 pt-4">
+                     <p className="text-sm text-muted-foreground">Enter the new API key below. The old key will be immediately invalidated.</p>
+                    <Input type="password" value={newPartnerApiKey} onChange={(e) => setNewPartnerApiKey(e.target.value)} placeholder="Enter new API Key" className="text-base" />
+                    <Button type="submit" className="w-full"><Icon name="KeyRound" /> Update Key</Button>
+                </form>
+            </Modal>
+             <Modal isOpen={!!newlyAddedPartner} onClose={() => setNewlyAddedPartner(null)} title={`Integration Added: ${newlyAddedPartner?.name}`}>
+                <div className="space-y-4 pt-2">
+                    <p className="p-3 text-sm bg-yellow-100 dark:bg-yellow-900/40 text-yellow-800 dark:text-yellow-200 rounded-lg border border-yellow-200 dark:border-yellow-800/60">
+                      <strong className="font-semibold block mb-1">Security Warning</strong>
+                      For your security, this key will not be shown again. Please copy it now and store it in a secure location.
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <Input readOnly value={newlyAddedPartner?.apiKey} className="font-mono text-xs" />
+                        <Button onClick={handleCopyKey} size="icon" variant="outline"><Icon name="Copy" /></Button>
+                    </div>
+                     <Button onClick={() => setNewlyAddedPartner(null)} className="w-full">I have saved my key</Button>
+                </div>
+            </Modal>
             <Modal 
                 isOpen={isAddressModalOpen} 
                 onClose={() => { setIsAddressModalOpen(false); setEditingAddress(null); }}
@@ -211,15 +278,15 @@ export default function SettingsPage() {
                 />
             </Modal>
             <header className="mb-8">
-                <h1 className="text-h1 font-headline flex items-center gap-3"><Icon name="Settings" /> Account Settings</h1>
-                <p className="text-muted-foreground mt-1 text-body">Manage your profile, addresses, and order history.</p>
+                <h1 className="text-h1 font-headline flex items-center gap-3"><Icon name="Settings" /> Creator Settings</h1>
+                <p className="text-muted-foreground mt-1 text-body">Manage your profile, integrations, and order history.</p>
             </header>
 
             <Tabs defaultValue="profile" className="w-full">
                 <TabsList className="grid w-full grid-cols-4">
                     <TabsTrigger value="profile"><Icon name="UserCircle" /> Profile</TabsTrigger>
+                    <TabsTrigger value="integrations"><Icon name="KeyRound" /> Integrations</TabsTrigger>
                     <TabsTrigger value="shipping"><Icon name="Home" /> Shipping</TabsTrigger>
-                    <TabsTrigger value="billing"><Icon name="CreditCard" /> Billing</TabsTrigger>
                     <TabsTrigger value="orders"><Icon name="Package" /> Order History</TabsTrigger>
                 </TabsList>
                 
@@ -238,6 +305,37 @@ export default function SettingsPage() {
                                  <h3 className="text-lg font-semibold">Change Password</h3>
                                  <p className="text-sm text-muted-foreground">Password changes are handled by your authentication provider.</p>
                              </div>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+
+                <TabsContent value="integrations" className="mt-6">
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Icon name="KeyRound" /> POD Partner Integrations</CardTitle>
+                            <CardDescription>Manage API keys for Shopify and other Print-on-Demand partners.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            <form onSubmit={handleAddOrUpdatePartner} className="space-y-3 mb-4 p-4 border rounded-lg">
+                                 <Input type="text" value={newPartnerName} onChange={(e) => setNewPartnerName(e.target.value)} placeholder="Partner Name (e.g., Shopify, Printify)" className="text-base"/>
+                                <Input type="password" value={newPartnerApiKey} onChange={(e) => setNewPartnerApiKey(e.target.value)} placeholder="Partner API Key" className="text-base" />
+                                <Button type="submit" className="w-full"><Icon name="PlusCircle" /> Add New Partner</Button>
+                            </form>
+                            <div className="space-y-2 max-h-60 overflow-y-auto pr-2">
+                                {podPartners.length > 0 ? podPartners.map(partner => (
+                                     <div key={partner.id} className="flex justify-between items-center bg-muted/50 p-3 rounded-lg">
+                                        <p className="font-semibold">{partner.name}</p>
+                                        <div className="flex items-center gap-2">
+                                            <Button variant="outline" size="sm" onClick={() => { setPartnerToEdit(partner); setNewPartnerApiKey('')}}>
+                                                <Icon name="RefreshCcw" /> Rotate Key
+                                            </Button>
+                                            <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => setPartnerToDelete(partner)}>
+                                                <Icon name="Trash2" /> Delete
+                                            </Button>
+                                        </div>
+                                    </div>
+                                )) : <p className="text-sm text-muted-foreground text-center py-4">No fulfillment partners configured.</p>}
+                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -269,22 +367,6 @@ export default function SettingsPage() {
                             )) : (
                                 <p className="text-sm text-muted-foreground text-center py-8">No saved addresses.</p>
                             )}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-
-                <TabsContent value="billing" className="mt-6">
-                     <Card>
-                        <CardHeader  className="flex-row items-center justify-between">
-                             <div>
-                                <CardTitle>Payment Methods</CardTitle>
-                                <CardDescription>Your payment is securely handled by our checkout partner.</CardDescription>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="text-sm text-muted-foreground text-center py-8">
-                                <p>You will be redirected to our secure payment processor to add billing information during checkout.</p>
-                            </div>
                         </CardContent>
                     </Card>
                 </TabsContent>
@@ -337,5 +419,3 @@ export default function SettingsPage() {
         </div>
     );
 }
-
-    
