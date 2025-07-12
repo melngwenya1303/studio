@@ -561,8 +561,8 @@ export default function AiCreateView({}: AiCreateViewProps) {
                 <div className="w-[350px] flex-shrink-0 flex flex-col p-4 border-r">
                     <div className="flex-grow flex flex-col gap-6 overflow-y-auto pr-2">
                         <header>
-                            <h1 className="text-h2 font-headline">Library</h1>
-                            <p className="text-muted-foreground text-body">Select your product and style.</p>
+                            <h2 className="text-h2 font-headline">Library</h2>
+                            <p className="text-body text-muted-foreground">Select your product and style.</p>
                         </header>
                         
                         <section className="space-y-4">
@@ -826,7 +826,7 @@ export default function AiCreateView({}: AiCreateViewProps) {
                 <div className="w-[400px] flex-shrink-0 flex flex-col p-4 border-l">
                     <div className="flex-grow flex flex-col gap-4">
                         <header className="flex items-center justify-between">
-                            <h1 className="text-h2 font-headline">AI Controls</h1>
+                            <h2 className="text-h2 font-headline">AI Controls</h2>
                         </header>
 
                         <div className="flex-grow space-y-6 overflow-y-auto pr-2">
@@ -933,7 +933,7 @@ export default function AiCreateView({}: AiCreateViewProps) {
                             </section>
 
                             <section className="space-y-4">
-                                <h3 className="text-h3 font-headline">Style</h3>
+                                <Label className="text-h3 font-headline">Style</Label>
                                 <div className="grid grid-cols-2 gap-2">
                                     {STYLES.map(style => (
                                         <button 
