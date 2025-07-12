@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, SetStateAction } from 'react';
 import { motion } from 'framer-motion';
 import { useApp } from '@/contexts/AppContext';
 import Icon from '@/components/shared/icon';
@@ -19,6 +19,8 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
 import { Label } from '../ui/label';
+import { Textarea } from '../ui/textarea';
+import AiOptimizerButton from './ai-optimizer-button';
 
 type ViewMode = 'grid' | 'list';
 type SortOrder = 'newest' | 'oldest';
@@ -61,6 +63,63 @@ const ShareModalContent = ({ creation, user }: { creation: Creation, user: { uid
         </div>
     )
 }
+
+const PublishModalContent = ({ creation, onClose }: { creation: Creation; onClose: () => void }) => {
+    const { toast } = useToast();
+    const [title, setTitle] = useState(creation.title || 'New Design');
+    const [description, setDescription] = useState(creation.prompt || 'A beautiful new design from SurfaceStory.');
+    const [tags, setTags] = useState(creation.style);
+    const [isPublishing, setIsPublishing] = useState(false);
+
+    const handlePublish = () => {
+        setIsPublishing(true);
+        // Simulate API call to Shopify
+        setTimeout(() => {
+            toast({ title: "Published!", description: `"${title}" is now live on your store.` });
+            setIsPublishing(false);
+            onClose();
+        }, 1500);
+    };
+
+    return (
+        <div className="space-y-4">
+            <div className="space-y-2">
+                <Label htmlFor="product-title">Product Title</Label>
+                <div className="flex gap-2">
+                    <Input id="product-title" value={title} onChange={(e) => setTitle(e.target.value)} />
+                    <AiOptimizerButton 
+                        prompt={creation.prompt} 
+                        contentType="title" 
+                        onContentReceived={(content) => setTitle(JSON.parse(content)[0])}
+                    />
+                </div>
+            </div>
+            <div className="space-y-2">
+                <Label htmlFor="product-desc">Product Description</Label>
+                 <div className="flex gap-2 items-start">
+                    <Textarea id="product-desc" value={description} onChange={(e) => setDescription(e.target.value)} rows={5} />
+                    <AiOptimizerButton 
+                        prompt={creation.prompt} 
+                        contentType="description" 
+                        onContentReceived={(content) => setDescription(content)}
+                    />
+                </div>
+            </div>
+             <div className="space-y-2">
+                <Label htmlFor="product-tags">Tags</Label>
+                <Input id="product-tags" value={tags} onChange={(e) => setTags(e.target.value)} placeholder="e.g. fantasy, cyberpunk, animal" />
+             </div>
+            <div className="flex justify-end gap-2 pt-4">
+                <Button variant="ghost" onClick={onClose}>Cancel</Button>
+                <Button onClick={handlePublish} disabled={isPublishing}>
+                    {isPublishing ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Upload" />}
+                    {isPublishing ? 'Publishing...' : 'Publish to Store'}
+                </Button>
+            </div>
+        </div>
+    );
+};
+
 
 export default function DashboardView() {
     const { user, creations, startRemix, fetchMoreCreations, hasMoreCreations, isLoadingCreations } = useApp();
@@ -195,6 +254,15 @@ export default function DashboardView() {
         });
     }, [user]);
 
+    const handlePublish = useCallback((creation: Creation) => {
+        setModal({
+            isOpen: true,
+            title: `Publish to Store: ${creation.title}`,
+            size: 'lg',
+            children: <PublishModalContent creation={creation} onClose={() => setModal(prev => ({...prev, isOpen: false}))} />,
+        });
+    }, []);
+
     return (
         <TooltipProvider>
             <div className="p-4 md:p-8 animate-fade-in">
@@ -254,26 +322,6 @@ export default function DashboardView() {
                                 >
                                     <div className={viewMode === 'grid' ? 'relative w-full h-full' : 'relative w-24 h-24 flex-shrink-0 rounded-lg overflow-hidden'}>
                                         <Image src={creation.url} alt={creation.title || creation.prompt} fill className="object-cover transition-transform duration-300 group-hover:scale-105" />
-                                        {viewMode === 'grid' && (
-                                            <div className="absolute top-2 right-2 flex flex-col gap-2">
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button onClick={() => handleLike(creation.id)} size="icon" variant="ghost" className="bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 hover:text-pink-400">
-                                                            <Icon name="Heart" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent><p>Like</p></TooltipContent>
-                                                </Tooltip>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button onClick={() => handleShare(creation)} size="icon" variant="ghost" className="bg-black/30 text-white backdrop-blur-sm hover:bg-black/50 hover:text-white">
-                                                            <Icon name="Share2" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent><p>Share</p></TooltipContent>
-                                                </Tooltip>
-                                            </div>
-                                        )}
                                     </div>
 
                                     <div className={viewMode === 'grid' ? "absolute inset-0 bg-gradient-to-t from-black/80 to-transparent p-4 flex flex-col justify-end" : "flex-grow"}>
@@ -293,60 +341,51 @@ export default function DashboardView() {
                                         <motion.div 
                                             className={`flex items-center gap-2 mt-2 ${viewMode === 'grid' ? 'opacity-0 group-hover:opacity-100' : ''} transition-opacity duration-300`}
                                         >
+                                            <Button onClick={() => handlePublish(creation)} size="sm" variant="default">
+                                                <Icon name="Upload" className="w-3 h-3" />Publish
+                                            </Button>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
                                                     <Button
                                                         onClick={() => handleRemix(creation)} 
                                                         disabled={!!isRemixing}
                                                         size="sm"
-                                                        variant={viewMode === 'grid' ? 'default' : 'outline'}
-                                                        className={`${viewMode === 'grid' ? 'bg-white/20 text-white backdrop-blur-md hover:bg-white/30' : ''} text-xs font-semibold rounded-full flex items-center gap-1 disabled:opacity-50`}
+                                                        variant="outline"
                                                     >
                                                         {isRemixing === creation.id ? <Icon name="Wand2" className="w-3 h-3 animate-pulse" /> : <Icon name="Sparkles" className="w-3 h-3" />}
-                                                        Remix
                                                     </Button>
                                                 </TooltipTrigger>
-                                                <TooltipContent><p>Remix with AI</p></TooltipContent>
+                                                <TooltipContent><p>Remix</p></TooltipContent>
                                             </Tooltip>
-
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
                                                     <Button
                                                         onClick={() => handleDescribe(creation)}
                                                         disabled={!!isDescribing}
                                                         size="sm"
-                                                        variant={viewMode === 'grid' ? 'default' : 'outline'}
-                                                        className={`${viewMode === 'grid' ? 'bg-white/20 text-white backdrop-blur-md hover:bg-white/30' : ''} text-xs font-semibold rounded-full flex items-center gap-1 disabled:opacity-50`}
+                                                        variant="outline"
                                                     >
                                                         {isDescribing === creation.id ? <Icon name="Wand2" className="w-3 h-3 animate-pulse" /> : <Icon name="BookOpen" className="w-3 h-3" />}
-                                                        Describe
                                                     </Button>
                                                 </TooltipTrigger>
-                                                <TooltipContent><p>Describe with AI</p></TooltipContent>
+                                                <TooltipContent><p>Describe</p></TooltipContent>
                                             </Tooltip>
-                                            
-                                            {viewMode === 'list' && (
-                                                <>
-                                                 <Tooltip>
-                                                    <TooltipTrigger asChild><Button onClick={() => handleShare(creation)} size="sm" variant="outline"><Icon name="Share2" /></Button></TooltipTrigger>
-                                                    <TooltipContent><p>Share</p></TooltipContent>
-                                                </Tooltip>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button
-                                                            onClick={() => handleLike(creation.id)}
-                                                            size="sm"
-                                                            variant="outline"
-                                                            className="text-xs font-semibold rounded-full flex items-center gap-1 hover:text-pink-500"
-                                                        >
-                                                            <Icon name="Heart" className="w-3 h-3" />
-                                                            Like
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent><p>Like</p></TooltipContent>
-                                                </Tooltip>
-                                                </>
-                                            )}
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button onClick={() => handleLike(creation.id)} size="sm" variant="outline" className="hover:text-pink-500">
+                                                        <Icon name="Heart" className="w-3 h-3" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent><p>Like</p></TooltipContent>
+                                            </Tooltip>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button onClick={() => handleShare(creation)} size="sm" variant="outline">
+                                                        <Icon name="Share2" className="w-3 h-3" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent><p>Share</p></TooltipContent>
+                                            </Tooltip>
                                         </motion.div>
                                     </div>
                                 </motion.div>
