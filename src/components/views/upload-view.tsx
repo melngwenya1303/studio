@@ -141,8 +141,7 @@ export default function UploadView({ onBack }: UploadViewProps) {
             };
             const savedCreation = await addCreation(newCreation);
             toast({ title: 'Success!', description: `'${savedCreation.title}' has been saved to My Designs.` });
-        } catch (error: any)
-{
+        } catch (error: any) {
             toast({ variant: 'destructive', title: 'Save Error', description: error.message });
         } finally {
             setIsSaving(false);
