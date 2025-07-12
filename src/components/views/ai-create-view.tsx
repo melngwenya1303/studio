@@ -20,21 +20,18 @@ import { Textarea } from '@/components/ui/textarea';
 import Image from 'next/image';
 import { Checkbox } from '@/components/ui/checkbox';
 import Link from 'next/link';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipProvider, TooltipTrigger, TooltipContent } from '@/components/ui/tooltip';
-import { Separator } from '@/components/ui/separator';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { cn } from '@/lib/utils';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { useRouter } from 'next/navigation';
 import { Input } from '../ui/input';
 import { Switch } from '../ui/switch';
+import { describeImage } from '@/ai/flows/describe-image';
 
-type AiCreateViewProps = {
-    onBack: () => void;
-};
+type AiCreateViewProps = {};
 
 type StructuredPrompt = {
     subject: string;
@@ -42,10 +39,11 @@ type StructuredPrompt = {
     negativePrompt: string;
 }
 
-export default function AiCreateView({ onBack }: AiCreateViewProps) {
-    const { user, addCreation, remixData, clearRemixData, addToCart } = useApp();
+export default function AiCreateView({}: AiCreateViewProps) {
+    const { user, addCreation, remixData, clearRemixData, addToCart, startRemix } = useApp();
     const { toast } = useToast();
     const router = useRouter();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [prompt, setPrompt] = useState('');
     const [selectedDevice, setSelectedDevice] = useState<Device>(DEVICES[0]);
@@ -89,6 +87,11 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     const [seed, setSeed] = useState<number | null>(null);
     const [isSeedLocked, setIsSeedLocked] = useState(false);
 
+    // Upload State
+    const [uploadedImage, setUploadedImage] = useState<string | null>(null);
+    const [isAnalyzing, setIsAnalyzing] = useState(false);
+    const [analyzedPrompts, setAnalyzedPrompts] = useState<string[]>([]);
+
     const handleDeviceSelection = useCallback((device: Device) => {
         setSelectedDevice(device);
         if (device.models && device.models.length > 0) {
@@ -99,28 +102,34 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     }, []);
     
     const currentCanvas = selectedModel || selectedDevice;
+    const currentImage = generatedDecal?.url || uploadedImage;
 
     useEffect(() => {
         if (remixData) {
             if (remixData.prompt) {
                 setPrompt(remixData.prompt);
-                // When a prompt is passed from enhancer, clear the existing image if it's not a full remix
-                if (!remixData.url) {
-                    setGeneratedDecal(null);
-                }
             } 
             
             if (remixData.url) { 
-                 setGeneratedDecal({
+                 const remixedData = {
                     url: remixData.url,
                     prompt: remixData.prompt || '',
                     title: remixData.title || '',
                     style: remixData.style || STYLES[0].name,
                     deviceType: ('deviceType' in remixData && remixData.deviceType) ? remixData.deviceType : DEVICES[0].name,
-                });
+                };
+
+                // Determine if the remix data came from an upload or AI generation
+                if (remixedData.style === 'Custom') {
+                    setUploadedImage(remixedData.url);
+                    setGeneratedDecal(null);
+                } else {
+                    setGeneratedDecal(remixedData);
+                    setUploadedImage(null);
+                }
             }
 
-            if (remixData.style) {
+            if (remixData.style && remixData.style !== 'Custom') {
                 const style = STYLES.find(s => s.name === remixData.style) || STYLES[0];
                 setSelectedStyle(style);
             }
@@ -244,6 +253,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
 
         setIsLoading(true);
         setGeneratedDecal(null);
+        setUploadedImage(null);
         setGeneratedMockup(null);
         setStory(null);
         setRemixSuggestions([]);
@@ -300,7 +310,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     }, [prompt, structuredPrompt, isAdvancedPrompt, selectedModel, selectedDevice, selectedStyle.name, toast, isSeedLocked, seed]);
     
      const handleGenerateMockup = useCallback(async () => {
-        if (!generatedDecal?.url || !mockupPrompt.trim()) {
+        if (!currentImage || !mockupPrompt.trim()) {
             toast({ variant: 'destructive', title: 'Input Required', description: 'Please describe a scene for the mockup.' });
             return;
         }
@@ -309,7 +319,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         try {
             const result = await generateImage({
                 prompt: mockupPrompt,
-                baseImageUrl: generatedDecal.url,
+                baseImageUrl: currentImage,
             });
 
             if (result.blocked || !result.media) {
@@ -320,7 +330,6 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                 });
                 setIsGeneratingMockup(false);
             } else {
-                // In a real async flow, we'd get a job ID. Here we simulate completion.
                 setGeneratedMockup(result.media);
                 setIsGeneratingMockup(false);
             }
@@ -328,7 +337,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
             toast({ variant: 'destructive', title: 'Mockup Generation Error', description: error.message });
             setIsGeneratingMockup(false);
         }
-    }, [generatedDecal, mockupPrompt, toast]);
+    }, [currentImage, mockupPrompt, toast]);
 
 
     const handleEnhancePrompt = useCallback(async () => {
@@ -347,7 +356,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     }, [prompt, selectedDevice, selectedModel, selectedStyle.name, toast]);
 
     const handleSaveCreation = useCallback(async () => {
-        if (!generatedDecal) return;
+        if (!currentImage) return;
         if (!user) {
             toast({ variant: "destructive", title: "Login Required", description: "Please sign in to save your creations." });
             router.push('/login');
@@ -355,20 +364,43 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         }
         setIsSaving(true);
         try {
-            const savedCreation = await addCreation(generatedDecal);
+            const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
+            const isUpload = !!uploadedImage;
+
+            const creationData = {
+                url: currentImage,
+                prompt: isUpload ? 'User Uploaded Artwork' : (generatedDecal?.prompt || ''),
+                title: isUpload ? 'My Uploaded Design' : (generatedDecal?.title || ''),
+                style: isUpload ? 'Custom' : (generatedDecal?.style || ''),
+                deviceType: deviceName,
+            };
+
+            const savedCreation = await addCreation(creationData);
             toast({ title: 'Success!', description: `'${savedCreation.title}' has been saved to My Designs.` });
         } catch (error: any) {
             toast({ variant: "destructive", title: "Save Error", description: error.message });
         } finally {
             setIsSaving(false);
         }
-    }, [generatedDecal, user, addCreation, toast, router]);
+    }, [currentImage, uploadedImage, generatedDecal, user, addCreation, toast, router, selectedDevice, selectedModel]);
 
     const handleAddToCart = useCallback(() => {
-      if (!generatedDecal) return;
-      addToCart(generatedDecal);
+      if (!currentImage) return;
+      
+      const deviceName = selectedModel ? `${selectedDevice.name} (${selectedModel.name})` : selectedDevice.name;
+      const isUpload = !!uploadedImage;
+
+      const cartItem = {
+            url: currentImage,
+            prompt: isUpload ? 'User Uploaded Artwork' : (generatedDecal?.prompt || ''),
+            title: isUpload ? 'My Uploaded Design' : (generatedDecal?.title || ''),
+            style: isUpload ? 'Custom' : (generatedDecal?.style || ''),
+            deviceType: deviceName,
+      };
+
+      addToCart(cartItem);
       router.push('/checkout');
-    }, [generatedDecal, addToCart, router]);
+    }, [currentImage, uploadedImage, generatedDecal, addToCart, router, selectedDevice, selectedModel]);
 
     const handleGetFeedback = useCallback(async () => {
         if (!generatedDecal) return;
@@ -420,7 +452,6 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     const handleTellStory = async () => {
         if (!story || isSpeaking) return;
         
-        // If we already have audio, play it.
         if (story.audio && audioRef.current) {
             setIsSpeaking(true);
             audioRef.current.src = story.audio;
@@ -429,11 +460,10 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
             return;
         }
 
-        // Otherwise, generate it.
         setIsSpeaking(true);
         try {
             const { media } = await generateAudio({ text: story.text });
-            setStory(prev => prev ? { ...prev, audio: media } : null); // Cache the audio
+            setStory(prev => prev ? { ...prev, audio: media } : null);
             if (audioRef.current) {
                 audioRef.current.src = media;
                 audioRef.current.play();
@@ -452,6 +482,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         setSelectedModel(DEVICES[0].models ? DEVICES[0].models[0] : null);
         setSelectedStyle(STYLES[0]);
         setGeneratedDecal(null);
+        setUploadedImage(null);
         setGeneratedMockup(null);
         setStory(null);
         setIsLoading(false);
@@ -478,6 +509,47 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         setStructuredPrompt(prev => ({...prev, [field]: value}));
     }
 
+    const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const file = event.target.files?.[0];
+        if (file) {
+            if (!file.type.startsWith('image/')) {
+                toast({ variant: 'destructive', title: 'Invalid File Type', description: 'Please upload an image file (PNG, JPG, etc.).' });
+                return;
+            }
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setUploadedImage(reader.result as string);
+                setGeneratedDecal(null); // Clear AI image when uploading
+                setAnalyzedPrompts([]);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+    
+    const handleAnalyzeImage = async () => {
+        if (!uploadedImage) return;
+        setIsAnalyzing(true);
+        setAnalyzedPrompts([]);
+        try {
+            const result = await describeImage({ imageDataUri: uploadedImage });
+            setAnalyzedPrompts(result.prompts);
+            toast({ title: "Analysis Complete", description: "The AI has generated some prompt ideas for you." });
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Analysis Failed', description: error.message });
+        } finally {
+            setIsAnalyzing(false);
+        }
+    };
+
+    const handleRemixWithPrompt = (prompt: string) => {
+        if (!uploadedImage) return;
+        startRemix({
+            prompt: prompt,
+            url: uploadedImage,
+            style: 'Custom',
+        });
+    };
+
     return (
         <TooltipProvider>
             <div className="flex h-full w-full">
@@ -486,7 +558,6 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                 </Modal>
                 <audio ref={audioRef} className="hidden" />
 
-                {/* Left Panel: Library */}
                 <div className="w-[350px] flex-shrink-0 flex flex-col p-4 border-r">
                     <div className="flex-grow flex flex-col gap-6 overflow-y-auto pr-2">
                         <header>
@@ -495,9 +566,9 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                         </header>
                         
                         <section className="space-y-4">
-                            <h3 className="text-h3 font-headline">Product</h3>
+                            <h3 className="text-h3 font-headline">1. Your Canvas</h3>
                             <div className="space-y-2">
-                                <Label htmlFor="device-type">Product Type</Label>
+                                <Label>Product Type</Label>
                                 <Select
                                     value={selectedDevice.name}
                                     onValueChange={(value) => {
@@ -506,7 +577,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                     }}
                                     disabled={isLoading}
                                 >
-                                    <SelectTrigger id="device-type" className="w-full">
+                                    <SelectTrigger className="w-full">
                                         <SelectValue placeholder="Select a device" />
                                     </SelectTrigger>
                                     <SelectContent>
@@ -524,7 +595,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
 
                             {selectedDevice.models && selectedDevice.models.length > 0 && (
                                 <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} transition={{ duration: 0.3 }} className="space-y-2 overflow-hidden">
-                                    <Label htmlFor="device-model">Model</Label>
+                                    <Label>Model</Label>
                                     <Select
                                         value={selectedModel?.name}
                                         onValueChange={(value) => {
@@ -533,7 +604,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                         }}
                                         disabled={isLoading}
                                     >
-                                        <SelectTrigger id="device-model" className="w-full">
+                                        <SelectTrigger className="w-full">
                                             <SelectValue placeholder="Select a model" />
                                         </SelectTrigger>
                                         <SelectContent>
@@ -547,10 +618,24 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                 </motion.div>
                             )}
                         </section>
+
+                        <section className="space-y-4">
+                             <h3 className="text-h3 font-headline">2. Your Asset</h3>
+                            <div className="space-y-2">
+                                <Label>Upload Your Artwork</Label>
+                                <Button id="upload-button" variant="outline" className="w-full h-24 border-dashed" onClick={() => fileInputRef.current?.click()}>
+                                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                                        <Icon name="Upload" className="w-6 h-6" />
+                                        <span>Click to upload</span>
+                                        <span className="text-xs">PNG, JPG, GIF</span>
+                                    </div>
+                                </Button>
+                                <input type="file" ref={fileInputRef} onChange={handleFileChange} accept="image/*" className="hidden" />
+                            </div>
+                        </section>
                     </div>
                 </div>
 
-                {/* Center Canvas: Stage */}
                 <motion.div 
                     initial={{ scale: 0.8, opacity: 0 }} 
                     animate={{ scale: 1, opacity: 1 }} 
@@ -608,7 +693,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                             />
                                         </motion.div>
                                         <AnimatePresence>
-                                            {generatedDecal && (
+                                            {currentImage && (
                                                 <motion.div
                                                     className="absolute"
                                                     initial={{ opacity: 0, scale: 0.8 }}
@@ -625,7 +710,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                     }}
                                                 >
                                                     <Image
-                                                        src={generatedDecal.url}
+                                                        src={currentImage}
                                                         alt="Generated Decal"
                                                         fill
                                                         className="object-contain"
@@ -677,9 +762,9 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                             value={mockupPrompt} 
                                                             onChange={e => setMockupPrompt(e.target.value)}
                                                             placeholder="e.g., on a sunlit desk in a cozy cafe"
-                                                            disabled={!generatedDecal || isGeneratingMockup}
+                                                            disabled={!currentImage || isGeneratingMockup}
                                                         />
-                                                        <Button onClick={handleGenerateMockup} disabled={!generatedDecal || !mockupPrompt.trim() || isGeneratingMockup}>
+                                                        <Button onClick={handleGenerateMockup} disabled={!currentImage || !mockupPrompt.trim() || isGeneratingMockup}>
                                                             Generate
                                                         </Button>
                                                     </div>
@@ -723,7 +808,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                             <ToggleGroupItem value="3D" aria-label="3D Preview">
                                                <Icon name="Box" className="w-4 h-4 mr-2" /> 3D
                                             </ToggleGroupItem>
-                                            <ToggleGroupItem value="mockup" aria-label="Mockup Preview" disabled={!generatedDecal}>
+                                            <ToggleGroupItem value="mockup" aria-label="Mockup Preview" disabled={!currentImage}>
                                                <Icon name="Camera" className="w-4 h-4 mr-2" /> Mockups
                                             </ToggleGroupItem>
                                         </ToggleGroup>
@@ -738,16 +823,13 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                     </div>
                 </motion.div>
 
-                {/* Right Panel: Controls */}
                 <div className="w-[400px] flex-shrink-0 flex flex-col p-4 border-l">
                     <div className="flex-grow flex flex-col gap-4">
                         <header className="flex items-center justify-between">
-                            <h1 className="text-h2 font-headline">Controls</h1>
-                            <Button variant="ghost" size="icon" onClick={onBack}><Icon name="X" /></Button>
+                            <h1 className="text-h2 font-headline">AI Controls</h1>
                         </header>
 
                         <div className="flex-grow space-y-6 overflow-y-auto pr-2">
-                            {/* Vision */}
                             <section className="space-y-4">
                                 <h3 className="text-h3 font-headline">Vision</h3>
                                 <AnimatePresence mode="wait">
@@ -850,7 +932,6 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                 </div>
                             </section>
 
-                            {/* Style */}
                             <section className="space-y-4">
                                 <h3 className="text-h3 font-headline">Style</h3>
                                 <div className="grid grid-cols-2 gap-2">
@@ -874,15 +955,42 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                 </div>
                             </section>
 
-                            {/* AI Coach */}
-                            <section className="space-y-3 p-3 bg-muted/50 rounded-lg">
+                             <section className="space-y-3 p-3 bg-muted/50 rounded-lg">
                                 <div className="flex items-center justify-between">
-                                  <h3 className="text-h3 font-headline flex items-center gap-2"><Icon name="Bot" className="text-primary" /> AI Coach</h3>
-                                  <Button variant="outline" size="sm" onClick={handleGetRemixSuggestions} disabled={!prompt.trim() || isGettingRemix || isLoading}>
-                                      {isGettingRemix ? 'Getting ideas...' : 'Get Remix Ideas'}
-                                  </Button>
+                                  <h3 className="text-h3 font-headline flex items-center gap-2"><Icon name={uploadedImage ? 'Camera' : 'Bot'} className="text-primary" />{uploadedImage ? 'AI Deconstruction' : 'AI Coach'}</h3>
+                                  {uploadedImage ? (
+                                     <Button variant="outline" size="sm" onClick={handleAnalyzeImage} disabled={!uploadedImage || isAnalyzing}>
+                                        {isAnalyzing ? 'Analyzing...' : 'Analyze Image'}
+                                     </Button>
+                                  ) : (
+                                      <Button variant="outline" size="sm" onClick={handleGetRemixSuggestions} disabled={!prompt.trim() || isGettingRemix || isLoading}>
+                                          {isGettingRemix ? 'Getting ideas...' : 'Get Remix Ideas'}
+                                      </Button>
+                                  )}
                                 </div>
-                                {remixSuggestions.length > 0 && (
+                                {uploadedImage ? (
+                                    analyzedPrompts.length > 0 && (
+                                    <motion.div 
+                                        initial={{opacity: 0, y: -10}} animate={{opacity: 1, y: 0}}
+                                        className="text-sm text-muted-foreground space-y-2"
+                                    >
+                                        <p className="text-xs">Try remixing your upload with one of these AI-generated prompts:</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {analyzedPrompts.map((suggestion, i) => (
+                                                <motion.button 
+                                                    key={i}
+                                                    className="px-3 py-1 bg-background rounded-full text-xs hover:bg-primary/10 border"
+                                                    onClick={() => handleRemixWithPrompt(suggestion)}
+                                                    whileHover={{scale: 1.05}} whileTap={{scale: 0.95}}
+                                                >
+                                                    "{suggestion}"
+                                                </motion.button>
+                                            ))}
+                                        </div>
+                                    </motion.div>
+                                    )
+                                ) : (
+                                    remixSuggestions.length > 0 && (
                                     <motion.div 
                                         initial={{opacity: 0, y: -10}} animate={{opacity: 1, y: 0}}
                                         className="text-sm text-muted-foreground space-y-2"
@@ -905,13 +1013,14 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                             ))}
                                         </div>
                                     </motion.div>
+                                    )
                                 )}
                             </section>
                         </div>
                         
                         <div className="mt-auto pt-6 space-y-3 border-t">
                              <div className="flex items-start space-x-2">
-                                <Checkbox id="terms" checked={policyAccepted} onCheckedChange={(checked) => setPolicyAccepted(Boolean(checked))} disabled={isLoading} className="mt-1"/>
+                                <Checkbox id="terms" checked={policyAccepted} onCheckedChange={(checked) => setPolicyAccepted(Boolean(checked))} disabled={isLoading || !!uploadedImage} className="mt-1"/>
                                 <label
                                     htmlFor="terms"
                                     className="text-sm text-muted-foreground leading-snug"
@@ -919,11 +1028,11 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                     I agree to the{' '}
                                     <Link href="/privacy-policy" className="underline text-primary hover:text-primary/80" target="_blank">
                                         Content Policy
-                                    </Link> and understand that my design may be reviewed for safety.
+                                    </Link> and understand that my design may be reviewed for safety. For uploads, I confirm I own the rights.
                                 </label>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Button onClick={() => handleGenerate()} disabled={isLoading || !(prompt.trim() || structuredPrompt.subject.trim()) || !policyAccepted}
+                                <Button onClick={() => handleGenerate()} disabled={isLoading || !(prompt.trim() || structuredPrompt.subject.trim()) || !policyAccepted || !!uploadedImage}
                                     className="flex-grow text-lg h-12 text-white transition-all duration-300 bg-gradient-to-r from-primary to-accent hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none">
                                     <motion.span whileHover={{ y: -1 }} whileTap={{ y: 1 }} className="flex items-center gap-2">
                                         <Icon name={isLoading ? 'Wand2' : 'Sparkles'} className={isLoading ? "animate-pulse" : ""} />
@@ -942,7 +1051,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                 </Tooltip>
                             </div>
                             
-                            {generatedDecal && (
+                            {currentImage && (
                                 <motion.div 
                                     initial={{ opacity: 0, y: 10 }}
                                     animate={{ opacity: 1, y: 0 }}
@@ -957,16 +1066,18 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                             <Icon name="ShoppingCart" /> Add to Cart
                                         </Button>
                                     </div>
-                                    <div className="grid grid-cols-2 gap-3">
-                                        <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
-                                            {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
-                                            Edit with AI ✨
-                                        </Button>
-                                        <Button variant="outline" onClick={handleTellStory} disabled={!story || isSpeaking} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
-                                            <Icon name={isSpeaking ? "Volume2" : "BookOpen"} className={isSpeaking ? "animate-pulse" : ""} />
-                                            {isSpeaking ? "Playing..." : "Tell Me the Story"}
-                                        </Button>
-                                    </div>
+                                    {!uploadedImage && generatedDecal && (
+                                        <div className="grid grid-cols-2 gap-3">
+                                            <Button variant="outline" onClick={handleGetFeedback} disabled={isGettingFeedback} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
+                                                {isGettingFeedback ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
+                                                Edit with AI ✨
+                                            </Button>
+                                            <Button variant="outline" onClick={handleTellStory} disabled={!story || isSpeaking} className="w-full border-primary/50 text-primary hover:bg-primary/10 hover:text-primary">
+                                                <Icon name={isSpeaking ? "Volume2" : "BookOpen"} className={isSpeaking ? "animate-pulse" : ""} />
+                                                {isSpeaking ? "Playing..." : "Tell Me the Story"}
+                                            </Button>
+                                        </div>
+                                    )}
                                 </motion.div>
                             )}
                         </div>
