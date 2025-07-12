@@ -59,9 +59,8 @@ const GalleryCard = React.memo(function GalleryCard({
                </div>
             </CardContent>
            <div className="p-4 flex flex-col flex-grow">
-                <p className="text-base font-semibold text-card-foreground mb-2 line-clamp-2" title={item.prompt}>{item.prompt}</p>
-                <p className="text-sm text-muted-foreground italic mb-4 line-clamp-2">Curator's Note: "{item.curatorNote}"</p>
-                <div className="flex items-center gap-2 text-sm mt-auto">
+                <p className="text-sm font-semibold text-card-foreground mb-2 line-clamp-3" title={item.prompt}>{item.prompt}</p>
+                <div className="flex items-center gap-2 text-sm mt-auto pt-2">
                    <Badge variant="outline" className="flex-shrink-0">{item.style}</Badge>
                    <div className="flex items-center gap-1.5 text-muted-foreground">
                        <Icon name="Heart" className="text-pink-500"/>
@@ -88,7 +87,7 @@ const GalleryCard = React.memo(function GalleryCard({
                     <TooltipTrigger asChild>
                         <Button onClick={() => onRemix(item)} disabled={isRemixing} className="flex-grow">
                             {isRemixing ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Sparkles" />}
-                            Remix
+                            Remix with Prompt
                         </Button>
                     </TooltipTrigger>
                     <TooltipContent><p>Remix with AI</p></TooltipContent>
@@ -119,8 +118,7 @@ const GalleryListItem = React.memo(function GalleryListItem({
                 <Image src={item.url} alt={item.prompt} fill className="object-cover rounded-t-lg md:rounded-l-lg md:rounded-r-none" {...{ 'data-ai-hint': item['data-ai-hint'] }} />
             </div>
             <div className="p-4 flex flex-col flex-grow self-stretch">
-                <p className="text-base font-semibold text-card-foreground mb-2 line-clamp-2" title={item.prompt}>{item.prompt}</p>
-                <p className="text-sm text-muted-foreground italic mb-4 line-clamp-2">Curator's Note: "{item.curatorNote}"</p>
+                <p className="text-sm font-semibold text-card-foreground mb-2 line-clamp-2" title={item.prompt}>{item.prompt}</p>
                 <div className="flex-grow"></div>
                 <div className="flex items-center justify-between mt-auto">
                     <div className="flex items-center gap-2 text-sm">
@@ -231,42 +229,9 @@ export default function InspirationGalleryView() {
         }
     }, [startRemix, toast]);
 
-    const handleRemix = useCallback(async (item: GalleryItem) => {
-        setIsRemixing(item.id);
-        try {
-            const result = await getRemixSuggestions({ prompt: item.prompt });
-            setModal({
-                isOpen: true,
-                title: 'Intelligent Remix Ideas',
-                children: (
-                    <div className="space-y-4">
-                        <p>Not sure where to start? Try one of these AI-powered ideas to remix this design!</p>
-                        <ul className="space-y-3">
-                             <li onClick={() => {
-                                startRemix(item);
-                                setModal(prev => ({ ...prev, isOpen: false }));
-                            }} className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
-                                <p className="font-semibold">Just take me to the original</p>
-                            </li>
-                            {result.suggestions.map((p, i) => (
-                                <li key={i} onClick={() => {
-                                    startRemix({ ...item, prompt: p });
-                                    setModal(prev => ({ ...prev, isOpen: false }));
-                                }} className="p-3 bg-muted rounded-lg cursor-pointer hover:bg-primary/10 dark:hover:bg-primary/20 transition-colors">
-                                    <p className="font-mono text-sm">"{p}"</p>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                ),
-            });
-        } catch (error: any) {
-            toast({ variant: 'destructive', title: 'Error Getting Suggestions', description: error.message });
-            startRemix(item);
-        } finally {
-            setIsRemixing(null);
-        }
-    }, [startRemix, toast]);
+    const handleRemix = useCallback((item: GalleryItem) => {
+        startRemix(item);
+    }, [startRemix]);
 
     const handleLike = useCallback((itemId: number) => {
         toast({ title: 'Liked!', description: 'You liked this design.' });
