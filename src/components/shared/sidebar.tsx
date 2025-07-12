@@ -25,7 +25,7 @@ const navItems = [
 ];
 
 const bottomNavItems = [
-    { href: '/settings', name: 'Creator Settings', icon: 'Settings' as IconName },
+    { href: '/settings', name: 'Creator Admin', icon: 'Settings' as IconName },
 ]
 
 const adminNavItems = [

@@ -18,7 +18,7 @@ import { useToast } from '@/hooks/use-toast';
 import Modal from '@/components/shared/modal';
 import { Switch } from '@/components/ui/switch';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-
+import { Bar, BarChart, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, Legend } from "recharts";
 
 // Types
 type Address = {
@@ -32,14 +32,6 @@ type Address = {
   isDefault: boolean;
 };
 
-type PaymentMethod = {
-  id: string;
-  type: string;
-  last4: string;
-  expiry: string;
-  isDefault: boolean;
-};
-
 type Order = {
   id: string;
   createdAt: { toDate: () => Date };
@@ -48,6 +40,20 @@ type Order = {
   tracking?: string;
   items: any[];
 };
+
+const mockCreatorAnalytics = {
+    totalCreations: 128,
+    totalLikes: 4300,
+    totalSales: 152,
+    topDesigns: [
+        { name: 'Bioluminescent Stag', sales: 45 },
+        { name: 'Cyberpunk Alley', sales: 31 },
+        { name: 'Astronaut Discovery', sales: 25 },
+        { name: 'Zen Garden Koi', sales: 18 },
+        { name: 'Steampunk Owl', sales: 11 },
+    ]
+}
+
 
 const AddressForm = ({ address, onSave, onCancel }: { address?: Address | null, onSave: (addr: Omit<Address, 'id'>) => void, onCancel: () => void }) => {
     const [formData, setFormData] = useState({
@@ -116,7 +122,7 @@ const AddressForm = ({ address, onSave, onCancel }: { address?: Address | null, 
 };
 
 
-export default function SettingsPage() {
+export default function CreatorAdminPage() {
     const { user } = useApp();
     const { toast } = useToast();
     const db = useMemo(() => getFirestore(firebaseApp), []);
@@ -278,25 +284,97 @@ export default function SettingsPage() {
                 />
             </Modal>
             <header className="mb-8">
-                <h1 className="text-h1 font-headline flex items-center gap-3"><Icon name="Settings" /> Creator Settings</h1>
-                <p className="text-muted-foreground mt-1 text-body">Manage your profile, integrations, and order history.</p>
+                <h1 className="text-h1 font-headline flex items-center gap-3"><Icon name="Settings" /> Creator Admin</h1>
+                <p className="text-muted-foreground mt-1 text-body">Manage your profile, integrations, sales, and analytics.</p>
             </header>
 
-            <Tabs defaultValue="profile" className="w-full">
-                <TabsList className="grid w-full grid-cols-4">
+            <Tabs defaultValue="analytics" className="w-full">
+                <TabsList className="grid w-full grid-cols-5">
+                    <TabsTrigger value="analytics"><Icon name="PieChart" /> Analytics</TabsTrigger>
                     <TabsTrigger value="profile"><Icon name="UserCircle" /> Profile</TabsTrigger>
                     <TabsTrigger value="integrations"><Icon name="KeyRound" /> Integrations</TabsTrigger>
                     <TabsTrigger value="shipping"><Icon name="Home" /> Shipping</TabsTrigger>
                     <TabsTrigger value="orders"><Icon name="Package" /> Order History</TabsTrigger>
                 </TabsList>
                 
+                <TabsContent value="analytics" className="mt-6">
+                    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 mb-4">
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Total Creations</CardTitle>
+                                <Icon name="Brush" className="text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{mockCreatorAnalytics.totalCreations}</div>
+                                <p className="text-xs text-muted-foreground">+15 from last month</p>
+                            </CardContent>
+                        </Card>
+                         <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Total Likes</CardTitle>
+                                <Icon name="Heart" className="text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{mockCreatorAnalytics.totalLikes.toLocaleString()}</div>
+                                <p className="text-xs text-muted-foreground">+25% from last month</p>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                <CardTitle className="text-sm font-medium">Total Sales</CardTitle>
+                                <Icon name="ShoppingCart" className="text-muted-foreground" />
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-2xl font-bold">{mockCreatorAnalytics.totalSales}</div>
+                                <p className="text-xs text-muted-foreground">+10 from last month</p>
+                            </CardContent>
+                        </Card>
+                    </div>
+                     <Card>
+                        <CardHeader>
+                            <CardTitle>Top Performing Designs</CardTitle>
+                            <CardDescription>Your most popular designs by sales.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="h-[300px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={mockCreatorAnalytics.topDesigns} layout="vertical">
+                                    <CartesianGrid horizontal={false} strokeDasharray="3 3" />
+                                    <XAxis type="number" stroke="#888888" fontSize={12} tickLine={false} axisLine={false} />
+                                    <YAxis 
+                                        type="category" 
+                                        dataKey="name" 
+                                        width={120} 
+                                        stroke="#888888" 
+                                        fontSize={12} 
+                                        tickLine={false} 
+                                        axisLine={false} 
+                                    />
+                                    <Tooltip
+                                      cursor={{ fill: 'hsla(var(--muted))' }}
+                                      contentStyle={{
+                                        backgroundColor: "hsl(var(--background))",
+                                        border: "1px solid hsl(var(--border))",
+                                        borderRadius: "var(--radius)"
+                                      }}
+                                    />
+                                    <Bar dataKey="sales" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </CardContent>
+                    </Card>
+                </TabsContent>
+                
                 <TabsContent value="profile" className="mt-6">
                     <Card>
                         <CardHeader>
                             <CardTitle>Personal Information</CardTitle>
-                            <CardDescription>Update your account details here.</CardDescription>
+                            <CardDescription>Update your account details here. This information may be displayed publicly.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="displayName">Display Name</Label>
+                                <Input id="displayName" defaultValue={user?.name || ''} />
+                            </div>
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email Address</Label>
                                 <Input id="email" type="email" defaultValue={user?.email || ''} disabled />
@@ -374,8 +452,8 @@ export default function SettingsPage() {
                 <TabsContent value="orders" className="mt-6">
                     <Card>
                         <CardHeader>
-                            <CardTitle>Order History</CardTitle>
-                            <CardDescription>Review your past purchases.</CardDescription>
+                            <CardTitle>Your Order History</CardTitle>
+                            <CardDescription>Review all your past purchases and sales.</CardDescription>
                         </CardHeader>
                         <CardContent>
                             <Table>
