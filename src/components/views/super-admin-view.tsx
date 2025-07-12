@@ -199,10 +199,10 @@ export default function SuperAdminView() {
     }, []);
     
     const getStatusVariant = useCallback((status: string) => {
-        switch (status) {
-            case 'Shipped': return 'default';
-            case 'Processing': return 'secondary';
-            case 'Delivered': return 'outline';
+        switch (status.toLowerCase()) {
+            case 'shipped': return 'default';
+            case 'processing': return 'secondary';
+            case 'delivered': return 'outline';
             default: return 'outline';
         }
     }, []);
@@ -493,3 +493,5 @@ export default function SuperAdminView() {
         </div>
     );
 }
+
+    
