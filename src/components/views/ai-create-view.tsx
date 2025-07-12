@@ -50,7 +50,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     const [isGettingFeedback, setIsGettingFeedback] = useState(false);
     const [remixSuggestions, setRemixSuggestions] = useState<string[]>([]);
     const [isGettingRemix, setIsGettingRemix] = useState(false);
-    const [story, setStory] = useState<{ text: string; audio: string } | null>(null);
+    const [story, setStory] = useState<{ text: string; audio?: string } | null>(null);
     const [isSaving, setIsSaving] = useState(false);
     const [policyAccepted, setPolicyAccepted] = useState(false);
     const [modal, setModal] = useState({ isOpen: false, title: '', children: <></>, size: 'md' as 'md' | 'lg' | 'xl' });
@@ -188,7 +188,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
     };
 
     const handleTextToSpeech = async () => {
-        if (!prompt.trim()) return;
+        if (!prompt.trim() || isSpeaking) return;
         setIsSpeaking(true);
         try {
             const { media } = await generateAudio({ text: prompt });
@@ -246,7 +246,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                 title: result.title 
             };
             setGeneratedDecal(newDecal);
-            setStory({ text: result.story, audio: result.storyAudio });
+            setStory({ text: result.story });
 
         } catch (error: any) {
             toast({ variant: "destructive", title: "Generation Error", description: error.message, duration: 5000 });
@@ -373,13 +373,31 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
 
     const handleTellStory = async () => {
         if (!story || isSpeaking) return;
-        setIsSpeaking(true);
-        if (audioRef.current) {
+        
+        // If we already have audio, play it.
+        if (story.audio && audioRef.current) {
+            setIsSpeaking(true);
             audioRef.current.src = story.audio;
             audioRef.current.play();
             audioRef.current.onended = () => setIsSpeaking(false);
+            return;
         }
-    }
+
+        // Otherwise, generate it.
+        setIsSpeaking(true);
+        try {
+            const { media } = await generateAudio({ text: story.text });
+            setStory(prev => prev ? { ...prev, audio: media } : null); // Cache the audio
+            if (audioRef.current) {
+                audioRef.current.src = media;
+                audioRef.current.play();
+                audioRef.current.onended = () => setIsSpeaking(false);
+            }
+        } catch (error: any) {
+            toast({ variant: "destructive", title: "Audio Generation Error", description: error.message });
+            setIsSpeaking(false);
+        }
+    };
     
     const handleStartOver = useCallback(() => {
         setPrompt('');
