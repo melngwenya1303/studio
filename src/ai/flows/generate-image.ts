@@ -66,6 +66,11 @@ const generateImageFlow = ai.defineFlow(
     outputSchema: GenerateImageOutputSchema,
   },
   async (input) => {
+    // This flow now simulates an asynchronous job.
+    // In a real-world scenario, this would create a job document in Firestore
+    // and push a message to a Cloud Tasks queue. Another function would listen
+    // to this queue, perform the generation, and update the job document.
+
     const checkResult = await checkForProhibitedContent({ prompt: input.prompt });
 
     if (checkResult.is_prohibited) {
@@ -86,6 +91,7 @@ const generateImageFlow = ai.defineFlow(
       ]
     }
 
+    // The actual generation is now "awaited" as if it's a background job completing.
     const {media} = await ai.generate({
       model: model,
       prompt: generationPrompt,

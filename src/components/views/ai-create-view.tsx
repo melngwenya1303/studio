@@ -274,12 +274,14 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                     title: 'Mockup Generation Failed',
                     description: result.reason || 'An unexpected error occurred.',
                 });
+                setIsGeneratingMockup(false);
             } else {
+                // In a real async flow, we'd get a job ID. Here we simulate completion.
                 setGeneratedMockup(result.media);
+                setIsGeneratingMockup(false);
             }
         } catch (error: any) {
             toast({ variant: 'destructive', title: 'Mockup Generation Error', description: error.message });
-        } finally {
             setIsGeneratingMockup(false);
         }
     }, [generatedDecal, mockupPrompt, toast]);
@@ -825,6 +827,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                            <div className="flex flex-col items-center justify-center gap-4 text-muted-foreground">
                                                <Icon name="Wand2" className="w-16 h-16 text-primary animate-pulse" />
                                                <p className="font-semibold">Generating lifestyle mockup...</p>
+                                               <p className="text-xs">This job is running in the background.</p>
                                            </div>
                                        ) : generatedMockup ? (
                                            <Image src={generatedMockup} alt="AI Generated Mockup" fill className="object-contain rounded-lg" />
