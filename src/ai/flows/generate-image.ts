@@ -66,10 +66,22 @@ const generateImageFlow = ai.defineFlow(
     outputSchema: GenerateImageOutputSchema,
   },
   async (input) => {
-    // This flow now simulates an asynchronous job.
-    // In a real-world scenario, this would create a job document in Firestore
-    // and push a message to a Cloud Tasks queue. Another function would listen
-    // to this queue, perform the generation, and update the job document.
+    // LAUNCH ENHANCEMENT: For the mockup generation feature, this flow must be
+    // enhanced to support a fully asynchronous architecture.
+    // The current simulation should be replaced with a robust system using
+    // Google Cloud services.
+    //
+    // The target architecture is:
+    // 1. A lightweight HTTP-triggered Cloud Function that acts as the API endpoint.
+    // 2. This function validates the request and creates a job document in Firestore
+    //    with a 'pending' status.
+    // 3. The function then pushes the job details (e.g., prompt, baseImageUrl, userId)
+    //    to a Cloud Tasks queue.
+    // 4. A separate, long-running Cloud Function (worker) will be triggered by messages
+    //    from the Cloud Tasks queue to perform the actual image generation.
+    // 5. Upon completion, the worker function will update the Firestore job
+    //    document with the final image URL and a 'completed' status.
+    // This ensures the frontend remains responsive and the platform can scale.
 
     const checkResult = await checkForProhibitedContent({ prompt: input.prompt });
 
