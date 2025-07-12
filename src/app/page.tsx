@@ -11,8 +11,14 @@ export default function Home() {
   const { user } = useApp();
 
   useEffect(() => {
+    if (user === undefined) {
+      // Auth state is still loading
+      return;
+    }
     if (user) {
       router.replace('/dashboard');
+    } else {
+      router.replace('/login');
     }
   }, [user, router]);
 

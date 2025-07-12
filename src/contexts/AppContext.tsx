@@ -13,7 +13,7 @@ const CREATIONS_PAGE_SIZE = 8;
 const GALLERY_PAGE_SIZE = 8;
 
 interface AppContextType {
-  user: User | null;
+  user: User | null | undefined; // undefined means loading
   isAdmin: boolean;
   creations: Creation[];
   addCreation: (creation: Omit<Creation, 'id' | 'createdAt'>) => Promise<Creation>;
@@ -36,7 +36,7 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export const AppProvider = ({ children }: { children: ReactNode }) => {
   const router = useRouter();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null | undefined>(undefined);
   const [isAdmin, setIsAdmin] = useState(false);
   const [creations, setCreations] = useState<Creation[]>([]);
   const [remixData, setRemixData] = useState<Partial<Creation & GalleryItem> | null>(null);
