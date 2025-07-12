@@ -54,6 +54,7 @@ export type User = {
     followers?: number;
     following?: number;
     creationsCount?: number;
+    isAdmin?: boolean;
 };
 
 export type GalleryItem = {

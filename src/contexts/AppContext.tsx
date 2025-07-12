@@ -103,19 +103,56 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }, [db]);
 
   useEffect(() => {
-    // LOGIN BYPASS FOR TESTING
-    const mockUser = {
-        uid: 'mock-admin-user-01',
-        email: 'admin@surfacestory.dev',
-        name: 'Super Admin',
-    };
-    setUser(mockUser);
-    setIsAdmin(true);
-    fetchInitialCreations(mockUser.uid);
-    if (galleryItems.length === 0) {
-      fetchInitialGalleryItems();
-    }
-  }, [fetchInitialCreations, fetchInitialGalleryItems, galleryItems.length]);
+    const auth = getAuth(firebaseApp);
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (firebaseUser) {
+        const userDocRef = doc(db, 'users', firebaseUser.uid);
+        const userDocSnap = await getDoc(userDocRef);
+
+        let userProfile: User;
+
+        if (userDocSnap.exists()) {
+          const data = userDocSnap.data();
+          userProfile = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            name: data.name || firebaseUser.displayName,
+            creationsCount: data.creationsCount || 0,
+            isAdmin: data.isAdmin || false,
+          };
+          setIsAdmin(data.isAdmin || false);
+        } else {
+          userProfile = {
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            name: firebaseUser.displayName,
+            creationsCount: 0,
+            isAdmin: false,
+          };
+          setIsAdmin(false);
+          await setDoc(userDocRef, { 
+              email: firebaseUser.email, 
+              name: firebaseUser.displayName || firebaseUser.email,
+              createdAt: serverTimestamp(),
+              creationsCount: 0,
+              isAdmin: false
+          });
+        }
+        setUser(userProfile);
+        fetchInitialCreations(firebaseUser.uid);
+      } else {
+        setUser(null);
+        setIsAdmin(false);
+        setCreations([]);
+      }
+      if (galleryItems.length === 0) {
+        fetchInitialGalleryItems();
+      }
+    });
+
+    return () => unsubscribe();
+  }, [db, fetchInitialCreations, fetchInitialGalleryItems, galleryItems.length]);
+
 
   const fetchMoreCreations = useCallback(async () => {
     const userId = user?.uid;
@@ -176,6 +213,7 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     await updateDoc(userDocRef, {
         creationsCount: increment(1)
     });
+    setUser(prev => prev ? ({...prev, creationsCount: (prev.creationsCount || 0) + 1}) : null);
 
     const newCreation = {
         id: docRef.id,

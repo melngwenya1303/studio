@@ -141,7 +141,7 @@ export default function ProfilePage({ params }: { params: { userId: string } }) 
                             <h1 className="text-h1 font-headline">{profileUser.name}</h1>
                             <p className="text-muted-foreground mt-1 text-body">{profileUser.bio}</p>
                             <div className="flex justify-center md:justify-start items-center gap-6 mt-4 text-sm">
-                                <div><span className="font-bold">{userCreations.length}</span> Creations</div>
+                                <div><span className="font-bold">{profileUser.creationsCount}</span> Creations</div>
                                 <div><span className="font-bold">{profileUser.followers}</span> Followers</div>
                                 <div><span className="font-bold">{profileUser.following}</span> Following</div>
                             </div>
