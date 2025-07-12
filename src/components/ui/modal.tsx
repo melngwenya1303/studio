@@ -34,16 +34,16 @@ const Modal = ({ isOpen, onClose, title, children, size = 'md' }: ModalProps) =>
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
             transition={{ type: "spring", stiffness: 300, damping: 30 }}
-            className={`bg-white dark:bg-gray-800/90 backdrop-blur-xl border border-white/10 rounded-2xl p-6 shadow-2xl w-full ${sizes[size]}`}
+            className={`bg-card border rounded-2xl p-6 shadow-2xl w-full ${sizes[size]}`}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-xl font-bold text-gray-800 dark:text-white">{title}</h3>
-              <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={onClose} className="text-gray-400 hover:text-gray-600 dark:hover:text-white transition-colors">
+              <h3 className="text-xl font-bold text-card-foreground">{title}</h3>
+              <motion.button whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.9 }} onClick={onClose} className="text-muted-foreground hover:text-foreground transition-colors">
                 <Icon name="X" className="w-6 h-6" />
               </motion.button>
             </div>
-            <div className="text-gray-600 dark:text-gray-300 whitespace-pre-wrap">{children}</div>
+            <div className="text-muted-foreground whitespace-pre-wrap">{children}</div>
           </motion.div>
         </motion.div>
       )}
