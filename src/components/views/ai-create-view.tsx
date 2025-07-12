@@ -316,7 +316,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         }
     }, [generatedDecal, user, addCreation, toast, router]);
 
-    const handlePurchase = useCallback(() => {
+    const handleAddToCart = useCallback(() => {
       if (!generatedDecal) return;
       addToCart(generatedDecal);
       router.push('/checkout');
@@ -660,8 +660,8 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                             {isSaving ? <Icon name="Wand2" className="animate-pulse" /> : <Icon name="Heart" />}
                                             {isSaving ? 'Saving...' : 'Save Design'}
                                         </Button>
-                                        <Button onClick={handlePurchase} className="w-full bg-green-600 hover:bg-green-700">
-                                            <Icon name="ShoppingCart" /> Purchase
+                                        <Button onClick={handleAddToCart} className="w-full bg-green-600 hover:bg-green-700">
+                                            <Icon name="ShoppingCart" /> Add to Cart
                                         </Button>
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">

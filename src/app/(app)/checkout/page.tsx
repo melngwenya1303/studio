@@ -21,10 +21,10 @@ export default function CheckoutPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = useState(false);
-    const item = cart[0]; // For now, we handle a single item checkout
+    const cartItem = cart[0]; // For now, we handle a single item checkout
 
     const handleProceedToCheckout = async () => {
-        if (!item || !user) {
+        if (!cartItem || !user) {
             toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in and have an item in your cart.'});
             return;
         }
@@ -37,8 +37,8 @@ export default function CheckoutPage() {
                 orderId: `SS-${Date.now()}`,
                 customerName: user.email || 'Valued Customer',
                 shippingAddress: '123 Creator Lane, Artville, CA 90210',
-                imageUrl: item.url, // This should be a public URL or data URI
-                productType: `${item.deviceType} Decal`,
+                imageUrl: cartItem.url, // This should be a public URL or data URI
+                productType: `${cartItem.deviceType} Decal`,
                 podPartner: 'Printify', // This could be selected based on product/region
             };
 
@@ -58,7 +58,7 @@ export default function CheckoutPage() {
         }
     };
 
-    if (!item) {
+    if (!cartItem) {
         return (
             <div className="flex flex-col items-center justify-center h-full text-center p-8">
                 <Icon name="ShoppingCart" className="w-24 h-24 text-muted-foreground mb-6" />
@@ -95,12 +95,12 @@ export default function CheckoutPage() {
                         <CardContent className="space-y-6">
                             <div className="flex items-center gap-4">
                                 <div className="relative w-24 h-24 bg-muted rounded-lg overflow-hidden flex-shrink-0">
-                                    <Image src={item.url} alt={item.title} fill className="object-cover" />
+                                    <Image src={cartItem.url} alt={cartItem.title} fill className="object-cover" />
                                 </div>
                                 <div className="flex-grow">
-                                    <p className="font-semibold">{item.title || 'Custom Design'}</p>
-                                    <p className="text-sm text-muted-foreground">{item.deviceType} Decal</p>
-                                    <p className="text-sm text-muted-foreground">Style: {item.style}</p>
+                                    <p className="font-semibold">{cartItem.title || 'Custom Design'}</p>
+                                    <p className="text-sm text-muted-foreground">{cartItem.deviceType} Decal</p>
+                                    <p className="text-sm text-muted-foreground">Style: {cartItem.style}</p>
                                 </div>
                                 <p className="font-semibold">${price.toFixed(2)}</p>
                             </div>

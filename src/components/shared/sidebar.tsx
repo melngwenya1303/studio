@@ -60,7 +60,6 @@ const SidebarContent = () => {
   const cartItem = { href: '/checkout', name: 'Cart', icon: 'ShoppingCart' as IconName, count: cart.length };
 
   const handleSignOut = () => {
-    // This won't work in bypass mode, but keep it for when it's re-enabled
     const auth = getAuth();
     signOut(auth);
   };
