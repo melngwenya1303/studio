@@ -90,7 +90,18 @@ const PublishModalContent = ({ creation, onClose }: { creation: Creation; onClos
                     <AiOptimizerButton 
                         prompt={creation.prompt} 
                         contentType="title" 
-                        onContentReceived={(content) => setTitle(JSON.parse(content)[0])}
+                        onContentReceived={(content) => {
+                            try {
+                                const titles = JSON.parse(content);
+                                if (Array.isArray(titles) && titles.length > 0) {
+                                    setTitle(titles[0]);
+                                }
+                            } catch (e) {
+                                console.error("Could not parse titles from AI", e);
+                                // Fallback to raw content if not valid JSON
+                                setTitle(content);
+                            }
+                        }}
                     />
                 </div>
             </div>
@@ -156,7 +167,7 @@ export default function DashboardView() {
         items.sort((a, b) => {
             const dateA = a.createdAt ? (a.createdAt as any).toDate().getTime() : 0;
             const dateB = b.createdAt ? (b.createdAt as any).toDate().getTime() : 0;
-            return sortOrder === 'newest' ? dateB - dateA : dateA - dateB;
+            return sortOrder === 'newest' ? dateB - dateA : dateA - b.createdAt;
         });
 
         return items;
