@@ -143,11 +143,16 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
 
       } else {
-        setUser(null);
-        setIsAdmin(false);
-        setCreations([]);
-        setLastVisibleCreation(null);
-        setHasMoreCreations(true);
+        // LOGIN BYPASS: If no user, create a mock admin user for testing
+        const mockUser = {
+            uid: 'mock-admin-user',
+            email: 'admin@surfacestory.dev',
+            name: 'Admin User (Bypass)'
+        };
+        setUser(mockUser);
+        setIsAdmin(true);
+        fetchInitialCreations(mockUser.uid);
+
         if (galleryItems.length === 0) {
             fetchInitialGalleryItems();
         }
