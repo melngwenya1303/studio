@@ -103,6 +103,24 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
   }, [db]);
 
   useEffect(() => {
+    // DEV MODE: Bypass login and set a mock super admin user
+    const mockUser: User = {
+        uid: 'mock-super-admin-001',
+        email: 'admin@surfacestory.ai',
+        name: 'Super Admin',
+        isAdmin: true,
+        creationsCount: 128,
+    };
+    setUser(mockUser);
+    setIsAdmin(true);
+    fetchInitialCreations(mockUser.uid);
+
+    if (galleryItems.length === 0) {
+        fetchInitialGalleryItems();
+    }
+    
+    // Original Firebase Auth Logic
+    /*
     const auth = getAuth(firebaseApp);
     const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       if (firebaseUser) {
@@ -151,7 +169,8 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
     });
 
     return () => unsubscribe();
-  }, [db, fetchInitialCreations, fetchInitialGalleryItems, galleryItems.length]);
+    */
+  }, []);
 
 
   const fetchMoreCreations = useCallback(async () => {
