@@ -3,6 +3,7 @@
 
 /**
  * @fileOverview Generates a decal image based on a text prompt, with a content safety check.
+ * This flow is designed to be a "worker" in an asynchronous architecture.
  *
  * - generateImage - A function that generates an image based on a given prompt.
  * - GenerateImageInput - The input type for the generateImage function, including the prompt.
@@ -68,23 +69,7 @@ const generateImageFlow = ai.defineFlow(
     outputSchema: GenerateImageOutputSchema,
   },
   async (input) => {
-    // LAUNCH ENHANCEMENT: For the mockup generation feature, this flow must be
-    // enhanced to support a fully asynchronous architecture.
-    // The current simulation should be replaced with a robust system using
-    // Google Cloud services.
-    //
-    // The target architecture is:
-    // 1. A lightweight HTTP-triggered Cloud Function that acts as the API endpoint.
-    // 2. This function validates the request and creates a job document in Firestore
-    //    with a 'pending' status.
-    // 3. The function then pushes the job details (e.g., prompt, baseImageUrl, userId)
-    //    to a Cloud Tasks queue.
-    // 4. A separate, long-running Cloud Function (worker) will be triggered by messages
-    //    from the Cloud Tasks queue to perform the actual image generation.
-    // 5. Upon completion, the worker function will update the Firestore job
-    //    document with the final image URL and a 'completed' status.
-    // This ensures the frontend remains responsive and the platform can scale.
-
+    // First, check for any prohibited content. This is a fast check.
     const checkResult = await checkForProhibitedContent({ prompt: input.prompt });
 
     if (checkResult.is_prohibited) {
@@ -106,9 +91,10 @@ const generateImageFlow = ai.defineFlow(
       ]
     }
     
+    // Use the provided seed, or generate a new one for reproducibility.
     const seed = input.seed || Math.floor(Math.random() * 1000000);
 
-    // The actual generation is now "awaited" as if it's a background job completing.
+    // This is the long-running, computationally intensive part of the job.
     const {media} = await ai.generate({
       model: model,
       prompt: generationPrompt,

@@ -4,7 +4,7 @@
  * @fileOverview A flow that generates a UI spec from a prompt.
  *
  * This flow takes a user prompt and generates a title, story, and image for a decal design.
- * The narrated audio is no longer generated here to avoid rate-limiting; it's generated on-demand in the UI.
+ * It's designed to simulate a scalable, asynchronous backend architecture.
  *
  * - generateUiSpec - The main function to generate the UI spec.
  * - GenerateUiSpecInput - The input type for the generateUiSpec function.
@@ -72,7 +72,19 @@ const generateUiSpecFlow = ai.defineFlow(
     outputSchema: GenerateUiSpecOutputSchema,
   },
   async input => {
-    
+    // This flow simulates a robust, asynchronous backend job queue.
+    // TARGET ARCHITECTURE:
+    // 1. Client sends request to a lightweight HTTP Cloud Function (API Endpoint).
+    // 2. API Endpoint validates the request, creates a 'job' doc in Firestore
+    //    with 'pending' status, and pushes the job to a message queue (e.g., BullMQ/Redis).
+    // 3. A separate, long-running Worker Process (Cloud Run) picks up the job
+    //    from the queue and begins the AI generation.
+    // 4. The worker updates the Firestore doc with the final image URL and 'completed' status.
+    // 5. The client listens for real-time updates on the Firestore doc and displays the image when ready.
+    //
+    // The Promise.all below simulates the parallel processing of different parts of the job
+    // by the worker process.
+
     let finalPrompt = input.prompt;
     if (input.setting || input.style || input.deviceType) {
         finalPrompt = `A decal design for a ${input.deviceType}, ${input.prompt}, ${input.setting || ''}, in the style of ${input.style}.`;
@@ -81,9 +93,14 @@ const generateUiSpecFlow = ai.defineFlow(
         finalPrompt += ` --no ${input.negativePrompt}`;
     }
 
-    // Run image generation first to check for blocked content
-    const imageResult = await generateImage({ prompt: finalPrompt, seed: input.seed });
-    
+    // Run all generation tasks in parallel to simulate an asynchronous worker.
+    const [imageResult, titleResult, storyResult] = await Promise.all([
+        generateImage({ prompt: finalPrompt, seed: input.seed }),
+        generateTitle({ prompt: finalPrompt }),
+        storyPrompt({ prompt: finalPrompt }),
+    ]);
+
+    // Handle content blocking from the image generation.
     if (imageResult.blocked || !imageResult.media) {
       return {
         title: 'Blocked',
@@ -95,24 +112,20 @@ const generateUiSpecFlow = ai.defineFlow(
       };
     }
     
-    // If not blocked, proceed with title and story generation in parallel
-    const [titleResult, storyResult] = await Promise.all([
-      generateTitle({ prompt: finalPrompt }),
-      storyPrompt({ prompt: finalPrompt }),
-    ]);
-
     const title = titleResult.title;
     const story = storyResult.output?.story;
     const imageUrl = imageResult.media;
 
-    // Validate results
-    if (!title) {
-      throw new Error('The AI failed to generate a title for this prompt.');
-    }
-     if (!story) {
-      throw new Error('The AI failed to generate a story.');
-    }
-
-    return {title, story, imageUrl, blocked: false, seed: imageResult.seed };
+    // Validate all parts of the job completed successfully.
+    if (!title) throw new Error('The AI failed to generate a title for this prompt.');
+    if (!story) throw new Error('The AI failed to generate a story.');
+    
+    return {
+      title, 
+      story, 
+      imageUrl, 
+      blocked: false, 
+      seed: imageResult.seed 
+    };
   }
 );
