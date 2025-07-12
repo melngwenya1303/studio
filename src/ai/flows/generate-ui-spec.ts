@@ -107,7 +107,7 @@ const generateUiSpecFlow = ai.defineFlow(
       throw new Error('The AI failed to generate a title for this prompt.');
     }
      if (!story) {
-      throw a new Error('The AI failed to generate a story.');
+      throw new Error('The AI failed to generate a story.');
     }
 
     return {title, story, imageUrl, blocked: false };
