@@ -86,6 +86,8 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         setting: '',
         negativePrompt: ''
     });
+    const [seed, setSeed] = useState<number | null>(null);
+    const [isSeedLocked, setIsSeedLocked] = useState(false);
 
     const handleDeviceSelection = useCallback((device: Device) => {
         setSelectedDevice(device);
@@ -231,8 +233,9 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         }
     };
 
-    const handleGenerate = useCallback(async () => {
-        const hasSimplePrompt = prompt.trim() !== '';
+    const handleGenerate = useCallback(async (newPrompt?: string) => {
+        const finalPrompt = newPrompt || prompt;
+        const hasSimplePrompt = finalPrompt.trim() !== '';
         const hasAdvancedPrompt = structuredPrompt.subject.trim() !== '';
         if (!hasSimplePrompt && !hasAdvancedPrompt) {
             toast({ variant: "destructive", title: "Input Required", description: "Please enter a prompt." });
@@ -257,13 +260,21 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                     negativePrompt: structuredPrompt.negativePrompt,
                     style: selectedStyle.name,
                     deviceType: deviceName,
+                    seed: isSeedLocked ? seed || undefined : undefined,
                 };
             } else {
-                 const fullPromptWithStyle = `A decal design for a ${deviceName}. ${prompt}, in the style of ${selectedStyle.name}, high resolution, clean edges, sticker, vector art`;
-                 generationInput = { prompt: fullPromptWithStyle };
+                 const fullPromptWithStyle = `A decal design for a ${deviceName}. ${finalPrompt}, in the style of ${selectedStyle.name}, high resolution, clean edges, sticker, vector art`;
+                 generationInput = { 
+                     prompt: fullPromptWithStyle,
+                     seed: isSeedLocked ? seed || undefined : undefined,
+                 };
             }
             
             const result = await generateUiSpec(generationInput);
+            
+            if (result.seed) {
+                setSeed(result.seed);
+            }
 
             if (result.blocked) {
                 toast({ variant: "destructive", title: "Prompt Blocked", description: result.blockedReason, duration: 5000 });
@@ -273,7 +284,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
             
             const newDecal = { 
                 url: result.imageUrl, 
-                prompt: isAdvancedPrompt ? `${structuredPrompt.subject}, ${structuredPrompt.setting}` : prompt,
+                prompt: isAdvancedPrompt ? `${structuredPrompt.subject}, ${structuredPrompt.setting}` : finalPrompt,
                 style: selectedStyle.name, 
                 deviceType: deviceName,
                 title: result.title 
@@ -286,7 +297,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         } finally {
             setIsLoading(false);
         }
-    }, [prompt, structuredPrompt, isAdvancedPrompt, selectedModel, selectedDevice, selectedStyle.name, toast]);
+    }, [prompt, structuredPrompt, isAdvancedPrompt, selectedModel, selectedDevice, selectedStyle.name, toast, isSeedLocked, seed]);
     
      const handleGenerateMockup = useCallback(async () => {
         if (!generatedDecal?.url || !mockupPrompt.trim()) {
@@ -446,6 +457,8 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         setIsLoading(false);
         setPolicyAccepted(false);
         setRemixSuggestions([]);
+        setSeed(null);
+        setIsSeedLocked(false);
         toast({ title: 'Canvas Cleared', description: 'Ready for your next great idea!' });
     }, [toast]);
 
@@ -563,6 +576,10 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                             <div className="space-y-1">
                                                 <Label htmlFor="negativePrompt">Negative Prompt (exclude things)</Label>
                                                 <Input id="negativePrompt" placeholder="e.g., blurry, text, watermark" value={structuredPrompt.negativePrompt} onChange={e => handleStructuredPromptChange('negativePrompt', e.target.value)} />
+                                            </div>
+                                            <div className="flex items-center space-x-2 pt-2">
+                                                <Switch id="lock-seed-switch" checked={isSeedLocked} onCheckedChange={setIsSeedLocked} disabled={!seed}/>
+                                                <Label htmlFor="lock-seed-switch">Lock Seed ({seed || 'N/A'})</Label>
                                             </div>
                                         </motion.div>
                                     ) : (
@@ -727,7 +744,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                 </label>
                             </div>
                             <div className="flex items-center gap-2">
-                                <Button onClick={handleGenerate} disabled={isLoading || !(prompt.trim() || structuredPrompt.subject.trim()) || !policyAccepted}
+                                <Button onClick={() => handleGenerate()} disabled={isLoading || !(prompt.trim() || structuredPrompt.subject.trim()) || !policyAccepted}
                                     className="flex-grow text-lg h-12 text-white transition-all duration-300 bg-gradient-to-r from-primary to-accent hover:shadow-xl disabled:from-gray-400 disabled:to-gray-500 disabled:cursor-not-allowed disabled:shadow-none">
                                     <motion.span whileHover={{ y: -1 }} whileTap={{ y: 1 }}>
                                         {isLoading ? 'Designing...' : 'Generate My Vision'}

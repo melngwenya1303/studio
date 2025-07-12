@@ -23,6 +23,7 @@ const GenerateUiSpecInputSchema = z.object({
   deviceType: z.string().optional().describe('The target device for the decal.'),
   setting: z.string().optional().describe('The setting or background for the subject.'),
   negativePrompt: z.string().optional().describe('Elements to exclude from the image.'),
+  seed: z.number().optional().describe('The seed for consistent image generation.'),
 });
 export type GenerateUiSpecInput = z.infer<typeof GenerateUiSpecInputSchema>;
 
@@ -54,6 +55,7 @@ const GenerateUiSpecOutputSchema = z.object({
   imageUrl: z.string().describe('The data URI of the generated decal image.'),
   blocked: z.boolean().describe('Whether the prompt was blocked by the safety filter.'),
   blockedReason: z.string().optional().describe('The reason the prompt was blocked.'),
+  seed: z.number().optional().describe('The seed used for the generation.'),
 });
 export type GenerateUiSpecOutput = z.infer<typeof GenerateUiSpecOutputSchema>;
 
@@ -80,7 +82,7 @@ const generateUiSpecFlow = ai.defineFlow(
     }
 
     // Run image generation first to check for blocked content
-    const imageResult = await generateImage({ prompt: finalPrompt });
+    const imageResult = await generateImage({ prompt: finalPrompt, seed: input.seed });
     
     if (imageResult.blocked || !imageResult.media) {
       return {
@@ -89,6 +91,7 @@ const generateUiSpecFlow = ai.defineFlow(
         imageUrl: '',
         blocked: true,
         blockedReason: imageResult.reason || 'The AI failed to generate an image. This can happen with unusual prompts or if the content violates safety policies. Please try again with a different idea.',
+        seed: imageResult.seed,
       };
     }
     
@@ -110,6 +113,6 @@ const generateUiSpecFlow = ai.defineFlow(
       throw new Error('The AI failed to generate a story.');
     }
 
-    return {title, story, imageUrl, blocked: false };
+    return {title, story, imageUrl, blocked: false, seed: imageResult.seed };
   }
 );

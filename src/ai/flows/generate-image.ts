@@ -18,6 +18,7 @@ import { firebaseApp } from '@/lib/firebase';
 const GenerateImageInputSchema = z.object({
   prompt: z.string().describe('The prompt to use to generate the decal image.'),
   baseImageUrl: z.string().optional().describe('The Data URI of an existing image to use as the base for a mockup.'),
+  seed: z.number().optional().describe('The seed to use for consistent image generation.'),
 });
 export type GenerateImageInput = z.infer<typeof GenerateImageInputSchema>;
 
@@ -25,6 +26,7 @@ const GenerateImageOutputSchema = z.object({
   media: z.string().optional().describe('The generated image as a data URI.'),
   blocked: z.boolean().describe('Whether the prompt was blocked by the safety filter.'),
   reason: z.string().optional().describe('The reason the prompt was blocked.'),
+  seed: z.number().optional().describe('The seed used for the generation.'),
 });
 export type GenerateImageOutput = z.infer<typeof GenerateImageOutputSchema>;
 
@@ -42,8 +44,8 @@ const checkForProhibitedContent = ai.defineTool(
     async (input) => {
         const db = getFirestore(firebaseApp);
         const blocklistCol = collection(db, 'blocklist');
-        const blocklistSnapshot = await getDocs(blocklistCol);
-        const prohibitedWords = blocklistSnapshot.docs.map(doc => doc.data().word.toLowerCase());
+        const snapshot = await getDocs(blocklistCol);
+        const prohibitedWords = snapshot.docs.map(doc => doc.data().word.toLowerCase());
 
         const wordsInPrompt = input.prompt.toLowerCase().split(/\s+/);
         const matched = prohibitedWords.filter(prohibited => wordsInPrompt.includes(prohibited));
@@ -89,6 +91,7 @@ const generateImageFlow = ai.defineFlow(
         return {
             blocked: true,
             reason: `Your prompt was blocked because it contains the following prohibited term(s): ${checkResult.matched_words.join(', ')}. Please revise your prompt.`,
+            seed: input.seed,
         };
     }
 
@@ -102,6 +105,8 @@ const generateImageFlow = ai.defineFlow(
         { text: `Generate a realistic lifestyle photo placing this product naturally in the following scene: ${input.prompt}. The product should be the main focus.`},
       ]
     }
+    
+    const seed = input.seed || Math.floor(Math.random() * 1000000);
 
     // The actual generation is now "awaited" as if it's a background job completing.
     const {media} = await ai.generate({
@@ -109,6 +114,7 @@ const generateImageFlow = ai.defineFlow(
       prompt: generationPrompt,
       config: {
         responseModalities: ['TEXT', 'IMAGE'],
+        seed: seed,
       },
     });
 
@@ -118,7 +124,8 @@ const generateImageFlow = ai.defineFlow(
 
     return {
         media: media.url,
-        blocked: false
+        blocked: false,
+        seed: seed,
     };
   }
 );
