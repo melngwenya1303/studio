@@ -170,7 +170,9 @@ export default function LeaderboardPage() {
                                                 <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <span className="font-semibold text-base">{user.name}</span>
+                                                <Link href={`/profile/${user.id.split('_')[0]}`} passHref>
+                                                    <span className="font-semibold text-base hover:underline cursor-pointer">{user.name}</span>
+                                                </Link>
                                                 <p className="text-xs text-muted-foreground">Top {percentile}% of Creators</p>
                                             </div>
                                         </div>

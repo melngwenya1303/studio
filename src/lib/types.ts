@@ -50,6 +50,10 @@ export type User = {
     uid: string;
     email: string | null;
     name: string | null;
+    bio?: string;
+    followers?: number;
+    following?: number;
+    creationsCount?: number;
 };
 
 export type GalleryItem = {

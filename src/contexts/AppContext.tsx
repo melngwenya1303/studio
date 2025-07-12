@@ -131,7 +131,11 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         const currentUser = { 
             uid: firebaseUser.uid, 
             email: firebaseUser.email, 
-            name: userData?.name || firebaseUser.displayName 
+            name: userData?.name || firebaseUser.displayName,
+            bio: userData?.bio || 'Digital artist exploring the intersection of dreams and code.',
+            followers: userData?.followers || 0,
+            following: userData?.following || 0,
+            creationsCount: userData?.creationsCount || 0,
         };
         
         setUser(currentUser);
@@ -143,19 +147,9 @@ export const AppProvider = ({ children }: { children: ReactNode }) => {
         }
 
       } else {
-        // LOGIN BYPASS: If no user, create a mock admin user for testing
-        const mockUser = {
-            uid: 'mock-admin-user',
-            email: 'admin@surfacestory.dev',
-            name: 'Admin User (Bypass)'
-        };
-        setUser(mockUser);
-        setIsAdmin(true);
-        fetchInitialCreations(mockUser.uid);
-
-        if (galleryItems.length === 0) {
-            fetchInitialGalleryItems();
-        }
+        setUser(null);
+        setIsAdmin(false);
+        setCreations([]);
       }
     });
     
