@@ -255,31 +255,33 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         }
     }, [selectedModel, selectedDevice, selectedStyle.name, toast]);
     
-    const handleGenerateMockup = useCallback(async () => {
-      if (!generatedDecal?.url || !mockupPrompt.trim()) {
-        toast({ variant: "destructive", title: "Input Required", description: "Please describe a scene for the mockup." });
-        return;
-      }
-      setIsGeneratingMockup(true);
-      setGeneratedMockup(null);
-      try {
-        const result = await generateImage({
-          prompt: mockupPrompt,
-          baseImageUrl: generatedDecal.url
-        });
-        
-        if (result.blocked || !result.media) {
-          toast({ variant: "destructive", title: "Mockup Generation Failed", description: result.reason || 'An unexpected error occurred.' });
-          setIsGeneratingMockup(false);
-          return;
+     const handleGenerateMockup = useCallback(async () => {
+        if (!generatedDecal?.url || !mockupPrompt.trim()) {
+            toast({ variant: 'destructive', title: 'Input Required', description: 'Please describe a scene for the mockup.' });
+            return;
         }
-        setGeneratedMockup(result.media);
-        
-      } catch (error: any) {
-        toast({ variant: "destructive", title: "Mockup Generation Failed", description: error.message, duration: 5000 });
-      } finally {
-        setIsGeneratingMockup(false);
-      }
+        setIsGeneratingMockup(true);
+        setGeneratedMockup(null); // Clear previous mockup
+        try {
+            const result = await generateImage({
+                prompt: mockupPrompt,
+                baseImageUrl: generatedDecal.url,
+            });
+
+            if (result.blocked || !result.media) {
+                toast({
+                    variant: 'destructive',
+                    title: 'Mockup Generation Failed',
+                    description: result.reason || 'An unexpected error occurred.',
+                });
+            } else {
+                setGeneratedMockup(result.media);
+            }
+        } catch (error: any) {
+            toast({ variant: 'destructive', title: 'Mockup Generation Error', description: error.message });
+        } finally {
+            setIsGeneratingMockup(false);
+        }
     }, [generatedDecal, mockupPrompt, toast]);
 
 
@@ -392,6 +394,18 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
         setRemixSuggestions([]);
         toast({ title: 'Canvas Cleared', description: 'Ready for your next great idea!' });
     }, [toast]);
+
+    const handleMockupInspire = async () => {
+        setIsGettingCreativePrompt(true);
+        try {
+            const result = await generateCreativePrompt();
+            setMockupPrompt(result.prompt);
+        } catch(e: any) {
+            toast({ variant: "destructive", title: "Could not get idea", description: e.message });
+        } finally {
+            setIsGettingCreativePrompt(false);
+        }
+    }
 
     return (
         <TooltipProvider>
@@ -797,20 +811,29 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                        ) : generatedMockup ? (
                                            <Image src={generatedMockup} alt="AI Generated Mockup" fill className="object-contain rounded-lg" />
                                        ) : (
-                                          <div className="text-center text-muted-foreground flex flex-col items-center justify-center gap-4">
+                                          <div className="text-center text-muted-foreground flex flex-col items-center justify-center gap-4 p-4">
                                               <Icon name="Camera" className="w-24 h-24 text-primary/30" />
                                               <h3 className="text-lg font-semibold">Generate AI Lifestyle Mockup</h3>
-                                              <p className="max-w-xs">Describe a scene to place your product in. e.g., "on a sunlit desk in a cozy cafe"</p>
-                                               <div className="w-full max-w-md flex items-center gap-2">
-                                                    <Input 
-                                                        value={mockupPrompt} 
-                                                        onChange={e => setMockupPrompt(e.target.value)}
-                                                        placeholder="Describe a scene..."
-                                                        disabled={!generatedDecal || isGeneratingMockup}
-                                                    />
-                                                    <Button onClick={handleGenerateMockup} disabled={!generatedDecal || !mockupPrompt.trim() || isGeneratingMockup}>
-                                                        Generate
-                                                    </Button>
+                                              <p className="max-w-md">Describe a scene to place your product in. The AI will generate a realistic photo of your product in that environment.</p>
+                                               <div className="w-full max-w-md flex flex-col gap-2">
+                                                    <div className="flex items-center gap-2">
+                                                        <Input 
+                                                            value={mockupPrompt} 
+                                                            onChange={e => setMockupPrompt(e.target.value)}
+                                                            placeholder="e.g., on a sunlit desk in a cozy cafe"
+                                                            disabled={!generatedDecal || isGeneratingMockup}
+                                                        />
+                                                        <Button onClick={handleGenerateMockup} disabled={!generatedDecal || !mockupPrompt.trim() || isGeneratingMockup}>
+                                                            Generate
+                                                        </Button>
+                                                    </div>
+                                                    <div className="flex items-center justify-center gap-2 text-sm">
+                                                        <Button variant="link" size="sm" onClick={() => setMockupPrompt(prev => prev ? `${prev}, minimalist` : 'minimalist')}>Minimalist</Button>
+                                                        <Button variant="link" size="sm" onClick={() => setMockupPrompt(prev => prev ? `${prev}, in a cafe` : 'in a cafe')}>Cafe</Button>
+                                                        <Button variant="link" size="sm" onClick={() => setMockupPrompt(prev => prev ? `${prev}, outdoors` : 'outdoors')}>Outdoor</Button>
+                                                        <Button variant="link" size="sm" onClick={() => setMockupPrompt(prev => prev ? `${prev}, on a tech desk` : 'on a tech desk')}>Techy</Button>
+                                                        <Button variant="link" size="sm" onClick={handleMockupInspire} disabled={isGettingCreativePrompt}>{isGettingCreativePrompt ? "..." : "Inspire Me"}</Button>
+                                                    </div>
                                                </div>
                                           </div>
                                        )}
@@ -845,7 +868,7 @@ export default function AiCreateView({ onBack }: AiCreateViewProps) {
                                                <Icon name="Box" className="w-4 h-4 mr-2" /> 3D
                                             </ToggleGroupItem>
                                             <ToggleGroupItem value="mockup" aria-label="Mockup Preview" disabled={!generatedDecal}>
-                                               <Icon name="Camera" className="w-4 h-4 mr-2" /> Mockup
+                                               <Icon name="Camera" className="w-4 h-4 mr-2" /> Generate Mockups
                                             </ToggleGroupItem>
                                         </ToggleGroup>
                                     </motion.div>
